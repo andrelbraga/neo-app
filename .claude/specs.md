@@ -96,5 +96,5 @@ Feito: `/entrar` com sessão ativa mostra quem está conectado, com "Continuar" 
 ## 17/11/2026 — Repositórios separados
 
 - ADR-0017 (substitui a ADR-0002): o monorepo virou `neo-api` e `neo-app`, públicos em github.com/andrelbraga, com histórico novo. Documentos compartilhados (ADRs, pendências, regras de negócio) existem nos dois; o protótipo e a referência de layout ficam no app. CI separado em cada um. No Railway (projeto `neo`), cada serviço é ligado ao seu repositório.
-- ADR-0018: o projeto `neo` do Railway (plano gratuito) não deixou criar Postgres. Os serviços ficam no projeto **neonflow** (ambiente hml), e a API usa o Postgres dele com `DB_SCHEMA=neo360`: `search_path` só no schema, criado se faltar, com histórico de migrations próprio. Testado localmente com as 7 migrations num schema isolado.
+- ADR-0018: publicação no Railway da conta do André, projeto `8d27127a-…`: Postgres próprio, `neo-api` e `neo-app` ligados aos repositórios. A API usa `DB_SCHEMA=neo360`: `search_path` só no schema, criado se faltar, com histórico de migrations próprio. API em https://neo-api-production-ef2ad24b.up.railway.app e app em https://neo-app-production-4de6da2c.up.railway.app. (Antes, a conta do Eliseu, no plano gratuito, recusou Postgres e novos serviços.)
 
