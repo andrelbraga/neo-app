@@ -1,0 +1,107 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Paleta Neo360 (protótipo Boa Vista), em canais RGB para o Tailwind aplicar opacidade. */
+  :root {
+    --c-cream: 244 241 234;
+    --c-cream-card: 255 253 248;
+    --c-ink: 29 42 34;
+    --c-ink-muted: 91 107 96;
+    --c-forest: 29 58 45;
+    --c-forest-soft: 231 239 233;
+    --c-forest-deep: 19 39 30;
+    --c-teal: 47 143 134;
+    --c-teal-soft: 151 213 208;
+    --c-gold: 176 138 74;
+    --c-gold-soft: 243 234 217;
+    --c-ok: 47 125 79;
+    --c-coral: 176 138 74;
+    --c-coral-soft: 243 234 217;
+    --c-line: 226 220 205;
+    --sh-soft: 0 1px 2px rgba(29, 42, 34, 0.04), 0 8px 24px -12px rgba(29, 42, 34, 0.18);
+    --sh-lift: 0 2px 4px rgba(29, 42, 34, 0.06), 0 18px 40px -16px rgba(29, 42, 34, 0.3);
+  }
+  /* Painel e admin: paleta da referência (resources/design_tela.jpg), medida nos pixels. ADR-0013. */
+  .theme-sys {
+    --c-cream: 245 244 249; /* #F5F4F9 fundo lavanda */
+    --c-cream-card: 255 255 255;
+    --c-ink: 39 38 44; /* #27262C */
+    --c-ink-muted: 124 123 140; /* cinza dos códigos e rótulos, escurecido para leitura */
+    --c-forest: 50 39 219; /* #3227DB índigo */
+    --c-forest-soft: 230 227 255; /* #E6E3FF aba e ícone ativos */
+    --c-forest-deep: 35 34 48; /* #232230 barra escura */
+    --c-teal: 76 161 215; /* #4CA1D7 azul "confirmado" */
+    --c-teal-soft: 214 228 255; /* #D6E4FF */
+    --c-gold: 224 165 38; /* amarelo "parcial", escurecido para texto */
+    --c-gold-soft: 255 243 217;
+    --c-ok: 75 135 75; /* #4B874B verde "concluído" */
+    --c-coral: 242 126 95; /* etiqueta coral do detalhe */
+    --c-coral-soft: 255 228 220; /* #FFE4DC */
+    --c-line: 236 235 242;
+    --sh-soft: 0 1px 2px rgba(39, 38, 44, 0.03), 0 6px 18px -10px rgba(50, 39, 219, 0.14);
+    --sh-lift: 0 2px 6px rgba(39, 38, 44, 0.05), 0 22px 44px -18px rgba(50, 39, 219, 0.28);
+    @apply bg-cream text-ink;
+  }
+  /* A referência usa só sem serifa, com títulos em negrito. */
+  .theme-sys h1,
+  .theme-sys h2,
+  .theme-sys h3,
+  .theme-sys .font-serif {
+    font-family: Inter, system-ui, sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  html {
+    @apply bg-cream font-sans text-ink antialiased;
+    scroll-behavior: smooth;
+  }
+  ::selection {
+    @apply bg-teal-soft/60;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-serif font-semibold tracking-tight;
+  }
+  /* Item de grade nunca alarga a página: texto longo (link, nome) encolhe ou corta em vez de estourar. */
+  .grid > * {
+    min-width: 0;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-2xl border border-line/80 bg-cream-card shadow-soft;
+  }
+  .theme-sys .card {
+    @apply border-transparent;
+  }
+  .card-hover {
+    @apply transition duration-300 hover:-translate-y-0.5 hover:shadow-lift;
+  }
+  /* Fundo do painel: creme com um brilho turquesa e dourado, como a apresentação. */
+  .panel-bg {
+    background:
+      radial-gradient(1200px 500px at 110% -10%, rgba(151, 213, 208, 0.25), transparent 60%),
+      radial-gradient(900px 400px at -10% 110%, rgba(176, 138, 74, 0.12), transparent 60%),
+      #f4f1ea;
+  }
+  .hero-grad {
+    background: linear-gradient(135deg, #13271e 0%, #1d3a2d 45%, #2f6b5a 100%);
+  }
+  .theme-sys .panel-bg {
+    background: #f4f4fc;
+  }
+  .theme-sys .hero-grad {
+    background: linear-gradient(120deg, #232230 0%, #2a2190 48%, #3227db 100%);
+  }
+  .skeleton {
+    @apply relative overflow-hidden rounded-xl bg-line/50;
+  }
+  .skeleton::after {
+    content: "";
+    @apply absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/60 to-transparent;
+  }
+}

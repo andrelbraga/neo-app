@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Dashboard · Boa Vista</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fffdf8;--fg:#1d2a22;--muted:#5b6b60;--line:#e2dccd;--green:#1d3a2d;--gold:#b08a4a}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 Inter,system-ui,sans-serif;padding:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px)) 40px}
+h1{font-family:"Newsreader",Georgia,serif;font-size:28px;font-weight:600;margin:6px 0 4px}
+.sub{color:var(--muted);margin:0 0 16px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:18px}
+.tabs button{border:1px solid var(--line);background:var(--card);color:var(--green);padding:10px 14px;border-radius:12px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--green);color:#f4f1ea;border-color:var(--green)}
+.view{display:none}
+.view.on{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi small{color:var(--muted);font-size:12px;display:block}
+.kpi b{font-family:"Newsreader",Georgia,serif;font-size:26px;font-weight:600;color:var(--green)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;margin-bottom:14px}
+.box h2{font-family:"Newsreader",Georgia,serif;font-size:19px;font-weight:600;margin:0 0 6px}
+.box p{margin:0;color:var(--muted)}
+.etapas{display:grid;gap:8px;margin-top:12px}
+.etapa{display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid var(--line);border-radius:12px;font-size:13px}
+.etapa span{color:var(--muted)}
+.filtros{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.filtros span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:12px}
+.tbl{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:560px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}
+th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.vazio{padding:32px 18px;text-align:center;color:var(--muted)}
+.vazio b{display:block;color:var(--fg);font-size:15px;margin-bottom:4px}
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.nav a{display:inline-block;padding:10px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--green);font-weight:600;text-decoration:none;font-size:13px}
+.nav a.ev{background:var(--green);color:#f4f1ea;border-color:var(--green)}
+.evbox{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.evbox a{display:inline-block;padding:12px 16px;border-radius:12px;background:var(--green);color:#f4f1ea;font-weight:600;text-decoration:none}
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Navegação"><a href="painel.html">Painel do gestor</a><a href="index.html">Página da proposta</a><a href="evidencias.html" class="ev">Evidências de navegação →</a></nav>
+<h1>Dashboard</h1>
+<p class="sub">Uma visão para cada perfil. O corretor e a imobiliária veem a mesma tela, filtrada pela situação de cada cliente.</p>
+
+<div class="tabs" role="tablist" aria-label="Perfis">
+  <button role="tab" aria-selected="true" data-v="cliente">Cliente</button>
+  <button role="tab" aria-selected="false" data-v="corretor">Corretor e imobiliária</button>
+  <button role="tab" aria-selected="false" data-v="gestor">Gestor</button>
+</div>
+
+<section class="view on" id="v-cliente" aria-label="Dashboard do cliente">
+  <div class="box">
+    <h2>Seu perfil</h2>
+    <p>Acompanhe as etapas do seu atendimento. Nada aparece aqui até você criar seu perfil.</p>
+    <div class="etapas">
+      <div class="etapa">Proposta recebida <span>Pendente</span></div>
+      <div class="etapa">Perfil criado <span>Pendente</span></div>
+      <div class="etapa">Oportunidades alinhadas <span>Pendente</span></div>
+    </div>
+  </div>
+  <div class="box">
+    <h2>Oportunidades para você</h2>
+    <p>Quando seu perfil estiver criado e autorizado, as oportunidades alinhadas ao que você procura aparecem aqui.</p>
+  </div>
+</section>
+
+<section class="view" id="v-corretor" aria-label="Dashboard do corretor e da imobiliária">
+  <div class="box">
+    <h2>Cada cliente tem um dono</h2>
+    <p>O dono é definido na entrada e não muda. Se o cliente veio pela sua mala direta ou pelo seu código, ele é seu. Se veio de uma campanha da Neo360, você atende em nome da campanha, e o cliente continua sendo dela. Ninguém transfere um cliente para outra pessoa.</p>
+  </div>
+  <div class="cards">
+    <div class="kpi"><small>Clientes enviados</small><b>0</b></div>
+    <div class="kpi"><small>Responderam</small><b>0</b></div>
+    <div class="kpi"><small>Cadastros de perfil</small><b>0</b></div>
+    <div class="kpi"><small>Em atendimento</small><b>0</b></div>
+  </div>
+  <div class="filtros"><span>Situação: Todas</span><span>Dono: Todos</span><span>Período: Todos</span></div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Data</th><th>Cliente</th><th>Dono</th><th>Respondeu</th><th>Cadastro</th><th>Situação</th></tr></thead>
+      <tbody><tr><td colspan="6" class="vazio"><b>Nenhum cliente ainda</b>Quando a sua mala direta for enviada, cada cliente aparece aqui com o dono definido na entrada e a situação.</td></tr></tbody>
+    </table>
+  </div>
+</section>
+
+<section class="view" id="v-gestor" aria-label="Dashboard do gestor">
+  <div class="box evbox"><div><h2>Evidências de navegação</h2><p>O que as pessoas abrem, tocam e quanto tempo ficam, em tela própria.</p></div><a href="evidencias.html">Abrir →</a></div>
+  <div class="cards">
+    <div class="kpi"><small>Corretores ativos</small><b>0</b></div>
+    <div class="kpi"><small>Perfis no total</small><b>0</b></div>
+    <div class="kpi"><small>Autorizaram contato</small><b>0</b></div>
+    <div class="kpi"><small>Propostas enviadas</small><b>0</b></div>
+  </div>
+  <div class="box">
+    <h2>Por situação</h2>
+    <div class="etapas">
+      <div class="etapa">Novo <span>0</span></div>
+      <div class="etapa">Em atendimento <span>0</span></div>
+      <div class="etapa">Proposta enviada <span>0</span></div>
+      <div class="etapa">Encerrado <span>0</span></div>
+    </div>
+  </div>
+  <div class="tbl">
+    <table>
+      <thead><tr><th>Corretor</th><th>Código</th><th>Perfis</th><th>Autorizados</th><th>Propostas</th></tr></thead>
+      <tbody><tr><td colspan="5" class="vazio"><b>Nenhum corretor com perfis ainda</b>Cada corretor aparece com o próprio código.</td></tr></tbody>
+    </table>
+  </div>
+</section>
+
+<script>
+(function(){
+  var tabs=document.querySelectorAll('[role=tab]');
+  tabs.forEach(function(t){t.addEventListener('click',function(){
+    tabs.forEach(function(x){x.setAttribute('aria-selected',x===t?'true':'false');});
+    document.querySelectorAll('.view').forEach(function(v){v.classList.remove('on');});
+    document.getElementById('v-'+t.getAttribute('data-v')).classList.add('on');
+  });});
+})();
+</script>
+</body>
+</html>

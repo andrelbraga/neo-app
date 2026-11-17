@@ -1,0 +1,269 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Evidências · Boa Vista 104-A</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fffdf8;--fg:#1d2a22;--muted:#5b6b60;--line:#e2dccd;--green:#1d3a2d;--soft:#e8ede6;--bar:#5f8a79;--acc:#b08a4a;--warn:#8a5a17;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 Inter,system-ui,-apple-system,sans-serif;padding:0 max(16px,env(safe-area-inset-right,0px)) 48px max(16px,env(safe-area-inset-left,0px))}
+.top{position:sticky;top:0;padding-top:max(12px,env(safe-area-inset-top,0px));z-index:5;background:var(--bg);padding:12px 0 8px;border-bottom:1px solid var(--line)}
+.nav{display:flex;flex-wrap:wrap;gap:8px}
+.nav a{display:inline-block;padding:9px 13px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--green);font-weight:600;text-decoration:none;font-size:13px}
+h1{font-family:"Newsreader",Georgia,serif;font-size:28px;font-weight:600;margin:16px 0 4px;line-height:1.15}
+h2{font-family:"Newsreader",Georgia,serif;font-size:19px;font-weight:600;margin:0 0 6px}
+.sub{color:var(--muted);margin:0 0 12px}
+.wrap{max-width:900px;margin:0 auto}
+.tabs{display:flex;gap:6px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tabs button{flex:none;border:1px solid var(--line);background:var(--card);color:var(--green);padding:10px 14px;border-radius:12px;font:600 13px Inter,system-ui,sans-serif;cursor:pointer;min-height:42px}
+.tabs button[aria-selected="true"]{background:var(--green);color:#f4f1ea;border-color:var(--green)}
+.modo{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:12px 0}
+.modo button{border:1px solid var(--line);background:var(--card);color:var(--fg);padding:8px 12px;border-radius:999px;font:600 12.5px Inter,system-ui,sans-serif;cursor:pointer;min-height:38px}
+.modo button[aria-pressed="true"]{border-color:var(--green);background:var(--soft)}
+.note{border:1px solid var(--warn);color:var(--warn);border-radius:10px;padding:9px 12px;font-size:13px;margin:8px 0}
+.note.info{border-color:var(--line);color:var(--muted);background:var(--card)}
+.view{display:none}.view.on{display:block}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;min-width:0}
+.kpi small{color:var(--muted);font-size:12px;display:block}
+.kpi b{display:block;font-family:"Newsreader",Georgia,serif;font-size:26px;font-weight:600;color:var(--green);font-variant-numeric:tabular-nums;line-height:1.2;margin:4px 0}
+.kpi span{color:var(--muted);font-size:12px}
+.box{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0;min-width:0}
+.box p{margin:0;color:var(--muted)}
+.bar{display:grid;grid-template-columns:minmax(0,150px) minmax(0,1fr) 88px;gap:10px;align-items:center;margin:9px 0;font-size:13px}
+.bar span:first-child{overflow-wrap:anywhere}
+.track{height:10px;background:var(--soft);border-radius:999px;overflow:hidden}
+.fill{height:100%;background:var(--bar);border-radius:999px}
+.fill.acc{background:var(--acc)}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.path{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:13px;margin-top:10px}
+.path .step{border:1px solid var(--line);border-radius:999px;padding:3px 10px;background:var(--soft)}
+.path i{font-style:normal;color:var(--muted)}
+.lista{display:grid;gap:10px;margin-top:10px}
+.prop{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+.prop b{display:block}
+.prop small{color:var(--muted)}
+.vazio{color:var(--muted);font-size:13px;padding:6px 0}
+ul{margin:6px 0 0;padding-left:20px;color:var(--muted)}
+li{margin:4px 0}
+.pend{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:999px;padding:1px 8px;color:var(--muted);margin-left:6px;white-space:nowrap}
+@media (max-width:520px){.bar{grid-template-columns:minmax(0,1fr) 88px}.bar .track{grid-column:1 / -1;grid-row:2}}
+:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+  <nav class="nav" aria-label="Navegação"><a href="dashboard.html">← Dashboard</a><a href="painel.html">Painel do gestor</a><a href="index.html">Página da proposta</a></nav>
+  <div class="tabs" role="tablist" aria-label="Evidências">
+    <button role="tab" aria-selected="true" data-v="resumo">Resumo</button>
+    <button role="tab" aria-selected="false" data-v="pagina">Página</button>
+    <button role="tab" aria-selected="false" data-v="planta">Planta e 3D</button>
+    <button role="tab" aria-selected="false" data-v="conversa">Conversa e proposta</button>
+    <button role="tab" aria-selected="false" data-v="propostas">Propostas recebidas</button>
+    <button role="tab" aria-selected="false" data-v="regras">Regras</button>
+  </div>
+</div>
+
+<h1>Evidências de navegação</h1>
+<p class="sub">Como as pessoas exploram a proposta do Boa Vista 104-A. Leitura agregada para orientar o produto, nunca para medir uma pessoa em particular.</p>
+
+<div class="modo" role="group" aria-label="Fonte dos números">
+  <button type="button" data-modo="real" aria-pressed="true">Dados do teste</button>
+  <button type="button" data-modo="exemplo" aria-pressed="false">Exemplo do formato</button>
+</div>
+<div id="estado" class="note info" role="status">Carregando…</div>
+
+<section class="view on" id="v-resumo" aria-label="Resumo">
+  <div class="cards" id="k-resumo"></div>
+  <div class="box"><h2>Funil da visita</h2><p>Quantas visitas chegaram a cada passo.</p><div id="funil"></div></div>
+</section>
+
+<section class="view" id="v-pagina" aria-label="Página">
+  <div class="box"><h2>Tempo por parte da página</h2><p>Média por visita, com teto de 5 minutos por parte. Mede tempo na tela, não atenção.</p><div id="secoes"></div></div>
+  <div class="box"><h2>Até onde rolaram</h2><p>Parte das visitas que chegou a cada ponto da página.</p><div id="rolagem"></div></div>
+  <div class="box"><h2>Caminho mais comum</h2><p>As primeiras partes vistas, na ordem, pela maioria das visitas.</p><div id="caminho"></div></div>
+  <div class="box"><h2>Respostas às perguntas da página</h2><p>Perguntas opcionais que aparecem durante a visita.</p><div id="respostas"></div></div>
+</section>
+
+<section class="view" id="v-planta" aria-label="Planta e 3D">
+  <div class="box"><h2>O que abriram</h2><p>Quantas visitas abriram cada forma de ver o apartamento.</p><div id="vis"></div></div>
+  <div class="box"><h2>Controle de sol</h2><p>Uso do controle de hora e das estações.</p><div id="sol"></div>
+    <p class="note">A posição do sol só vira informação ao cliente depois de confirmar a orientação da unidade.</p></div>
+  <div class="box"><h2>Tempo por cômodo dentro do 3D <span class="pend">ainda não medido</span></h2><p>Entra numa próxima etapa: hoje a página sabe que a pessoa abriu o 3D, não em qual cômodo ela ficou.</p></div>
+</section>
+
+<section class="view" id="v-conversa" aria-label="Conversa e proposta">
+  <div class="box"><h2>Conversa com o corretor</h2><p>Aberturas e assuntos escolhidos nas respostas rápidas. O texto digitado não é gravado.</p><div id="chat"></div></div>
+  <div class="box"><h2>Montagem da proposta</h2><p>Quantas visitas mexeram em cada parte da composição.</p><div id="prop"></div></div>
+</section>
+
+<section class="view" id="v-propostas" aria-label="Propostas recebidas">
+  <div class="box"><h2>Propostas enviadas para análise</h2><p>Aqui aparecem nome e WhatsApp, porque a própria pessoa digitou e pediu retorno. Quem tocou em "Subir o contrato" aparece marcado: é a autorização para subir o contrato se a proposta for aprovada, não uma assinatura. Ficam separados da medição anônima. Só o dono do artefato lê.</p><div id="lista-prop" class="lista"></div></div>
+</section>
+
+<section class="view" id="v-regras" aria-label="Regras">
+  <div class="box"><h2>Como os dados são tratados</h2>
+    <ul>
+      <li>A medição só começa depois que a pessoa toca em Aceitar no aviso da página. Recusar é tão fácil quanto aceitar.</li>
+      <li>A sessão é anônima: sem nome, telefone, e-mail ou texto digitado.</li>
+      <li>Nome e WhatsApp só existem quando a pessoa envia uma proposta, e ficam num registro separado.</li>
+      <li>Sessões com menos de 5 segundos ficam fora das médias de tempo.</li>
+      <li>Para pesquisa, cada número precisa de no mínimo 10 visitas. Abaixo disso, o número serve só para conferir se a medição funciona.</li>
+    </ul>
+  </div>
+  <div class="box"><h2>Limites de hoje</h2>
+    <ul>
+      <li>Nesta hospedagem, a página só grava quando o visitante está logado com acesso ao artefato. Lead comum ainda não gera registro: depende da hospedagem própria.</li>
+      <li>"Links abertos de quantos enviados" e a comparação entre corretores dependem do link individual por cliente.</li>
+    </ul>
+  </div>
+  <div class="box"><h2>Decisões pendentes</h2>
+    <ul>
+      <li>Por quanto tempo guardar os registros.</li>
+      <li>Quem redige o texto final do aviso.</li>
+      <li>Medir só internamente até a hospedagem própria, ou esperar.</li>
+      <li>Revisão jurídica da LGPD antes do primeiro cliente real.</li>
+    </ul>
+  </div>
+</section>
+</div>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const SEC = { 'h-galeria':'Galeria', 'h-planta':'Planta e 3D', 'h-emp':'Torres e áreas', 'h-sim':'Simulador', 'h-neg':'Proposta', 'h-quem':'Quem constrói', 'h-ind':'Números da região', 'h-vid':'Vídeo de uso', 'Apresentação':'Capa', 'Crie seu perfil':'Crie seu perfil', 'Seu consultor':'Consultor', 'Imobiliária parceira':'Imobiliária', 'Incorporadora responsável':'Incorporadora', 'negociar':'Proposta', 'planta':'Planta e 3D' };
+  const nomeSec = k => SEC[k] || k;
+  const fmtT = s => s < 60 ? Math.round(s) + ' s' : Math.floor(s / 60) + ' min ' + String(Math.round(s % 60)).padStart(2, '0') + ' s';
+  const pct = (a, b) => b ? Math.round(a / b * 100) + '%' : '—';
+  const TETO = 300, MIN_SESSAO = 5;
+
+  /* ---------- exemplo fictício, só para mostrar o formato ---------- */
+  function exemplo(){
+    let x = 7; const r = () => (x = (x * 9301 + 49297) % 233280) / 233280;
+    const secs = ['Apresentação','Crie seu perfil','h-galeria','h-planta','h-emp','h-neg'];
+    const v = [];
+    for (let i = 0; i < 42; i++){
+      const secoes = {}; const caminho = [];
+      secs.forEach((s, j) => { if (r() < 0.95 - j * 0.12){ secoes[s] = +(5 + r() * (s === 'h-planta' ? 160 : 70)).toFixed(1); caminho.push(s); } });
+      const a = {};
+      const on = (k, p) => { if (r() < p) a[k] = 1; };
+      on('abriu_planta', .7); on('abriu_3d', .45); on('abriu_maquete', .3); on('abriu_maquete_104', .15); on('usou_sol', .25); on('estacao_inverno', .12); on('estacao_verao', .1);
+      on('viu_video', .28); on('abriu_chat', .3); on('chat_pagamento', .14); on('chat_investir', .08); on('chat_permuta', .05); on('chat_mensagem', .12);
+      on('mexeu_entrada', .35); on('mexeu_parcelas', .25); on('mexeu_reforcos', .12); on('mexeu_chaves', .06); on('veiculo_on', .1); on('gerar_proposta', .2); on('enviou_proposta', .07); on('viu_fechamento', .07); on('fechou_fechamento', .03); on('subir_contrato', .03); on('prefere_corretor', .06); on('abriu_perfil', .1);
+      const resp = r() < .5 ? [{ p: 'objetivo', r: ['Morar','Investir','Passeio ou temporada','Ainda estou conhecendo'][Math.floor(r() * 4)] }] : [];
+      v.push({ secoes, acoes: a, clicks: r() < .3 ? { conhecer: 1 } : {}, respostas: resp, caminho, rolagem: [25, 50, 75, 100][Math.floor(r() * 4)] });
+    }
+    const p = [{ tipo: 'proposta', nome: 'Cliente exemplo', whatsapp: '(54) 90000-0000', resumo: 'Proposta para o Apartamento 104-A: entrada R$ 150.000; saldo em 36x.', autorizou_contrato: true, registrado_em: '2026-11-15T15:00:00Z' }];
+    return { visitas: v, propostas: p };
+  }
+
+  /* ---------- leitura agregada ---------- */
+  function agrega(visitas){
+    const n = visitas.length;
+    const tem = (v, k) => (+((v.acoes || {})[k] || 0) > 0) || (+((v.clicks || {})[k] || 0) > 0);
+    const conta = k => visitas.filter(v => tem(v, k)).length;
+    const validas = visitas.filter(v => Object.values(v.secoes || {}).reduce((a, s) => a + (+s || 0), 0) >= MIN_SESSAO);
+    const tempos = validas.map(v => Object.values(v.secoes || {}).reduce((a, s) => a + Math.min(TETO, +s || 0), 0)).sort((a, b) => a - b);
+    const media = tempos.length ? tempos.reduce((a, b) => a + b, 0) / tempos.length : 0;
+    const mediana = tempos.length ? tempos[Math.floor(tempos.length / 2)] : 0;
+    const soma = {};
+    validas.forEach(v => Object.entries(v.secoes || {}).forEach(([k, s]) => { soma[k] = (soma[k] || 0) + Math.min(TETO, +s || 0); }));
+    const secoes = Object.entries(soma).map(([k, s]) => [nomeSec(k), s / Math.max(validas.length, 1)]).sort((a, b) => b[1] - a[1]);
+    const rol = [25, 50, 75, 100].map(p => [p, visitas.filter(v => (+v.rolagem || 0) >= p).length]);
+    const seqs = {};
+    visitas.forEach(v => { const c = (v.caminho || []).slice(0, 5).map(nomeSec); if (c.length >= 2){ const k = c.join(' → '); seqs[k] = (seqs[k] || 0) + 1; } });
+    const caminho = Object.entries(seqs).sort((a, b) => b[1] - a[1])[0] || null;
+    const resp = {};
+    visitas.forEach(v => (v.respostas || []).forEach(r => { const k = r.p + ' · ' + r.r; resp[k] = (resp[k] || 0) + 1; }));
+    return { n, nValidas: validas.length, media, mediana, secoes, rol, caminho, resp: Object.entries(resp).sort((a, b) => b[1] - a[1]), conta };
+  }
+
+  /* ---------- desenho ---------- */
+  const kpi = (rot, val, sub) => `<div class="kpi"><small>${esc(rot)}</small><b>${esc(val)}</b><span>${esc(sub || '')}</span></div>`;
+  function barras(el, linhas, fmt, acc){
+    if (!linhas.length){ el.innerHTML = '<p class="vazio">Nada registrado ainda.</p>'; return; }
+    const max = Math.max(...linhas.map(l => l[1]), 1);
+    el.innerHTML = linhas.map(([rot, v]) => `<div class="bar"><span>${esc(rot)}</span><div class="track"><div class="fill${acc ? ' acc' : ''}" style="width:${(v / max * 100).toFixed(0)}%"></div></div><span class="num">${esc(fmt(v))}</span></div>`).join('');
+  }
+  function desenha(dados){
+    const A = agrega(dados.visitas), n = A.n, c = A.conta;
+    const nProp = dados.propostas.length;
+    const nAut = dados.propostas.filter(p => p.autorizou_contrato).length;
+    $('k-resumo').innerHTML =
+      kpi('Visitas registradas', String(n), A.nValidas + ' com tempo válido') +
+      kpi('Tempo médio na página', fmtT(A.media), 'mediana ' + fmtT(A.mediana)) +
+      kpi('Chegaram à planta 3D', String(c('abriu_3d')), pct(c('abriu_3d'), n) + ' das visitas') +
+      kpi('Abriram a conversa', String(c('abriu_chat')), pct(c('abriu_chat'), n) + ' das visitas') +
+      kpi('Viram o vídeo', String(c('viu_video')), pct(c('viu_video'), n) + ' das visitas') +
+      kpi('Propostas enviadas', String(nProp), 'para análise') +
+      kpi('Autorizaram subir o contrato', String(nAut), nProp ? pct(nAut, nProp) + ' das propostas' : 'se a proposta for aprovada');
+    const fn = v => `${v} · ${pct(v, n)}`;
+    barras($('funil'), [
+      ['Abriu a página', n], ['Viu a planta', c('abriu_planta') + c('abriu_3d') ? dados.visitas.filter(v => ['abriu_planta','abriu_3d','abriu_maquete'].some(k => (v.acoes || {})[k])).length : 0],
+      ['Abriu o 3D', c('abriu_3d')], ['Mexeu na proposta', dados.visitas.filter(v => ['mexeu_entrada','mexeu_parcelas','mexeu_reforcos','mexeu_chaves','veiculo_on'].some(k => (v.acoes || {})[k])).length],
+      ['Gerou a proposta', c('gerar_proposta')], ['Enviou para análise', c('enviou_proposta')], ['Autorizou subir o contrato', c('subir_contrato')]
+    ], fn);
+    barras($('secoes'), A.secoes, fmtT);
+    barras($('rolagem'), A.rol.map(([p, q]) => [p + '% da página', q]), fn);
+    $('caminho').innerHTML = A.caminho
+      ? `<div class="path">${A.caminho[0].split(' → ').map(s => `<span class="step">${esc(s)}</span>`).join('<i>→</i>')}</div><p class="vazio">${A.caminho[1]} de ${n} visitas começaram assim.</p>`
+      : '<p class="vazio">Ainda sem caminhos registrados.</p>';
+    barras($('respostas'), A.resp, v => String(v), true);
+    barras($('vis'), [['Planta original', c('abriu_planta')], ['Planta 3D', c('abriu_3d')], ['Condomínio 3D', c('abriu_maquete')], ['Foi ao 104-A na maquete', c('abriu_maquete_104')]], fn);
+    barras($('sol'), [['Mexeu na hora do sol', c('usou_sol')], ['Verão', c('estacao_verao')], ['Outono', c('estacao_outono')], ['Inverno', c('estacao_inverno')], ['Primavera', c('estacao_primavera')]], fn, true);
+    barras($('chat'), [['Abriu a conversa', c('abriu_chat')], ['Clicou em falar com o corretor', c('falar_corretor')], ['Assunto: pagamento', c('chat_pagamento')], ['Assunto: investir', c('chat_investir')], ['Assunto: permuta', c('chat_permuta')], ['Escreveu mensagem', c('chat_mensagem')], ['Preferiu conversar', c('prefere_corretor')]], fn);
+    barras($('prop'), [['Mexeu na entrada', c('mexeu_entrada')], ['Mexeu nas parcelas', c('mexeu_parcelas')], ['Mexeu nos reforços', c('mexeu_reforcos')], ['Pagamento nas chaves', c('mexeu_chaves')], ['Incluiu veículo', c('veiculo_on')], ['Escolheu 2 veículos', c('veiculos_2')], ['Escolheu 3 veículos', c('veiculos_3')], ['Gerou a proposta completa', c('gerar_proposta')], ['Enviou para análise', c('enviou_proposta')], ['Viu o fechamento subir', c('viu_fechamento')], ['Fechou sem subir o contrato', c('fechou_fechamento')], ['Autorizou subir o contrato', c('subir_contrato')], ['Teste de subir contrato (#demo)', c('subir_contrato_teste')]], fn, true);
+    $('lista-prop').innerHTML = nProp
+      ? dados.propostas.slice().sort((a, b) => String(b.registrado_em).localeCompare(String(a.registrado_em))).map(p => `<div class="prop"><b>${esc(p.nome)} · ${esc(p.whatsapp)}</b>${p.autorizou_contrato ? `<span class="pend" style="border-color:#1d3a2d;color:#1d3a2d;margin:4px 0 0">Autorizou subir o contrato${p.autorizado_em ? ' · ' + esc(String(p.autorizado_em).slice(0, 16).replace('T', ' ')) : ''}</span>` : ''}<small>${esc(String(p.registrado_em || '').slice(0, 16).replace('T', ' '))}</small><p>${esc(p.resumo)}</p>${p.observacao ? `<p>Observação: ${esc(p.observacao)}</p>` : ''}</div>`).join('')
+      : '<p class="vazio">Nenhuma proposta enviada ainda.</p>';
+  }
+
+  /* ---------- fonte dos dados ---------- */
+  let modo = 'real', real = null, motivo = '';
+  function mostra(){
+    document.querySelectorAll('[data-modo]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.modo === modo)));
+    const est = $('estado');
+    if (modo === 'exemplo'){
+      est.className = 'note'; est.textContent = 'Exemplo com números fictícios, só para mostrar o formato. Nenhum vem de clientes reais.';
+      desenha(exemplo()); return;
+    }
+    if (!real){ est.className = 'note info'; est.textContent = motivo || 'Carregando…'; desenha({ visitas: [], propostas: [] }); return; }
+    const n = real.visitas.length;
+    est.className = n < 10 ? 'note' : 'note info';
+    est.textContent = n < 10
+      ? `Dados do teste: ${n} visita(s). Abaixo de 10 visitas, os números servem só para conferir se a medição funciona.`
+      : `Dados do teste: ${n} visitas registradas.`;
+    desenha(real);
+  }
+  document.querySelectorAll('[data-modo]').forEach(b => b.addEventListener('click', () => { modo = b.dataset.modo; mostra(); }));
+  document.querySelectorAll('[role=tab]').forEach(t => t.addEventListener('click', () => {
+    document.querySelectorAll('[role=tab]').forEach(x => x.setAttribute('aria-selected', String(x === t)));
+    document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + t.dataset.v));
+  }));
+
+  (async () => {
+    const CLAUDE = window.claude || { use: async () => null };
+    let db = null;
+    try { db = await CLAUDE.use('db'); } catch (e) {}
+    if (!db){ motivo = 'Leitura indisponível aqui. Abra pelo artefato publicado, com a conta de dono. Enquanto isso, veja o exemplo do formato.'; mostra(); return; }
+    try {
+      const snap = await db.collection('sessoes').get();
+      const docs = snap.docs.filter(d => d.exists).map(d => d.data());
+      const propostas = docs.filter(d => d.tipo === 'proposta');
+      docs.filter(d => d.tipo !== 'proposta' && d.proposta).forEach(d => propostas.push(d.proposta));
+      real = { visitas: docs.filter(d => d.tipo !== 'proposta'), propostas };
+    } catch (e) {
+      motivo = 'Só o dono do artefato consegue ler as evidências. Enquanto isso, veja o exemplo do formato.';
+    }
+    mostra();
+  })();
+  mostra();
+})();
+</script>
+</body>
+</html>

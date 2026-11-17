@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Cadastros de perfil</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fffdf8;--fg:#1d2a22;--muted:#5b6b60;--line:#e2dccd;--green:#1d3a2d;--gold:#b08a4a}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.5 Inter,system-ui,sans-serif;padding:max(16px,env(safe-area-inset-left,0px)) max(16px,env(safe-area-inset-right,0px)) 40px}
+h1{font-family:"Newsreader",Georgia,serif;font-size:28px;font-weight:600;margin:6px 0 4px}
+.sub{color:var(--muted);margin:0 0 18px}
+.bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.pill{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 14px;font-size:13px}
+.pill b{color:var(--green)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.kpi small{color:var(--muted);font-size:12px;display:block}
+.kpi b{font-family:"Newsreader",Georgia,serif;font-size:26px;font-weight:600;color:var(--green)}
+.tbl{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:640px}
+th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--line);font-size:13px;vertical-align:top}
+th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.vazio{padding:36px 18px;text-align:center;color:var(--muted)}
+.vazio b{display:block;color:var(--fg);font-size:15px;margin-bottom:4px}
+.tag{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;background:#e7efe9;color:var(--green)}
+.nav{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 18px}
+.nav a{display:inline-block;padding:10px 14px;border-radius:12px;background:var(--card);border:1px solid var(--line);color:var(--green);font-weight:600;text-decoration:none;font-size:13px}
+.nav a.on{background:var(--green);color:#f4f1ea;border-color:var(--green)}
+.nota{font-size:12px;color:var(--muted);margin-top:14px}
+</style>
+</head>
+<body>
+<nav class="nav" aria-label="Navegação"><a class="on" href="cadastros.html">Cadastros de perfil</a><a href="painel.html">Painel do gestor</a><a href="site.html">Página da proposta</a></nav>
+<h1>Cadastros de perfil</h1>
+<p class="sub">Clientes que criaram o perfil pela página de cada corretor. Cada linha fica ligada ao código do corretor de origem.</p>
+
+<div class="bar">
+  <span class="pill">Corretor: <b>Fabiano · FAB-0427</b></span>
+  <span class="pill">Período: <b>Todos</b></span>
+  <span class="pill">Situação: <b>Todas</b></span>
+</div>
+
+<div class="cards">
+  <div class="kpi"><small>Perfis criados</small><b>0</b></div>
+  <div class="kpi"><small>Autorizaram o contato</small><b>0</b></div>
+  <div class="kpi"><small>Em atendimento</small><b>0</b></div>
+  <div class="kpi"><small>Convertidos em proposta</small><b>0</b></div>
+</div>
+
+<div class="tbl">
+<table>
+  <thead>
+    <tr><th>Data</th><th>Código</th><th>Tipo</th><th>Região</th><th>Prazo</th><th>Faixa</th><th>Autorização</th><th>Situação</th></tr>
+  </thead>
+  <tbody>
+    <tr><td colspan="8" class="vazio"><b>Nenhum perfil criado ainda</b>Quando um cliente enviar o cadastro, a linha aparece aqui com o código do corretor de origem.</td></tr>
+  </tbody>
+</table>
+</div>
+
+<p class="nota">Cada linha mostra apenas o que o cliente autorizou. A situação muda manualmente pelo corretor: Novo, Em atendimento, Proposta enviada ou Encerrado.</p>
+</body>
+</html>

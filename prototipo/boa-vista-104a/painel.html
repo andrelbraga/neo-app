@@ -1,0 +1,674 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Painel · Boa Vista 104-A</title>
+<style>
+:root{--bg:#f4f1ea;--card:#fffdf8;--line:#e2d9c7;--fg:#1d2620;--muted:#6d6a5e;--verde:#174a33;--verde2:#eef4ea;--ouro:#b8934a;--alerta:#fbf3e6;--alerta-l:#ecd9b4}
+:root:not([data-theme="light"]) .x{}
+body{margin:0;background:var(--bg);color:var(--fg);font:14px/1.45 system-ui,-apple-system,"Inter",sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+header{position:sticky;top:0;z-index:5;background:var(--verde);color:#f6f0df;display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px))}
+header h1{font:700 18px Georgia,serif;margin:0}
+header small{display:block;opacity:.8;font-size:12px}
+header a{color:#f6f0df;font-size:13px;border:1px solid rgba(255,255,255,.4);border-radius:999px;padding:7px 12px;text-decoration:none;white-space:nowrap}
+.wrap{display:grid;grid-template-columns:230px minmax(0,1fr);gap:18px;max-width:1180px;margin:0 auto;padding:16px max(16px,env(safe-area-inset-right,0px)) 40px max(16px,env(safe-area-inset-left,0px))}
+nav{position:sticky;top:76px;align-self:start;display:grid;gap:4px}
+nav a{padding:10px 12px;border-radius:10px;color:var(--fg);text-decoration:none;font-weight:600;font-size:14px}
+nav a:hover,nav a:focus-visible{background:#e8e2d3;outline:none}
+main{display:grid;gap:14px;min-width:0}
+.sec{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:10px;scroll-margin-top:90px}
+.sec h2{font:700 15px system-ui;margin:0;display:flex;justify-content:space-between;align-items:center;gap:8px;text-transform:uppercase;letter-spacing:.05em;color:#4b4636}
+.tag{font:700 10px system-ui;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 8px;background:#e9e1cf;color:#5b4a22;white-space:nowrap}
+.tag.g{background:#e3efe0;color:var(--verde)}
+.muted{color:var(--muted);font-size:13px;margin:0}
+.lin{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:8px 0;border-top:1px dashed var(--line);flex-wrap:wrap}
+.lin:first-of-type{border-top:0}
+.lin>div{min-width:0}
+.campo{display:grid;gap:4px;min-width:0}
+.campo label,.campo .k{font-size:12px;color:var(--muted)}
+.inp,.sel{font:inherit;font-size:15px;min-height:42px;padding:8px 10px;border:1px solid #cfc6b3;border-radius:10px;background:#fff;color:var(--fg);width:100%;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.sw{font:600 13px system-ui;min-width:52px;height:30px;border-radius:999px;border:1px solid #b9b2a2;background:#e9e4d6;position:relative;cursor:pointer;padding:0;flex:none}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:left .15s}
+.sw[aria-checked="true"]{background:var(--verde);border-color:var(--verde)}
+.sw[aria-checked="true"]::after{left:25px}
+.aviso{background:var(--alerta);border:1px solid var(--alerta-l);color:#5b4a22;border-radius:10px;padding:9px 12px;font-size:13px;margin:0}
+.prev{background:var(--verde2);border-left:3px solid #7fa07a;border-radius:12px;padding:12px 14px;display:grid;gap:6px}
+.prev div{display:flex;justify-content:space-between;gap:10px}
+.prev .t{font-weight:700;border-top:1px solid #cfd9c9;padding-top:6px}
+.status{font-size:12px;color:var(--muted);min-height:1.2em}
+.bloq{background:var(--alerta);border:1px solid var(--alerta-l);border-radius:16px;padding:18px;display:none}
+.bloq.on{display:block}
+.mail{background:#fff;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.mail-h{background:#f0ede4;padding:10px 14px;font-size:13px;color:#4b4636;display:grid;gap:2px;overflow-wrap:anywhere}
+.mail-b{padding:12px 14px;white-space:pre-wrap;font:14px/1.5 system-ui,sans-serif;overflow-wrap:anywhere;margin:0}
+.papel{border-top:1px dashed var(--line);padding-top:10px;display:grid;gap:8px}
+.papel:first-of-type{border-top:0}
+.papel .lin{border-top:0;padding:0}
+.papel small{display:block;color:var(--muted);font-size:13px}
+.papel .bt[aria-pressed="true"]{background:var(--verde2);border-color:#7fa07a}
+.devbox{background:#fbfaf6;border:1px dashed #b9b2a2;border-radius:12px;padding:10px 14px;font-size:13px;color:#4b4636}
+.devbox ol{margin:6px 0 0;padding-left:20px;display:grid;gap:4px}
+@media (max-width:820px){.wrap{grid-template-columns:1fr}nav{position:static;grid-auto-flow:column;overflow-x:auto;padding-bottom:4px}nav a{white-space:nowrap}}
+@media (max-width:560px){.grid,.grid3{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.sw::after{transition:none}}
+
+  .editor-bio{display:flex;flex-direction:column;gap:12px;margin-top:14px}
+  .bloco{background:var(--card,#fffdf8);border:1px solid var(--line,#e2dccd);border-radius:12px;padding:12px;display:flex;flex-direction:column;gap:10px}
+  .bloco.arrastando{box-shadow:0 8px 24px rgba(0,0,0,.18);opacity:.95;position:relative;z-index:2}
+  .bloco-cab{display:flex;align-items:center;gap:8px}
+  .bloco-tit{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+  .bloco-tit b{font-size:15px}
+  .bloco-tit small{font-size:12px;color:var(--muted,#27322b)}
+  .pega{touch-action:none;cursor:grab;border:0;background:transparent;font-size:18px;letter-spacing:-2px;color:#66706a;padding:6px 4px;min-width:36px;min-height:44px}
+  .seta{border:1px solid var(--line,#e2dccd);background:#fff;border-radius:8px;min-width:36px;min-height:36px;font-size:15px;cursor:pointer}
+  .seta:disabled{opacity:.35;cursor:default}
+
+  .ident-grid{display:grid;grid-template-columns:1fr;gap:18px;margin-top:14px}
+  @media (min-width:900px){.ident-grid{grid-template-columns:1.1fr .9fr;align-items:start}}
+  .mod{background:var(--card,#fffdf8);border:1px solid var(--line,#e2dccd);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:12px;margin-bottom:12px}
+  .mod-cab,.blk-cab{display:flex;align-items:center;gap:8px}
+  .mod-blocos{display:flex;flex-direction:column;gap:10px}
+  .blk{background:#fff;border:1px solid var(--line,#e2dccd);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px}
+  .blk.arrastando,.mod.arrastando{box-shadow:0 8px 24px rgba(0,0,0,.18);position:relative;z-index:3;background:#fffdf8}
+  .img-linha{display:flex;align-items:center;gap:12px}
+  .thumb{width:64px;height:64px;border-radius:50%;overflow:hidden;background:#eef1ec;border:1px dashed #9aa79c;display:flex;align-items:center;justify-content:center;font-size:11px;color:#66706a;text-align:center;flex:none}
+  .thumb img{width:100%;height:100%;object-fit:cover}
+  .bt{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:8px 14px;border:1px solid var(--line,#e2dccd);background:#fff;border-radius:10px;font:600 14px system-ui;cursor:pointer;color:var(--verde,#1d3a2d)}
+  .bt-x{min-width:44px;min-height:44px;border:1px solid var(--line,#e2dccd);background:#fff;border-radius:10px;font-size:18px;cursor:pointer}
+  .ident-acoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+  .pv{background:#f4f1ea;border:1px solid var(--line,#e2dccd);border-radius:18px;padding:22px 20px;display:flex;flex-direction:column;gap:18px;color:#0d1510;font-family:Inter,system-ui,sans-serif}
+  .pv-mod{display:flex;flex-direction:column;gap:10px}
+  .pv-kick{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:#8a6a2c;font-weight:600}
+  .pv-img{width:84px;height:84px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 3px #f4f1ea,0 0 0 4px #d8b77c}
+  .pv-img img{width:100%;height:100%;object-fit:cover}
+  .pv-nome{font-family:Newsreader,Georgia,serif;font-size:28px;font-weight:600;margin:0;line-height:1.1}
+  .pv-esp{font-size:14px;color:#2d5b48}
+  .pv-reg{font-size:12px;color:#66706a}
+  .pv-bio{font-family:Newsreader,Georgia,serif;font-style:italic;font-size:18px;line-height:1.5;margin:0;color:#27322b}
+  .pv-stat{display:flex;flex-direction:column;gap:2px;border-top:1px solid #e2dccd;padding-top:8px}
+  .pv-stat small{font-size:12px;color:#66706a}
+  .pv-stat b{font-family:Newsreader,Georgia,serif;font-size:22px;font-weight:500;color:#1d3a2d}
+  .pv-lab{font-size:12px;color:#66706a}
+  .pv-vazio{font-size:14px;color:#66706a;margin:0}
+  .kicker-p{font-size:12px;color:#66706a;margin-bottom:8px;letter-spacing:.06em}
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Painel do gestor</h1><small>Boa Vista Residencial · Apartamento 104-A · Torre A</small></div>
+  <a href="index.html">Ver página do cliente</a>
+</header>
+
+<div class="wrap">
+  <nav aria-label="Seções do painel">
+    <a href="#preco">1 · Preço</a>
+    <a href="#regras">2 · Regras de pagamento</a>
+    <a href="#paginas">3 · O que aparece</a>
+    <a href="#corretores">4 · Corretores</a>
+    <a href="#resultado">5 · Resultado</a>
+    <a href="evidencias.html">6 · Evidências →</a>
+    <a href="#publico">7 · Liga e desliga</a>
+    <a href="#ident">8 · Identidade da apresentação</a>
+    <a href="#emails">9 · E-mails da proposta</a>
+    <a href="dashboard.html">10 · Dashboard</a>
+  </nav>
+
+  <main>
+    <div class="bloq" id="sem-acesso">
+      <strong>Acesso restrito ao gestor.</strong>
+      <p class="muted">Entre com a conta de dono do artefato para editar. Esta página só mostra o que está salvo.</p>
+    </div>
+
+    <section class="sec" id="preco" aria-labelledby="h-preco">
+      <h2 id="h-preco">1 · Preço e condição <span class="tag">só você</span></h2>
+      <p class="muted">O que o cliente lê na etapa 1 da proposta. Nada disso é digitado pelo cliente.</p>
+      <div class="grid">
+        <div class="campo"><label for="c-nomeRef">Como chamar o valor de referência</label>
+          <select class="sel" id="c-nomeRef" data-k="condicao.nomeRef">
+            <option>Valor de lançamento</option><option>Valor de tabela</option><option>Referência da incorporadora</option>
+          </select></div>
+        <div class="campo"><label for="c-tipo">Tipo da condição</label>
+          <select class="sel" id="c-tipo" data-k="condicao.tipo">
+            <option>Condição especial de lançamento</option><option>Condição promocional</option><option>Campanha de lançamento</option>
+          </select></div>
+        <div class="campo"><label for="c-ref">Valor de referência (R$)</label><input class="inp" type="number" inputmode="decimal" id="c-ref" data-k="condicao.ref"></div>
+        <div class="campo"><label for="c-promo">Condição promocional (R$)</label><input class="inp" type="number" inputmode="decimal" id="c-promo" data-k="condicao.promo"></div>
+        <div class="campo"><label for="c-validade">Válida até</label><input class="inp" type="text" id="c-validade" data-k="condicao.validade" placeholder="dd/mm/aaaa"></div>
+      </div>
+      <p class="aviso" id="av-preco" hidden></p>
+    </section>
+
+    <section class="sec" id="regras" aria-labelledby="h-regras">
+      <h2 id="h-regras">2 · Regras de pagamento <span class="tag">limites</span></h2>
+      <p class="muted">Quanto o cliente pode mexer. Fora desses limites a proposta aparece como sujeita à aprovação especial.</p>
+      <div class="grid3">
+        <div class="campo"><label for="c-entMin">Entrada mínima (R$)</label><input class="inp" type="number" id="c-entMin" data-k="condicao.entMin"></div>
+        <div class="campo"><label for="c-entSug">Entrada sugerida (R$)</label><input class="inp" type="number" id="c-entSug" data-k="condicao.entSug"></div>
+        <div class="campo"><label for="c-chaves">Pagamento nas chaves (R$)</label><input class="inp" type="number" id="c-chaves" data-k="condicao.chaves"></div>
+        <div class="campo"><label for="c-parcMin">Parcelas: mínimo</label><input class="inp" type="number" id="c-parcMin" data-k="condicao.parcMin"></div>
+        <div class="campo"><label for="c-parcMax">Parcelas: máximo</label><input class="inp" type="number" id="c-parcMax" data-k="condicao.parcMax"></div>
+        <div class="campo"><label for="c-refN">Reforços: quantidade</label><input class="inp" type="number" id="c-refN" data-k="condicao.refN"></div>
+        <div class="campo"><label for="c-refV">Reforço: valor (R$)</label><input class="inp" type="number" id="c-refV" data-k="condicao.refV"></div>
+      </div>
+      <div class="lin"><div>Entrada somente à vista<small>Ligado nesta unidade: a entrada não é parcelada e a página não oferece essa opção. Desligado, o cliente pode parcelar a entrada</small></div><button class="sw" role="switch" aria-checked="true" data-sw="condicao.entrada_so_avista" aria-label="Entrada somente à vista"></button></div>
+      <div class="prev" aria-live="polite">
+        <div class="k muted" style="font-size:12px">Como o cliente vê ao abrir a proposta (veículo desligado)</div>
+        <div><span>Preço promocional</span><b id="p-promo">—</b></div>
+        <div><span>Entrada sugerida</span><b id="p-ent">—</b></div>
+        <div><span id="p-refs-l">Reforços</span><b id="p-refs">—</b></div>
+        <div class="t"><span>Saldo a parcelar</span><b id="p-saldo">—</b></div>
+        <div><span id="p-parc-l">Parcela estimada</span><b id="p-parc">—</b></div>
+      </div>
+      <p class="aviso" id="av-regras" hidden></p>
+    </section>
+
+    <section class="sec" id="paginas" aria-labelledby="h-pag">
+      <h2 id="h-pag">3 · O que aparece na página <span class="tag">liga e desliga</span></h2>
+      <div class="lin"><div>Apresentação e destaques<small>Topo com fotos e chamada</small></div><button class="sw" role="switch" aria-checked="true" data-sw="secoes.hero" aria-label="Apresentação"></button></div>
+      <div class="lin"><div>Galeria<small>Fotos do empreendimento</small></div><button class="sw" role="switch" aria-checked="true" data-sw="secoes.galeria" aria-label="Galeria"></button></div>
+      <div class="lin"><div>Os fatos da unidade<small>Metragem, dormitórios, vaga</small></div><button class="sw" role="switch" aria-checked="true" data-sw="secoes.fatos" aria-label="Fatos"></button></div>
+      <div class="lin"><div>Planta e 3D do apartamento<small>Planta original e visão de cima</small></div><button class="sw" role="switch" aria-checked="true" data-sw="secoes.planta" aria-label="Planta e 3D"></button></div>
+      <div class="lin"><div>Maquete do empreendimento 3D<small>Quatro torres e entorno. Não desliga a planta 3D do apartamento</small></div><button class="sw" role="switch" aria-checked="true" data-sw="planta3d.maquete_ativo" aria-label="Maquete 3D do empreendimento"></button></div>
+      <div class="lin"><div>Planta baixa 3D do apartamento<small>Planta 3D da unidade. Não desliga a maquete</small></div><button class="sw" role="switch" aria-checked="true" data-sw="planta3d.apto_ativo" aria-label="Planta baixa 3D do apartamento"></button></div>
+      <div class="lin"><div>Torres e áreas<small>Empreendimento e proximidades</small></div><button class="sw" role="switch" aria-checked="true" data-sw="secoes.torres" aria-label="Torres"></button></div>
+      <div class="lin"><div>Simulador de condições<small>Desligado: a proposta já faz o cálculo</small></div><button class="sw" role="switch" aria-checked="false" data-sw="secoes.simulador" aria-label="Simulador"></button></div>
+      <div class="lin"><div>Proposta de compra<small>Condição, composição e subir o contrato</small></div><button class="sw" role="switch" aria-checked="true" data-sw="secoes.proposta" aria-label="Proposta"></button></div>
+      <div class="lin"><div>Contato com o corretor<small>Mensagem direta ao corretor</small></div><button class="sw" role="switch" aria-checked="true" data-sw="secoes.contato" aria-label="Contato"></button></div>
+    </section>
+
+    <section class="sec" id="corretores" aria-labelledby="h-cor">
+      <h2 id="h-cor">4 · Corretores e campanhas <span class="tag">mala direta</span></h2>
+      <p class="muted">O corretor trabalha dentro destas regras. Ele nunca altera a tabela, a promoção nem os limites.</p>
+      <div class="lin"><div>Corretor pode alterar o preço<small>Mantenha desligado</small></div><button class="sw" role="switch" aria-checked="false" data-sw="corretor.altera_preco" aria-label="Corretor altera preço"></button></div>
+      <div class="lin"><div>Corretor pode ligar e desligar seções<small>Só as seções da lista acima</small></div><button class="sw" role="switch" aria-checked="false" data-sw="corretor.liga_secoes" aria-label="Corretor liga seções"></button></div>
+      <div class="lin"><div>Links por lead<small>Cada link guarda a versão da campanha que o cliente recebeu</small></div><span class="tag">em preparação</span></div>
+    </section>
+
+    <section class="sec" id="resultado" aria-labelledby="h-res">
+      <h2 id="h-res">5 · Resultado <span class="tag">registro por link</span></h2>
+      <p class="muted">Sem envios registrados ainda. Quando a mala direta estiver ligada, aqui aparecem os links enviados, as aberturas, as propostas montadas e os pedidos de contrato, com a versão da campanha de cada link.</p>
+    </section>
+
+    <section class="sec" id="medicao" aria-labelledby="h-med">
+      <h2 id="h-med">6 · Evidências de navegação <span class="tag">tela própria</span></h2>
+      <p class="muted">A leitura do que as pessoas abrem, tocam e quanto tempo ficam saiu deste painel e tem navegação própria, para não misturar com o liga e desliga.</p>
+      <a href="evidencias.html" style="display:block;text-align:center;padding:14px;border-radius:12px;background:#174a33;color:#f6f0df;font-weight:600;text-decoration:none">Abrir evidências de navegação →</a>
+    </section>
+
+    <section class="sec" id="publico" aria-labelledby="h-pub">
+      <h2 id="h-pub">7 · Liga e desliga por confirmação <span class="tag">só o que você confirmou</span></h2>
+      <p class="muted">Cada bloco nasce desligado. Ligue só depois de confirmar o conteúdo. Desligado, ele não aparece na página do cliente.</p>
+      <div class="lin"><div>Posição do sol confirmada<small>Ligue só com a orientação da unidade validada. Enquanto desligado, a página mostra o aviso de demonstração</small></div><button class="sw" role="switch" aria-checked="false" data-sw="planta3d.sol_confirmado" aria-label="Sol confirmado"></button></div>
+      <div class="lin"><div>Quem constrói<small>Texto aprovado sobre a incorporadora</small></div><button class="sw" role="switch" aria-checked="false" data-sw="publico.dwell.ativo" aria-label="Quem constrói"></button></div>
+      <div class="campo"><label for="p-dwell">Texto aprovado (Quem constrói)</label><textarea class="inp" id="p-dwell" rows="3" data-k="publico.dwell.texto"></textarea></div>
+      <div class="lin"><div>Números do bairro e da locação<small>Mostra os três cartões abaixo, cada um com o texto aprovado</small></div><button class="sw" role="switch" aria-checked="false" data-sw="publico.indicadores.ativo" aria-label="Indicadores"></button></div>
+      <div class="lin"><div>Cartão: preço por m² na região</div><button class="sw" role="switch" aria-checked="false" data-sw="publico.indicadores.comparativo" aria-label="Comparativo"></button></div>
+      <div class="campo"><label for="p-comp">Texto aprovado (preço por m²)</label><textarea class="inp" id="p-comp" rows="2" data-k="publico.indicadores.comparativo_txt"></textarea></div>
+      <div class="lin"><div>Cartão: locação e temporada</div><button class="sw" role="switch" aria-checked="false" data-sw="publico.indicadores.renda" aria-label="Locação"></button></div>
+      <div class="campo"><label for="p-renda">Texto aprovado (locação)</label><textarea class="inp" id="p-renda" rows="2" data-k="publico.indicadores.renda_txt"></textarea></div>
+      <div class="lin"><div>Cartão: valorização histórica</div><button class="sw" role="switch" aria-checked="false" data-sw="publico.indicadores.valorizacao" aria-label="Valorização"></button></div>
+      <div class="campo"><label for="p-valor">Texto aprovado (valorização)</label><textarea class="inp" id="p-valor" rows="2" data-k="publico.indicadores.valorizacao_txt"></textarea></div>
+      <div class="campo"><label for="p-fonte">Fonte, período e data dos números</label><textarea class="inp" id="p-fonte" rows="2" data-k="publico.indicadores.fonte"></textarea></div>
+      <div class="lin"><div>Vídeo "Como usar esta página"<small>Aparece só com o endereço do vídeo preenchido</small></div><button class="sw" role="switch" aria-checked="false" data-sw="publico.video.ativo" aria-label="Vídeo"></button></div>
+      <div class="campo"><label for="p-vurl">Endereço do vídeo</label><input class="inp" type="url" id="p-vurl" data-k="publico.video.url" placeholder="https://"></div>
+    </section>
+
+    <section class="sec" id="ident" aria-labelledby="h-ident">
+      <h2 id="h-ident">8 · Identidade da apresentação <span class="tag">editor visual</span></h2>
+      <p class="muted">Ative cada módulo, escreva nos campos (os exemplos somem quando você digita) e arraste pelo ⋮⋮ para montar a ordem. A prévia ao lado mostra o que o cliente vê. CRECI, vínculos e números só ligue depois de validados.</p>
+      <div class="ident-grid">
+        <div class="ident-edit">
+          <div id="ident-modulos"></div>
+          <div class="ident-acoes">
+            <button class="bt" type="button" data-ex-add>+ Bloco personalizado (corretor)</button>
+            <button class="bt" type="button" id="ident-restaurar">Restaurar layout recomendado</button>
+          </div>
+        </div>
+        <div class="ident-previa-wrap">
+          <div class="kicker-p">Prévia do cliente</div>
+          <div id="ident-previa" class="pv" aria-live="polite"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="emails" aria-labelledby="h-emails">
+      <h2 id="h-emails">9 · E-mails ao gerar a proposta <span class="tag">desenho para o dev</span></h2>
+      <p class="muted">Quando o cliente gera a proposta, aceitando ou não o contrato, cada participante ligado aqui recebe um e-mail com o conteúdo do seu papel. Esta página ainda não envia e-mail: ela mostra como vai funcionar no sistema final.</p>
+      <div class="papel">
+        <div class="lin"><div><b>Neo360 (você)</b> <span class="tag g">proposta completa</span><small>Proposta completa: valores, condições, nome e WhatsApp do cliente, situação do contrato e origem do link</small></div><button class="sw" role="switch" aria-checked="false" data-sw="notificacoes.neo360.ativo" aria-label="Neo360 (você) recebe o e-mail"></button></div>
+        <div class="campo"><label for="m-neo360">E-mail de quem recebe</label><input class="inp" type="email" id="m-neo360" data-k="notificacoes.neo360.email" placeholder="nome@exemplo.com"></div>
+        <div><button class="bt" type="button" data-prev="neo360" aria-pressed="false">Ver prévia do e-mail</button></div>
+        <div data-prev-box="neo360" hidden></div>
+      </div>
+      <div class="papel">
+        <div class="lin"><div><b>Corretor responsável</b> <span class="tag g">proposta completa</span><small>Proposta completa e link para a ficha do cliente. Não vê os acordos financeiros de outros participantes</small></div><button class="sw" role="switch" aria-checked="false" data-sw="notificacoes.corretor.ativo" aria-label="Corretor responsável recebe o e-mail"></button></div>
+        <div class="campo"><label for="m-corretor">E-mail de quem recebe</label><input class="inp" type="email" id="m-corretor" data-k="notificacoes.corretor.email" placeholder="nome@exemplo.com"></div>
+        <div><button class="bt" type="button" data-prev="corretor" aria-pressed="false">Ver prévia do e-mail</button></div>
+        <div data-prev-box="corretor" hidden></div>
+      </div>
+      <div class="papel">
+        <div class="lin"><div><b>Imobiliária do corretor</b> <span class="tag">pendente: completo ou resumo</span><small>Proposta da equipe e situação da negociação. Não vê corretores de outras imobiliárias</small></div><button class="sw" role="switch" aria-checked="false" data-sw="notificacoes.imobiliaria.ativo" aria-label="Imobiliária do corretor recebe o e-mail"></button></div>
+        <div class="campo"><label for="m-imobiliaria">E-mail de quem recebe</label><input class="inp" type="email" id="m-imobiliaria" data-k="notificacoes.imobiliaria.email" placeholder="nome@exemplo.com"></div>
+        <div><button class="bt" type="button" data-prev="imobiliaria" aria-pressed="false">Ver prévia do e-mail</button></div>
+        <div data-prev-box="imobiliaria" hidden></div>
+      </div>
+      <div class="papel">
+        <div class="lin"><div><b>Indicador com over</b> <span class="tag g">aviso mínimo</span><small>Só o aviso de que a indicação gerou proposta, com a data. Nunca recebe nome, WhatsApp ou valores do cliente</small></div><button class="sw" role="switch" aria-checked="false" data-sw="notificacoes.indicador.ativo" aria-label="Indicador com over recebe o e-mail"></button></div>
+        <div class="campo"><label for="m-indicador">E-mail de quem recebe</label><input class="inp" type="email" id="m-indicador" data-k="notificacoes.indicador.email" placeholder="nome@exemplo.com"></div>
+        <div><button class="bt" type="button" data-prev="indicador" aria-pressed="false">Ver prévia do e-mail</button></div>
+        <div data-prev-box="indicador" hidden></div>
+      </div>
+      <div class="papel">
+        <div class="lin"><div><b>Cópia para o cliente</b> <span class="tag">pendente de decisão</span><small>Desenhado desligado. Falta decidir se o comprador também recebe a proposta por e-mail</small></div><button class="sw" role="switch" aria-checked="false" data-sw="notificacoes.cliente_copia" aria-label="Cópia para o cliente"></button></div>
+      </div>
+      <div class="devbox"><b>Para o desenvolvimento</b><ol>
+        <li>Gatilho: os botões "Enviar proposta" e "Seguir para contrato" da página do cliente. Os dois geram a proposta e disparam o evento <code>proposta_gerada</code>, aceitando ou não o contrato.</li>
+        <li>O backend cria uma linha em <code>notificacao_proposta</code> para cada destinatário ligado e envia a partir dessa fila. Um destinatário por papel por evento, para reenvio não duplicar.</li>
+        <li>O indicador só recebe o aviso mínimo, sem nome, WhatsApp ou valores do cliente. A regra também fica travada no banco.</li>
+        <li>Aqui os e-mails são cadastrados por unidade. No sistema final vêm do cadastro dos participantes de cada negociação.</li>
+        <li>Pendente: provedor de e-mail e remetente; cópia para o cliente; imobiliária recebe a proposta completa ou só o resumo.</li>
+      </ol></div>
+    </section>
+
+    <p class="status" id="status" role="status" aria-live="polite"></p>
+  </main>
+</div>
+
+<script>
+(() => {
+  const CLAUDE = window.claude || { use: async () => null };
+  const DEF = {
+    condicao: { nomeRef: 'Valor de lançamento', ref: 460000, promo: 370000, validade: '30/11/2026', tipo: 'Condição especial de lançamento', entMin: 120000, entSug: 150000, entrada_so_avista: true, parcMin: 12, parcMax: 36, refN: 2, refV: 15000, chaves: 0 },
+    secoes: { hero: true, galeria: true, fatos: true, planta: true, torres: true, simulador: false, proposta: true, contato: true },
+    planta3d: { maquete_ativo: true, apto_ativo: true, posicao_solar: true, janelas_luz: true, moveis: true, entorno: true, sol_confirmado: false },
+    publico: { dwell: { ativo: false, texto: '' }, indicadores: { ativo: false, comparativo: false, renda: false, valorizacao: false, comparativo_txt: '', renda_txt: '', valorizacao_txt: '', fonte: '' }, video: { ativo: false, url: '' } },
+    corretor: { altera_preco: false, liga_secoes: false },
+    /* e-mails ao gerar a proposta: desenho para o dev (nada é enviado daqui) */
+    notificacoes: { neo360: { ativo: true, email: '' }, corretor: { ativo: true, email: '' }, imobiliaria: { ativo: true, email: '' }, indicador: { ativo: false, email: '' }, cliente_copia: false },
+    identidade: {
+      modulos: ['corretor', 'imobiliaria', 'incorporadora'],
+      ativos: { corretor: true, imobiliaria: false, incorporadora: false },
+      campos: { corretor: { foto: '', nome: '', especialidade: '', registro: '', bio: '', vgv_vendas: '', vgv_negociacoes: '', experiencia: '' }, imobiliaria: { logo: '', nome: '', registro: '', texto: '' }, incorporadora: { logo: '', nome: '', texto: '' } },
+      exibir: { corretor: { foto: true, nome: true, especialidade: true, registro: true, bio: true, vgv_vendas: false, vgv_negociacoes: false, experiencia: false }, imobiliaria: { logo: true, nome: true, registro: true, texto: true }, incorporadora: { logo: true, nome: true, texto: false } },
+      ordem: { corretor: ['foto', 'nome', 'especialidade', 'registro', 'bio', 'vgv_vendas', 'vgv_negociacoes', 'experiencia'], imobiliaria: ['logo', 'nome', 'registro', 'texto'], incorporadora: ['logo', 'nome', 'texto'] },
+      extras: []
+    }
+  };
+  let cfg = JSON.parse(JSON.stringify(DEF)), ref = null, canEdit = false;
+  const $ = id => document.getElementById(id);
+  const brl = v => 'R$ ' + Math.round(v || 0).toLocaleString('pt-BR');
+  const isObj = o => o && typeof o === 'object' && !Array.isArray(o);
+  const mescla = (a, b) => { const o = { ...a }; for (const k in b) o[k] = isObj(a[k]) && isObj(b[k]) ? mescla(a[k], b[k]) : b[k]; return o; };
+  const lê = (o, p) => p.split('.').reduce((x, k) => (x == null ? undefined : x[k]), o);
+  const põe = (o, p, v) => { const ks = p.split('.'); let x = o; ks.slice(0, -1).forEach(k => { x = x[k] = { ...(x[k] || {}) }; }); x[ks[ks.length - 1]] = v; };
+  const status = t => { $('status').textContent = t; };
+  /* ===== e-mails ao gerar a proposta: prévia por papel (desenho; nada é enviado) ===== */
+  let prevAberta = null, ultimaProposta = null;
+  async function carregaUltima(){
+    if (!medDb || !canEdit) return;
+    try {
+      const snap = await medDb.collection('sessoes').get();
+      const ps = snap.docs.filter(d => d.exists).map(d => d.data()).filter(x => x && x.tipo === 'proposta')
+        .sort((a, b) => String(b.registrado_em || '').localeCompare(String(a.registrado_em || '')));
+      ultimaProposta = ps[0] || null;
+    } catch (e) {}
+  }
+  function mailHTML(pp){
+    const c = cfg.condicao, real = ultimaProposta;
+    const P = real || { nome: 'Cliente de exemplo', whatsapp: '(54) 9 0000-0000', resumo: 'condição de ' + brl(c.promo) + ', entrada de ' + brl(c.entSug) + ', ' + c.refN + ' reforços de ' + brl(c.refV) + ', saldo em até ' + c.parcMax + ' parcelas', observacao: '' };
+    const quando = new Date(P.registrado_em || Date.now()).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+    const un = 'Apartamento 104-A · Boa Vista Residencial, Gramado';
+    const sit = P.autorizou_contrato ? 'Cliente pediu para seguir para o contrato' : 'Proposta enviada; cliente ainda não pediu o contrato';
+    const n = (cfg.notificacoes || {})[pp] || {};
+    const para = n.email || 'e-mail ainda não cadastrado';
+    let assunto, corpo;
+    if (pp === 'indicador'){
+      assunto = 'Sua indicação gerou uma proposta';
+      corpo = 'Uma negociação que você apresentou gerou proposta em ' + quando + '.\n\nEmpreendimento: Boa Vista Residencial, Gramado.\n\nO corretor responsável acompanha os próximos passos. Os dados do comprador não são enviados a você.';
+    } else if (pp === 'imobiliaria'){
+      assunto = 'Proposta da equipe · 104-A Boa Vista';
+      corpo = 'Unidade: ' + un + '\nCorretor: [corretor responsável pela negociação]\nData: ' + quando + '\nSituação: ' + sit + '\n\n[Pendente: incluir ou não os valores e o contato do cliente]';
+    } else {
+      assunto = 'Nova proposta · 104-A Boa Vista · ' + (P.nome || 'sem nome');
+      corpo = 'Unidade: ' + un + '\nData: ' + quando + '\nCliente: ' + (P.nome || '—') + '\nWhatsApp: ' + (P.whatsapp || '—') + '\n\nProposta: ' + (P.resumo || '—') + '\n'
+        + (P.observacao ? '\nObservação do cliente: ' + P.observacao + '\n' : '') + '\nSituação: ' + sit
+        + (pp === 'neo360' ? '\nOrigem do link: [corretor ou campanha que enviou a página]' : '\n\nAbrir a ficha do cliente: [link para a ficha no Neo360]');
+    }
+    const nota = (n.ativo === false ? 'Desligado: este papel não recebe o e-mail. ' : '') + (real ? 'Prévia com a última proposta registrada.' : 'Prévia com dados de exemplo.');
+    return '<div class="mail"><div class="mail-h"><span><b>Para:</b> ' + esc(para) + '</span><span><b>Assunto:</b> ' + esc(assunto) + '</span><span>' + esc(nota) + '</span></div><pre class="mail-b">' + esc(corpo) + '</pre></div>';
+  }
+  function mostraPrevia(){
+    document.querySelectorAll('[data-prev-box]').forEach(b => { const on = b.dataset.prevBox === prevAberta; b.hidden = !on; b.innerHTML = on ? mailHTML(prevAberta) : ''; });
+    document.querySelectorAll('[data-prev]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.prev === prevAberta)));
+  }
+  document.addEventListener('click', async e => {
+    const b = e.target.closest('[data-prev]'); if (!b) return;
+    prevAberta = prevAberta === b.dataset.prev ? null : b.dataset.prev;
+    if (prevAberta) await carregaUltima();
+    mostraPrevia();
+  });
+  let medDb = null;
+  const MED_SECOES = { 'h-galeria': 'Galeria', 'h-por': 'Fatos da unidade', 'h-planta': 'Planta e 3D', 'h-emp': 'Torres e áreas', 'h-sim': 'Simulador', 'h-neg': 'Proposta de compra', 'h-con': 'Contato', 'Apresentação': 'Apresentação' };
+  const MED_ACOES = { abriu_planta: 'Abriu a planta original', abriu_3d: 'Abriu a visão 3D', girou_3d: 'Girou a visão 3D', abriu_maquete_104: 'Abriu o 104-A na maquete', veiculo_on: 'Ligou o veículo', veiculo_off: 'Desligou o veículo', usou_simulador: 'Usou o simulador', ver_proposta: 'Foi até a proposta', enviou_proposta: 'Montou a proposta', subir_contrato: 'Pediu para subir o contrato', prefere_corretor: 'Preferiu falar com o corretor', conhecer: 'Clicou em conhecer', falar_corretor: 'Clicou em falar com o corretor', enviou_mensagem: 'Enviou mensagem ao corretor' };
+  const fmtT = s => s < 60 ? Math.round(s) + ' s' : Math.floor(s / 60) + ' min ' + Math.round(s % 60) + ' s';
+  const linhaMed = (a, b) => { const d = document.createElement('div'); d.className = 'lin'; const x = document.createElement('div'); x.textContent = a; const y = document.createElement('b'); y.textContent = b; d.append(x, y); return d; };
+  const titulo = t => { const h = document.createElement('h2'); h.textContent = t; h.style.fontSize = '13px'; h.style.marginTop = '12px'; return h; };
+  async function lerMedicao(){
+    const out = $('med-out');
+    if (!medDb) { out.textContent = 'Leitura indisponível aqui. Abra pelo artefato publicado.'; return; }
+    if (!canEdit) { out.textContent = 'Só o dono ou um editor consegue ler as medições.'; return; }
+    out.textContent = 'Lendo…';
+    try {
+      const snap = await medDb.collection('sessoes').get();
+      const v = snap.docs.filter(d => d.exists).map(d => d.data());
+      const n = v.length;
+      out.replaceChildren();
+      if (!n) { out.textContent = 'Ainda não há visitas registradas.'; return; }
+      const tempos = v.map(x => Object.values(x.secoes || {}).reduce((a, s) => a + (+s || 0), 0));
+      const media = tempos.reduce((a, b) => a + b, 0) / n;
+      const comAcao = v.filter(x => Object.keys(x.acoes || {}).length || Object.keys(x.clicks || {}).length || (x.respostas || []).length).length;
+      out.append(linhaMed('Visitas registradas', String(n)), linhaMed('Com algum clique ou resposta', comAcao + ' de ' + n), linhaMed('Tempo médio nas seções, por visita', fmtT(media)));
+      const soma = {};
+      v.forEach(x => Object.entries(x.secoes || {}).forEach(([k, s]) => { soma[k] = (soma[k] || 0) + (+s || 0); }));
+      out.append(titulo('Tempo por parte da página (média por visita)'));
+      Object.entries(soma).sort((a, b) => b[1] - a[1]).forEach(([k, s]) => out.append(linhaMed(MED_SECOES[k] || k, fmtT(s / n))));
+      const cont = {};
+      v.forEach(x => { const todas = Object.assign({}, x.acoes || {}, x.clicks || {}); Object.entries(todas).forEach(([k, c]) => { if (+c > 0) cont[k] = (cont[k] || 0) + 1; }); });
+      out.append(titulo('O que as pessoas tocaram (quantas visitas fizeram)'));
+      const lista = Object.entries(cont).sort((a, b) => b[1] - a[1]);
+      if (!lista.length) out.append(linhaMed('Nenhum clique registrado ainda', ''));
+      lista.forEach(([k, c]) => out.append(linhaMed(MED_ACOES[k] || k, c + ' de ' + n)));
+    } catch (e) {
+      out.textContent = 'Não consegui ler as medições agora. Tente de novo em instantes.';
+    }
+  }
+
+  function pinta(){
+    if (!editorOk()) buildEditor();
+    document.querySelectorAll('[data-k]').forEach(el => {
+      const v = lê(cfg, el.dataset.k);
+      if (document.activeElement !== el) el.value = v ?? '';
+    });
+    document.querySelectorAll('[data-sw]').forEach(b => b.setAttribute('aria-checked', String(!!lê(cfg, b.dataset.sw))));
+    const c = cfg.condicao;
+    const saldo = c.promo - c.entSug - c.refN * c.refV - (c.chaves || 0);
+    $('p-promo').textContent = brl(c.promo);
+    $('p-ent').textContent = brl(c.entSug);
+    $('p-refs-l').textContent = c.refN + ' reforços de ' + brl(c.refV);
+    $('p-refs').textContent = brl(c.refN * c.refV);
+    $('p-saldo').textContent = saldo >= 0 ? brl(saldo) : 'acima do preço';
+    $('p-parc-l').textContent = 'Parcela estimada em ' + c.parcMax + ' vezes';
+    $('p-parc').textContent = saldo > 0 && c.parcMax ? brl(saldo / c.parcMax) : '—';
+    const avP = $('av-preco');
+    const erroP = c.promo > c.ref ? 'A condição promocional está acima do valor de referência. Confira os dois valores.' : '';
+    avP.hidden = !erroP; avP.textContent = erroP;
+    const erroR = c.entSug < c.entMin ? 'A entrada sugerida está abaixo da entrada mínima.' : (c.parcMin > c.parcMax ? 'O mínimo de parcelas está acima do máximo.' : '');
+    const avR = $('av-regras');
+    avR.hidden = !erroR; avR.textContent = erroR;
+    document.querySelectorAll('[data-k],[data-sw]').forEach(el => el.disabled = !canEdit);
+    $('sem-acesso').classList.toggle('on', !canEdit);
+    atualizaThumbs();
+    reordena();
+    renderPrevia();
+    if (prevAberta) mostraPrevia();
+    document.querySelectorAll('#ident button, #ident input, #ident textarea').forEach(el => el.disabled = !canEdit);
+  }
+  function grava(caminho){
+    const parte = caminho.split('.')[0];
+    if (!canEdit || !ref) return;
+    status('Salvando…');
+    ref.update({ [parte]: cfg[parte] })
+      .then(() => status('Salvo agora. A página do cliente já usa estes valores.'))
+      .catch(() => status('Não foi salvo. Confira a conexão e tente de novo.'));
+  }
+  document.addEventListener('change', e => {
+    const el = e.target.closest('[data-k]'); if (!el) return;
+    const k = el.dataset.k, num = el.type === 'number';
+    const v = num ? (el.value === '' ? 0 : parseFloat(el.value)) : el.value;
+    põe(cfg, k, v); pinta(); grava(k);
+  });
+  document.querySelectorAll('[data-sw]').forEach(b => b.addEventListener('click', () => {
+    const k = b.dataset.sw; põe(cfg, k, !lê(cfg, k)); pinta(); grava(k);
+  }));
+
+
+  /* ===== identidade da apresentação: editor visual ===== */
+  const MODULOS = {
+    corretor: { titulo: 'Corretor', sub: 'Quem apresenta a oportunidade', campos: [
+      { f: 'foto', lab: 'Foto do corretor', tipo: 'img', dica: 'Quadrada, rosto centralizado. Reduzida automaticamente.' },
+      { f: 'nome', lab: 'Nome', ph: 'Ex.: Fabiano Silva' },
+      { f: 'especialidade', lab: 'Especialidade', ph: 'Ex.: Especialista em Lançamentos Imobiliários' },
+      { f: 'registro', lab: 'CRECI', ph: 'Ex.: CRECI-RS 00000 · só após validação', dica: 'Só publique depois de validado' },
+      { f: 'bio', lab: 'Bio personalizada', ph: 'Ex.: Atendimento personalizado para quem busca oportunidades imobiliárias na Serra Gaúcha.', area: true },
+      { f: 'vgv_vendas', lab: 'VGV de vendas', ph: 'Ex.: R$ 00 milhões em 00 unidades e lotes vendidos diretamente, de 2020 a 2026.', area: true, dica: 'Comissão não entra. Só com contrato comprovado' },
+      { f: 'vgv_negociacoes', lab: 'VGV de negociações fechadas', ph: 'Ex.: R$ 00 milhões em N negociações concluídas (condomínios, loteamentos, incorporações).', area: true, dica: 'Só com contrato assinado. Diga sua participação' },
+      { f: 'experiencia', lab: 'Experiência', ph: 'Ex.: 00 anos em lançamentos na Serra Gaúcha', dica: 'Só com o número confirmado' }
+    ] },
+    imobiliaria: { titulo: 'Imobiliária', sub: 'Quando há vínculo com uma imobiliária', campos: [
+      { f: 'logo', lab: 'Logotipo', tipo: 'img', dica: 'Reduzido automaticamente' },
+      { f: 'nome', lab: 'Nome da imobiliária', ph: 'Ex.: Imobiliária Exemplo' },
+      { f: 'registro', lab: 'CRECI-J', ph: 'Ex.: CRECI-J 00000 · só após validação' },
+      { f: 'texto', lab: 'Texto de apresentação', ph: 'Ex.: Atendimento realizado em parceria com a imobiliária responsável.', area: true }
+    ] },
+    incorporadora: { titulo: 'Incorporadora', sub: 'Quem constrói o empreendimento', campos: [
+      { f: 'logo', lab: 'Logotipo', tipo: 'img' },
+      { f: 'nome', lab: 'Nome da incorporadora', ph: 'Ex.: Dwell Incorporadora' },
+      { f: 'texto', lab: 'Texto sobre a incorporadora', ph: 'Texto aprovado sobre a incorporadora', area: true }
+    ] }
+  };
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const extraDe = id => (cfg.identidade.extras || []).find(x => x.id === id);
+  const valorCampo = (m, f) => { if (f.startsWith('x')) { const x = extraDe(f); return x ? x.texto : ''; } return (cfg.identidade.campos[m] || {})[f] || ''; };
+  const visivel = (m, f) => { if (f.startsWith('x')) { const x = extraDe(f); return !!(x && x.exibir); } return !!(cfg.identidade.exibir[m] || {})[f]; };
+  const rotuloCampo = (m, f) => { if (f.startsWith('x')) { const x = extraDe(f); return x ? x.lab : ''; } const sp = MODULOS[m].campos.find(c => c.f === f); return sp ? sp.lab : f; };
+  function ordemDe(m){
+    const base = ((cfg.identidade.ordem || {})[m] || []).slice();
+    if (m === 'corretor') (cfg.identidade.extras || []).forEach(x => { if (!base.includes(x.id)) base.push(x.id); });
+    return base;
+  }
+  function blocoHTML(m, c){
+    const ctrl = c.tipo === 'img'
+      ? `<div class="img-linha"><div class="thumb" data-thumb="${m}.${c.f}">sem imagem</div><label class="bt">Enviar imagem<input type="file" accept="image/*" data-img="${m}.${c.f}" hidden></label></div>`
+      : c.area ? `<textarea class="inp" rows="3" data-k="identidade.campos.${m}.${c.f}" placeholder="${esc(c.ph)}"></textarea>`
+      : `<input class="inp" data-k="identidade.campos.${m}.${c.f}" placeholder="${esc(c.ph)}">`;
+    return `<div class="blk" data-f="${c.f}"><div class="blk-cab"><button class="pega" type="button" aria-label="Arrastar ${esc(c.lab)}">⋮⋮</button><div class="bloco-tit" style="flex:1;min-width:0"><b>${esc(c.lab)}</b>${c.dica ? `<small>${esc(c.dica)}</small>` : ''}</div><button class="sw" type="button" role="switch" aria-checked="true" data-sw="identidade.exibir.${m}.${c.f}" aria-label="Exibir ${esc(c.lab)}"></button></div>${ctrl}</div>`;
+  }
+  function extraHTML(x){
+    return `<div class="blk" data-f="${x.id}"><div class="blk-cab"><button class="pega" type="button" aria-label="Arrastar bloco">⋮⋮</button><input class="inp" style="flex:1;min-width:0" aria-label="Nome do bloco" value="${esc(x.lab)}" data-ex-lab="${x.id}"><button class="sw" type="button" role="switch" aria-checked="${x.exibir ? 'true' : 'false'}" data-ex-sw="${x.id}" aria-label="Exibir bloco"></button><button class="bt-x" type="button" data-ex-del="${x.id}" aria-label="Excluir bloco">×</button></div><textarea class="inp" rows="3" data-ex-txt="${x.id}" placeholder="Escreva o texto deste bloco">${esc(x.texto)}</textarea></div>`;
+  }
+  function moduloHTML(m){
+    const M = MODULOS[m];
+    const extras = m === 'corretor' ? (cfg.identidade.extras || []).map(extraHTML).join('') : '';
+    return `<div class="mod" data-mod="${m}"><div class="mod-cab"><button class="pega" type="button" aria-label="Arrastar módulo">⋮⋮</button><div class="bloco-tit" style="flex:1;min-width:0"><b>${M.titulo}</b><small>${M.sub}</small></div><button class="sw" type="button" role="switch" aria-checked="false" data-sw="identidade.ativos.${m}" aria-label="Ativar ${M.titulo}"></button></div><div class="mod-blocos" data-blocos="${m}">${M.campos.map(c => blocoHTML(m, c)).join('')}${extras}</div></div>`;
+  }
+  function editorOk(){
+    const box = $('ident-modulos'); if (!box) return true;
+    return box.querySelectorAll('.mod').length === cfg.identidade.modulos.length && box.querySelectorAll('[data-ex-lab]').length === (cfg.identidade.extras || []).length;
+  }
+  function buildEditor(){
+    const box = $('ident-modulos'); if (!box) return;
+    box.innerHTML = cfg.identidade.modulos.map(moduloHTML).join('');
+    box.querySelectorAll('[data-sw]').forEach(b => b.addEventListener('click', () => {
+      if (!canEdit) return; const k = b.dataset.sw; põe(cfg, k, !lê(cfg, k)); pinta(); grava(k);
+    }));
+    reordena();
+  }
+  function reordena(){
+    const box = $('ident-modulos'); if (!box) return;
+    cfg.identidade.modulos.forEach(m => { const el = box.querySelector(`.mod[data-mod="${m}"]`); if (el) box.appendChild(el); });
+    box.querySelectorAll('.mod').forEach(el => {
+      const cont = el.querySelector('.mod-blocos');
+      ordemDe(el.dataset.mod).forEach(f => { const b = cont.querySelector(`[data-f="${f}"]`); if (b) cont.appendChild(b); });
+    });
+  }
+  function atualizaThumbs(){
+    document.querySelectorAll('[data-thumb]').forEach(t => {
+      const [m, f] = t.dataset.thumb.split('.');
+      const v = (cfg.identidade.campos[m] || {})[f];
+      t.innerHTML = v ? `<img src="${v}" alt="">` : 'sem imagem';
+    });
+  }
+  function renderPrevia(){
+    const box = $('ident-previa'); if (!box) return;
+    const I = cfg.identidade, kick = { corretor: 'Seu consultor', imobiliaria: 'Em parceria com', incorporadora: 'Empreendimento de' };
+    let html = '';
+    I.modulos.forEach(m => {
+      if (!I.ativos[m]) return;
+      const itens = ordemDe(m).filter(f => visivel(m, f) && valorCampo(m, f)).map(f => {
+        const v = valorCampo(m, f);
+        if (f === 'foto' || f === 'logo') return `<div class="pv-img"><img src="${v}" alt=""></div>`;
+        if (f === 'nome') return `<h3 class="pv-nome">${esc(v)}</h3>`;
+        if (f === 'especialidade') return `<div class="pv-esp">${esc(v)}</div>`;
+        if (f === 'registro') return `<div class="pv-reg">${esc(v)}</div>`;
+        if (f === 'bio' || f === 'texto') return `<p class="pv-bio">${esc(v)}</p>`;
+        if (f.startsWith('x')) return `<div class="pv-lab">${esc(rotuloCampo(m, f))}</div><p class="pv-bio">${esc(v)}</p>`;
+        return `<div class="pv-stat"><small>${esc(rotuloCampo(m, f))}</small><b>${esc(v)}</b></div>`;
+      });
+      if (!itens.length) return;
+      html += `<div class="pv-mod"><div class="pv-kick">${kick[m] || ''}</div>${itens.join('')}</div>`;
+    });
+    box.innerHTML = html || '<p class="pv-vazio">Nenhum módulo ativo ainda. Ligue o corretor, a imobiliária ou a incorporadora para ver a prévia.</p>';
+  }
+  /* arrastar: módulos e blocos, com mouse ou toque */
+  (() => {
+    const box = $('ident-modulos'); if (!box) return;
+    let el = null, cont = null, offset = 0, h = 0;
+    const mover = e => {
+      if (!el) return;
+      let mudou, guarda = 0;
+      do {
+        el.style.transform = '';
+        const centro = e.clientY - offset + h / 2;
+        mudou = false;
+        const prev = el.previousElementSibling, next = el.nextElementSibling;
+        if (prev && centro < prev.getBoundingClientRect().top + prev.offsetHeight / 2){ cont.insertBefore(el, prev); mudou = true; }
+        else if (next && centro > next.getBoundingClientRect().top + next.offsetHeight / 2){ cont.insertBefore(next, el); mudou = true; }
+      } while (mudou && guarda++ < 30);
+      el.style.transform = '';
+      const nat = el.getBoundingClientRect().top;
+      el.style.transform = `translateY(${e.clientY - offset - nat}px)`;
+    };
+    box.addEventListener('pointerdown', e => {
+      const g = e.target.closest('.pega'); if (!g || !canEdit) return;
+      el = g.closest('.mod, .blk'); if (!el) { el = null; return; }
+      cont = el.parentElement; h = el.offsetHeight; offset = e.clientY - el.getBoundingClientRect().top;
+      el.classList.add('arrastando');
+      try { g.setPointerCapture(e.pointerId); } catch (_) {}
+      e.preventDefault();
+    });
+    box.addEventListener('pointermove', e => { if (el) mover(e); });
+    const solta = () => {
+      if (!el) return;
+      const alvo = el; el = null;
+      alvo.style.transform = ''; alvo.classList.remove('arrastando');
+      if (alvo.classList.contains('mod')) cfg.identidade.modulos = [...box.querySelectorAll('.mod')].map(d => d.dataset.mod);
+      else { const m = alvo.closest('.mod').dataset.mod; cfg.identidade.ordem[m] = [...alvo.parentElement.children].map(d => d.dataset.f); }
+      pinta(); grava('identidade');
+    };
+    box.addEventListener('pointerup', solta);
+    box.addEventListener('pointercancel', solta);
+  })();
+  /* extras (blocos personalizados do corretor) */
+  (() => {
+    const box = $('ident-modulos'); if (!box) return;
+    box.addEventListener('click', e => {
+      if (!canEdit) return;
+      const del = e.target.closest('[data-ex-del]'), sw = e.target.closest('[data-ex-sw]');
+      if (del){
+        const id = del.dataset.exDel;
+        cfg.identidade.extras = (cfg.identidade.extras || []).filter(x => x.id !== id);
+        cfg.identidade.ordem.corretor = (cfg.identidade.ordem.corretor || []).filter(x => x !== id);
+        buildEditor(); pinta(); grava('identidade'); return;
+      }
+      if (sw){
+        const x = extraDe(sw.dataset.exSw); if (!x) return;
+        x.exibir = !x.exibir; buildEditor(); pinta(); grava('identidade');
+      }
+    });
+    box.addEventListener('input', e => {
+      const lab = e.target.closest('[data-ex-lab]'), txt = e.target.closest('[data-ex-txt]');
+      const x = lab ? extraDe(lab.dataset.exLab) : txt ? extraDe(txt.dataset.exTxt) : null;
+      if (!x) return;
+      if (lab) x.lab = lab.value; else x.texto = txt.value;
+      renderPrevia();
+    });
+    box.addEventListener('change', e => {
+      const lab = e.target.closest('[data-ex-lab]'), txt = e.target.closest('[data-ex-txt]');
+      if (lab || txt){ pinta(); grava('identidade'); }
+    });
+  })();
+  document.addEventListener('click', e => {
+    const add = e.target.closest('[data-ex-add]');
+    if (!add || !canEdit) return;
+    const id = 'x' + Date.now();
+    cfg.identidade.extras = [...(cfg.identidade.extras || []), { id, lab: 'Novo bloco', texto: '', exibir: true }];
+    cfg.identidade.ordem.corretor = [...(cfg.identidade.ordem.corretor || []), id];
+    buildEditor(); pinta(); grava('identidade');
+  });
+  document.addEventListener('input', e => {
+    const el = e.target.closest('[data-k^="identidade."]'); if (!el) return;
+    põe(cfg, el.dataset.k, el.value); renderPrevia();
+  });
+  document.addEventListener('change', e => {
+    const inp = e.target.closest && e.target.closest('input[data-img]');
+    if (!inp || !inp.files || !inp.files[0]) return;
+    const [m, fld] = inp.dataset.img.split('.');
+    const rd = new FileReader();
+    rd.onload = () => {
+      const im = new Image();
+      im.onload = () => {
+        const c = document.createElement('canvas'); c.width = c.height = 240;
+        const s = Math.min(im.width, im.height);
+        c.getContext('2d').drawImage(im, (im.width - s) / 2, (im.height - s) / 2, s, s, 0, 0, 240, 240);
+        cfg.identidade.campos[m][fld] = c.toDataURL('image/jpeg', 0.85);
+        pinta(); grava('identidade');
+      };
+      im.onerror = () => status('Não consegui ler essa imagem. Tente outro arquivo.');
+      im.src = rd.result;
+    };
+    rd.readAsDataURL(inp.files[0]);
+    inp.value = '';
+  });
+  let restArmado = false;
+  const bRest = $('ident-restaurar');
+  if (bRest) bRest.addEventListener('click', () => {
+    if (!canEdit) return;
+    if (!restArmado){
+      restArmado = true; bRest.textContent = 'Toque de novo para confirmar';
+      setTimeout(() => { restArmado = false; bRest.textContent = 'Restaurar layout recomendado'; }, 4000);
+      return;
+    }
+    restArmado = false; bRest.textContent = 'Restaurar layout recomendado';
+    cfg.identidade.modulos = [...DEF.identidade.modulos];
+    cfg.identidade.ordem = JSON.parse(JSON.stringify(DEF.identidade.ordem));
+    cfg.identidade.exibir = JSON.parse(JSON.stringify(DEF.identidade.exibir));
+    buildEditor(); pinta(); grava('identidade');
+  });
+
+  (async () => {
+    let db = null, user = null;
+    try { db = await CLAUDE.use('db'); } catch (e) {}
+    try { user = await CLAUDE.use('user'); } catch (e) {}
+    try { canEdit = !!db && !!user && (await user.canEdit()) === true; } catch (e) { canEdit = false; }
+    pinta();
+    medDb = db;
+    if (!db) { status('Abra pelo artefato publicado para ver e editar os valores salvos.'); return; }
+    ref = db.doc('config/site');
+    ref.onSnapshot(snap => {
+      if (snap.exists) cfg = mescla(DEF, snap.data());
+      else if (canEdit) ref.set(cfg).catch(() => {});
+      pinta();
+    }, () => status('Sem conexão com os dados salvos.'));
+  })();
+})();
+</script>
+<div style="max-width:980px;margin:28px auto 40px;padding:0 16px">
+  <a href="dashboard.html" style="display:block;text-align:center;padding:16px;border-radius:14px;background:#1d3a2d;color:#f4f1ea;font:600 15px Inter,system-ui,sans-serif;text-decoration:none">Abrir dashboard</a>
+</div>
+</body>
+</html>

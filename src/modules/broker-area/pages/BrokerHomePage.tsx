@@ -1,0 +1,120 @@
+import { useQuery } from "@tanstack/react-query";
+import { BadgeCheck, Check, Copy, ExternalLink, FileSignature, Handshake, Share2, Users } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useAuthStore } from "@/modules/auth/store/auth.store";
+import { statusLabel, type Development } from "@/modules/developments/model/development.types";
+import { brokerLink, developmentService } from "@/modules/developments/services/development.service";
+import { ActivityFeed, FunnelBars } from "@/modules/leads/components/ActivityFeed";
+import { myLeadService } from "@/modules/leads/services/lead.service";
+import { formatBRL } from "@/shared/lib/format";
+import { waShare } from "@/shared/lib/whatsapp";
+import { buttonClass } from "@/shared/ui/styles";
+import { EmptyState } from "@/shared/ui/ui";
+import { KpiCard, Skeleton } from "@/shared/ui/visuals";
+
+function greeting(now = new Date()) {
+  const h = now.getHours();
+  return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+}
+
+/** Cartão do empreendimento com o link exclusivo do corretor (RN-02.1, RN-02.4). */
+function LinkCard({ d, code }: { d: Development; code: string }) {
+  const [copied, setCopied] = useState(false);
+  const link = brokerLink(d.slug, code);
+  const message = `Olá! Separei para você o ${d.name}, em ${d.city}. Veja fotos, planta, condições e a maquete 3D: ${link}`;
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(true);
+      toast.success("Link copiado");
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      toast.error("Não foi possível copiar. Selecione o link e copie.");
+    }
+  };
+  return (
+    <article className="card card-hover group animate-rise overflow-hidden">
+      <div className="relative h-44 overflow-hidden">
+        {d.cover_image_url ? (
+          <img src={d.cover_image_url} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+        ) : (
+          <div className="hero-grad h-full" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-forest-deep/85 via-forest-deep/20 to-transparent" />
+        <div className="absolute bottom-3 left-4 right-4 text-cream">
+          <span className="rounded-full bg-white/20 px-2 py-0.5 text-[11px] backdrop-blur">{statusLabel[d.status]}</span>
+          <h3 className="mt-1 text-2xl">{d.name}</h3>
+          <p className="text-xs text-cream/80">{[d.city, d.state].filter(Boolean).join(" · ")}</p>
+        </div>
+      </div>
+      <div className="p-4">
+        <label className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted" htmlFor={`link-${d.id}`}>
+          Seu link exclusivo
+        </label>
+        <div className="mt-1 flex items-center gap-2 rounded-xl border border-line bg-white p-1 pl-3">
+          <input id={`link-${d.id}`} readOnly value={link} onFocus={(e) => e.target.select()} className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
+          <button type="button" onClick={copy} aria-label="Copiar link" className="rounded-lg bg-forest-soft p-2 text-forest transition hover:bg-forest hover:text-cream">
+            {copied ? <Check size={15} className="animate-pop" /> : <Copy size={15} />}
+          </button>
+        </div>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <a href={waShare(message)} target="_blank" rel="noreferrer" className={buttonClass("whatsapp")}>
+            <Share2 size={15} /> Enviar pelo WhatsApp
+          </a>
+          <a href={link} target="_blank" rel="noreferrer" className={buttonClass("outline")}>
+            <ExternalLink size={15} /> Ver como cliente
+          </a>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+/** Início do corretor: indicadores, funil, links para ofertar e o que os clientes estão fazendo agora. */
+export function BrokerHomePage() {
+  const broker = useAuthStore((s) => s.user?.broker);
+  const summary = useQuery({ queryKey: ["corretor", "summary"], queryFn: myLeadService.summary, refetchInterval: 10_000 });
+  const activity = useQuery({ queryKey: ["corretor", "activity"], queryFn: myLeadService.activity, refetchInterval: 10_000 });
+  const developments = useQuery({ queryKey: ["published-developments"], queryFn: developmentService.published });
+  const s = summary.data;
+
+  return (
+    <div className="space-y-6">
+      <section className="hero-grad relative animate-rise overflow-hidden rounded-3xl p-6 text-cream shadow-lift md:p-8">
+        <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-teal-soft/20 blur-3xl" />
+        <div className="absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-gold/20 blur-3xl" />
+        <p className="relative text-sm text-cream/75">{greeting()},</p>
+        <h1 className="relative mt-1 text-3xl md:text-4xl">{broker?.first_name ?? "corretor"}</h1>
+        <p className="relative mt-2 max-w-xl text-sm text-cream/80">
+          Envie seu link, acompanhe quem abriu, receba a proposta e feche pelo WhatsApp. Seu código é <b className="rounded bg-white/15 px-1.5 py-0.5 font-mono text-cream">{broker?.code}</b>.
+        </p>
+      </section>
+
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        <KpiCard icon={<Users size={16} />} label="Clientes" value={s?.leads} hint="abriram seus links" />
+        <KpiCard icon={<FileSignature size={16} />} label="Propostas novas" value={s?.new_proposals} tone={s?.new_proposals ? "rose" : "teal"} hint="ainda não abertas" />
+        <KpiCard icon={<Handshake size={16} />} label="Em negociação" value={s?.by_stage.proposta} tone="gold" hint="na etapa proposta" />
+        <KpiCard icon={<BadgeCheck size={16} />} label="Vendas fechadas" value={s?.sales} tone="teal" hint={s?.sales_value ? `${formatBRL(s.sales_value)} vendidos` : undefined} />
+      </section>
+
+      <div className="grid items-start gap-6 xl:grid-cols-3">
+        <div className="space-y-4 xl:col-span-2">
+          <h2 className="text-2xl text-ink">Empreendimentos para ofertar</h2>
+          {developments.isPending && (
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+              <Skeleton className="h-72" />
+              <Skeleton className="h-72" />
+            </div>
+          )}
+          {developments.data?.length === 0 && <EmptyState title="Nenhum empreendimento publicado" text="Quando a Neo360 publicar um empreendimento, ele aparece aqui." />}
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">{broker && developments.data?.map((d) => <LinkCard key={d.id} d={d} code={broker.code} />)}</div>
+        </div>
+        <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-1">
+          <ActivityFeed items={activity.data} loading={activity.isPending} basePath="/painel/clientes" />
+          <FunnelBars summary={s} />
+        </div>
+      </div>
+    </div>
+  );
+}
