@@ -124,3 +124,9 @@ Feito: `/entrar` com sessão ativa mostra quem está conectado, com "Continuar" 
   - avisos de "nada é enviado" corrigidos e atalhos de demonstração escondidos.
 - Correção nos dois layouts: segundo WhatsApp ao tocar em "Prefiro conversar com o corretor".
 - Admin, cartão "Layout A × B" e RN-03.15: o B passa a ser "página nova (v11)". Rótulos das ações novas e da seção "estudos" na jornada.
+
+## 17/11/2026 — v11 como layout A, sem perfil e sem chat
+
+- ADR-0022, RN-03.15. `index.html` (A, padrão) passa a ser a página da v11; `index-b.html` (B), a apresentação anterior. "Crie seu perfil" e o painel de chat ficam escondidos nas duas páginas, e a conversa é pelo WhatsApp do corretor.
+- Ponte: reconhece a v11 pelo coletor de medição dela (`window.BVMetrics`), não pela letra do layout. As duas páginas mandam proposta, ações, seções e tempo ao corretor. Saíram os textos de perfil da v11.
+- Admin e cartão A × B: "A · página nova (v11)" e "B · apresentação clássica".

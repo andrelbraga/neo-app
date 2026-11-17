@@ -12,7 +12,7 @@ Pedido do usuário (17/11/2026): "Crie um layout A e B então volte o layout ant
 ## Decisão
 
 - **Layout A** (`public/showroom/boa-vista/index.html`): a apresentação anterior ao estilo metrô, com capítulos, abertura guiada, planta viva e linha do tempo do pagamento (ADR-0012), sem chat (ADR-0015). Volta a ser o padrão.
-- **Layout B** (`index-b.html`, ao lado): a versão em estilo metrô (ADR-0016). Desde a ADR-0021, a página da entrega v11.
+- **Layout B** (`index-b.html`, ao lado): a versão em estilo metrô (ADR-0016). Desde a ADR-0021, a página da entrega v11; desde a ADR-0022, a v11 é o A e a apresentação anterior é o B.
 - **Admin:** escolhe o layout padrão de cada empreendimento (`developments.default_layout`, V8), no cadastro do empreendimento.
 - **Corretor:** no cartão do link, escolhe A ou B a cada envio. O link leva `?layout=a|b` e fica fixo, mesmo que o admin troque o padrão depois. Sem o parâmetro, vale o padrão do empreendimento.
 - **Registro:**

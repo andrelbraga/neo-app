@@ -1,4 +1,4 @@
-/** Layouts da página de apresentação (ADR-0019): A é o padrão; B é a página da entrega v11 (ADR-0021). */
+/** Layouts da página de apresentação (ADR-0019): A é o padrão, com a página da entrega v11; B é a apresentação anterior (ADR-0022). */
 export type Layout = "a" | "b";
 
 /** Lê o layout pedido no link (`?layout=b`); qualquer outro valor fica no A. */

@@ -1,6 +1,6 @@
 # ADR-0021 — Layout B passa a ser a página da entrega v11
 
-- **Status:** aceita
+- **Status:** substituída em parte pela ADR-0022 (a v11 passou a ser o layout A)
 - **Data:** 17/11/2026
 - **Decisores:** responsável pelo produto (CLI)
 - **Substitui em parte:** ADR-0019 (conteúdo do layout B)

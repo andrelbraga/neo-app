@@ -17,7 +17,7 @@
   var SLUG = Q.get("slug") || "";
   var CODE = Q.get("code") || "";
   var API = (Q.get("api") || "/api").replace(/\/$/, "");
-  // Layout da apresentação que o cliente viu (ADR-0019): A é o padrão; B é a página da entrega v11 (ADR-0021).
+  // Layout da apresentação que o cliente viu (ADR-0019): A é a página da entrega v11 (padrão), B a anterior (ADR-0022).
   var LAYOUT = Q.get("layout") === "b" ? "b" : "a";
   var layoutSent = false;
   if (!SLUG || !CODE) return;
@@ -43,14 +43,15 @@
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j && j.data && j.data.error); return j.data; }); });
   }
 
-  // Layout B: medição própria da página (metrics/collector.js), com aceite e visita em andamento no navegador.
-  var LAYOUT_B = LAYOUT === "b";
+  // Página da entrega v11 (ADR-0021, ADR-0022): reconhecida pelo coletor de medição dela (metrics/collector.js),
+  // que guarda o aceite e a visita em andamento no navegador. Vale qualquer que seja a letra do layout.
+  var V11 = typeof window.BVMetrics === "object" && window.BVMetrics !== null;
   var B_METRICS = "neo360-bv-metrics-v1";
   var B_CHOICE = "neo360-bv-metrics-choice-v1";
 
   function consent() {
     try {
-      if (LAYOUT_B) return localStorage.getItem(B_CHOICE) === "yes";
+      if (V11) return localStorage.getItem(B_CHOICE) === "yes";
       return typeof REG_OK !== "undefined" && REG_OK === true;
     } catch (e) { return false; }
   }
@@ -180,7 +181,7 @@
 
   /* ---------- medição: só com o aceite da própria página ---------- */
   var origAcao = window.regAcao;
-  if (!LAYOUT_B && typeof origAcao === "function") {
+  if (!V11 && typeof origAcao === "function") {
     window.regAcao = function (chave) {
       origAcao(chave);
       if (!consent()) return;
@@ -211,9 +212,9 @@
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState !== "hidden" || !consent()) return;
     try {
-      var row = LAYOUT_B ? bRow() : null;
-      var secoes = LAYOUT_B ? row && row.sections : REG.secoes;
-      var rolagem = LAYOUT_B ? row && row.scroll : REG.rolagem;
+      var row = V11 ? bRow() : null;
+      var secoes = V11 ? row && row.sections : REG.secoes;
+      var rolagem = V11 ? row && row.scroll : REG.rolagem;
       if (!secoes) return;
       var t = JSON.stringify(secoes);
       if (t === lastTime || t === "{}") return;
@@ -222,14 +223,14 @@
     } catch (e) {}
   });
 
-  // Layout B: o coletor da página registra as ações sem passar por regAcao; a ponte manda as novas.
-  if (LAYOUT_B) {
+  // Página v11: o coletor registra as ações sem passar por regAcao; a ponte manda as novas.
+  if (V11) {
     var sentActions = {};
     setInterval(function () {
       if (!consent() || !token) return;
       if (!layoutSent) {
         layoutSent = true;
-        track("acao", { chave: "layout_b" });
+        track("acao", { chave: "layout_" + LAYOUT });
       }
       var row = bRow();
       Object.keys((row && row.actions) || {}).forEach(function (k) {
@@ -261,8 +262,8 @@
       var r = function (v) { return Math.round((Number(v) || 0) * 100) / 100; };
       var cut = function (v, n) { return String(v || "").trim().slice(0, n); };
       return {
-        // No layout B o cliente propõe o valor (#p-preco) e o saldo sai dele.
-        preco: r(LAYOUT_B ? Number(($("#p-preco") || {}).value) : CAMPANHA.promo),
+        // Na página v11 o cliente propõe o valor (#p-preco) e o saldo sai dele.
+        preco: r(V11 ? Number(($("#p-preco") || {}).value) : CAMPANHA.promo),
         preco_referencia: r(CAMPANHA.ref),
         campanha: cut(CAMPANHA.tipo, 60),
         validade: cut(CAMPANHA.validade, 20),
@@ -317,7 +318,7 @@
         lastSent = sig;
         hasContact = true;
         showSaved(body.name, digits(body.phone));
-        offerWhatsApp($("#nz-ok") ? "#nz-ok" : LAYOUT_B || dados.autorizou_contrato ? "#p-aviso" : "#p-aviso-env");
+        offerWhatsApp($("#nz-ok") ? "#nz-ok" : V11 || dados.autorizou_contrato ? "#p-aviso" : "#p-aviso-env");
         return true;
       })
       .catch(function () { return false; });
@@ -412,30 +413,22 @@
     });
   }
 
-  /* ---------- layout B (ADR-0021): textos e envio da página da entrega v11 ---------- */
-  function adaptB() {
+  /* ---------- página v11 (ADR-0021, ADR-0022): textos e envio ---------- */
+  function adaptV11() {
     // Atalhos para dashboards, evidências e referências do pacote, que não fazem parte do app.
     document.querySelectorAll('.synth-ribbon, .dash-go, a[href^="referencia-"], a[href="dashboard.html"], a[href="evolucao.html"]')
       .forEach(function (el) { el.hidden = true; el.style.display = "none"; });
 
-    // A página foi escrita como protótipo sem envio. Com a ponte, proposta, perfil e medição chegam ao
-    // corretor; os avisos passam a dizer isso (RN-03.3, RN-03.8).
+    // A página foi escrita como protótipo sem envio. Com a ponte, proposta e medição chegam ao
+    // corretor; os avisos passam a dizer isso (RN-03.3, RN-03.8). O perfil e o chat estão fora da página (ADR-0022).
     var first = firstName();
     var texts = [
       [".ndec > p:not([class])", "Ao registrar sua intenção, a proposta vai para " + first + " com seu nome e WhatsApp, e a conversa segue por lá. Nada aqui emite contrato ou reserva o imóvel."],
       ["#negociar .ncard .nct span", "Seu contato, para " + first + " responder"],
       ["#negociar .nlegal", "O resumo pode ser copiado, exportado ou impresso por você. A proposta só vai para o corretor quando você registra sua intenção."],
-      [".pf-ok span", "Autorizo enviar estas preferências ao meu corretor e salvá-las neste navegador."],
-      ["footer.foot p", "Informações fornecidas pela incorporadora. Valores, condições e imagens ilustrativas, sujeitos a confirmação. A proposta e o perfil vão para o seu corretor quando você os envia; a medição da navegação, só com o seu aceite."],
+      ["footer.foot p", "Informações fornecidas pela incorporadora. Valores, condições e imagens ilustrativas, sujeitos a confirmação. A proposta vai para o seu corretor quando você a envia; a medição da navegação, só com o seu aceite."],
     ];
     texts.forEach(function (t) { var el = $(t[0]); if (el) el.textContent = t[1]; });
-    var pfTxt = Array.prototype.find.call(document.querySelectorAll("#perfil p"), function (p) { return /somente neste navegador/.test(p.textContent); });
-    if (pfTxt) pfTxt.textContent = "A proposta do Neo360 é dar continuidade ao atendimento com suas preferências, objetivos e condições de negociação. Com sua autorização, o perfil vai para o seu corretor.";
-    var pf = $("#pf-form");
-    if (pf) pf.addEventListener("submit", function () {
-      var msg = $("#pf-msg");
-      setTimeout(function () { if (msg) msg.textContent = "Preferências enviadas para " + first + "."; }, 0);
-    });
 
     // Aviso de medição do coletor: aparece ao abrir a página e quando o cliente toca em "Medição deste navegador".
     var consentText = "Registrar sua navegação nesta apresentação? Guardamos ações, rolagem e tempo por seção, sem texto digitado, e mandamos para " + first + " saber o que mais interessou a você.";
@@ -477,7 +470,7 @@
   call("GET", "/public/showroom/" + encodeURIComponent(SLUG) + "/" + encodeURIComponent(CODE))
     .then(function (room) {
       fillBroker(room);
-      if (LAYOUT_B) adaptB();
+      if (V11) adaptV11();
       token = storage(true);
       return call("POST", "/public/showroom/" + encodeURIComponent(SLUG) + "/" + encodeURIComponent(CODE) + "/visit?layout=" + LAYOUT);
     })
