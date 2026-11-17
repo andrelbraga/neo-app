@@ -73,4 +73,10 @@ describe("AppRoutes", () => {
     at("/e/boa-vista-residencial/FAB-0427");
     expect(screen.getByText("Carregando…")).toBeInTheDocument();
   });
+
+  it("com senha provisória, qualquer tela leva à troca de senha", () => {
+    session({ ...brokerUser, must_change_password: true });
+    at("/painel");
+    expect(screen.getByRole("heading", { name: /Crie a sua senha/ })).toBeInTheDocument();
+  });
 });

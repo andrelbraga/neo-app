@@ -98,3 +98,18 @@ Feito: `/entrar` com sessão ativa mostra quem está conectado, com "Continuar" 
 - ADR-0017 (substitui a ADR-0002): o monorepo virou `neo-api` e `neo-app`, públicos em github.com/andrelbraga, com histórico novo. Documentos compartilhados (ADRs, pendências, regras de negócio) existem nos dois; o protótipo e a referência de layout ficam no app. CI separado em cada um. No Railway (projeto `neo`), cada serviço é ligado ao seu repositório.
 - ADR-0018: publicação no Railway da conta do André, projeto `8d27127a-…`: Postgres próprio, `neo-api` e `neo-app` ligados aos repositórios. A API usa `DB_SCHEMA=neo360`: `search_path` só no schema, criado se faltar, com histórico de migrations próprio. API em https://neo-api-production-ef2ad24b.up.railway.app e app em https://neo-app-production-4de6da2c.up.railway.app. (Antes, a conta do Eliseu, no plano gratuito, recusou Postgres e novos serviços.)
 
+## 17/11/2026 — Layout A e B da apresentação
+
+- ADR-0019, RN-03.15: a apresentação anterior ao estilo metrô voltou como layout A (`index.html`, padrão), e a metrô ficou como B (`index-b.html`). V8: `developments.default_layout` e `leads.layout`.
+  - O admin escolhe o padrão do empreendimento; o corretor escolhe A ou B no link de cada envio (`?layout=`).
+  - A visita grava o layout da primeira visita, e o resumo traz `by_layout`. Início do corretor e visão geral do admin com o cartão "Layout A × B" (clientes, propostas, vendas e valor).
+- Conferido localmente: link sem layout abre o A; `?layout=b` abre o B; cada cliente conta no seu layout; o link do corretor muda para `?layout=b`; o admin vê o campo no empreendimento.
+
+## 17/11/2026 — Usuários e senha provisória
+
+- ADR-0020, RN-01.7, RN-01.8.
+  - Admin: tela Usuários (`/admin/usuarios`) com todas as contas e a situação da senha, que nunca é exibida (só existe o hash). "Redefinir senha" gera uma senha provisória, mostrada uma vez, escondida, com o olho e o botão de copiar.
+  - V9: `users.must_change_password` e `password_reset_at`. Com senha provisória, o usuário vai para "Crie a sua senha", e a API recusa o resto (403) até a troca (`PUT /api/auth/password`).
+  - Olho em todos os campos de senha; "Trocar senha" no menu da conta.
+- Conferido no Chrome: lista sem senhas, provisória escondida até o olho, login com a provisória levado à troca, API com 403 antes e 200 depois da troca.
+

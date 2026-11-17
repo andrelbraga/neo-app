@@ -11,6 +11,7 @@ export const developmentService = {
 };
 
 /** Link exclusivo do corretor para um empreendimento (RN-02.1). */
-export function brokerLink(slug: string, code: string, origin = window.location.origin): string {
-  return `${origin}/e/${slug}/${code}`;
+/** Link exclusivo do corretor. Com `layout`, o link fixa o layout da apresentação (ADR-0019). */
+export function brokerLink(slug: string, code: string, origin = window.location.origin, layout?: "a" | "b"): string {
+  return `${origin}/e/${slug}/${code}${layout ? `?layout=${layout}` : ""}`;
 }

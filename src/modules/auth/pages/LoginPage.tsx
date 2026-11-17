@@ -5,6 +5,7 @@ import { Button, Field, Logo } from "@/shared/ui/ui";
 import { buttonClass, inputClass } from "@/shared/ui/styles";
 import { authService } from "../services/auth.service";
 import { canOpen, homeFor, roleLabel, useAuthStore } from "../store/auth.store";
+import { PasswordInput } from "@/shared/ui/PasswordInput";
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ export function LoginPage() {
             <input id="email" type="email" autoComplete="email" className={inputClass} value={email} onChange={(e) => setEmail(e.target.value)} required />
           </Field>
           <Field id="password" label="Senha">
-            <input id="password" type="password" autoComplete="current-password" className={inputClass} value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <PasswordInput id="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </Field>
           {error && <p className="text-sm text-rose-700">{error}</p>}
           <Button type="submit" disabled={busy} className="w-full">

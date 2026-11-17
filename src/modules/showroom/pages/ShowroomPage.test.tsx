@@ -87,6 +87,15 @@ describe("ShowroomPage", () => {
     expect(screen.queryByRole("button", { name: /Conversar com/ })).not.toBeInTheDocument();
   });
 
+  it("abre o layout do link ou, sem ele, o padrão do empreendimento", async () => {
+    svc.get.mockResolvedValue({ development: { ...developmentFixture, presentation_url: "/showroom/boa-vista/index.html", default_layout: "b" }, broker });
+    const { unmount } = open();
+    expect((await screen.findByTitle("Boa Vista Residencial")).getAttribute("src")).toMatch(/^\/showroom\/boa-vista\/index-b\.html\?.*layout=b/);
+    unmount();
+    renderPage(<ShowroomPage />, { path: "/e/:slug/:code", route: "/e/boa-vista-residencial/FAB-0427?layout=a" });
+    expect((await screen.findByTitle("Boa Vista Residencial")).getAttribute("src")).toMatch(/^\/showroom\/boa-vista\/index\.html\?.*layout=a/);
+  });
+
   it("abre a página de apresentação própria do empreendimento, com a ponte para a API", async () => {
     svc.get.mockResolvedValue({ development: { ...developmentFixture, presentation_url: "/showroom/boa-vista/index.html" }, broker });
     open();

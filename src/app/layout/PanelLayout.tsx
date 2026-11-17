@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Bell, BellRing, Building2, Home, LayoutGrid, LogOut, Search, User, Users } from "lucide-react";
+import { Bell, BellRing, Building2, Home, KeyRound, LayoutGrid, LogOut, Search, User, Users } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { authService } from "@/modules/auth/services/auth.service";
@@ -20,6 +20,7 @@ const adminNav = [
   { to: "/admin/clientes", label: "Clientes", icon: Users, badge: true },
   { to: "/admin/empreendimentos", label: "Empreendimentos", icon: Building2 },
   { to: "/admin/profissionais", label: "Profissionais", icon: User },
+  { to: "/admin/usuarios", label: "Usuários", icon: KeyRound },
 ];
 
 /** Título da barra superior: a seção do menu que contém a página aberta. */

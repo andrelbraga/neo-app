@@ -6,6 +6,7 @@ import { inputClass } from "@/shared/ui/styles";
 import type { SignupRequest } from "../model/auth.types";
 import { authService } from "../services/auth.service";
 import { useAuthStore } from "../store/auth.store";
+import { PasswordInput } from "@/shared/ui/PasswordInput";
 
 const empty: SignupRequest = { first_name: "", last_name: "", phone: "", email: "", creci: "", password: "" };
 
@@ -57,7 +58,7 @@ export function SignupPage() {
           <input id="email" type="email" className={inputClass} value={form.email} onChange={set("email")} required autoComplete="email" />
         </Field>
         <Field id="password" label="Senha" hint="Pelo menos 8 caracteres." className="sm:col-span-2">
-          <input id="password" type="password" className={inputClass} value={form.password} onChange={set("password")} required minLength={8} autoComplete="new-password" />
+          <PasswordInput id="password" value={form.password} onChange={set("password")} required minLength={8} autoComplete="new-password" />
         </Field>
         {error && <p className="text-sm text-rose-700 sm:col-span-2">{error}</p>}
         <Button type="submit" disabled={busy} className="sm:col-span-2">

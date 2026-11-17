@@ -17,6 +17,9 @@
   var SLUG = Q.get("slug") || "";
   var CODE = Q.get("code") || "";
   var API = (Q.get("api") || "/api").replace(/\/$/, "");
+  // Layout da apresentação que o cliente viu (ADR-0019): A é o padrão, B é a versão em estilo metrô.
+  var LAYOUT = Q.get("layout") === "b" ? "b" : "a";
+  var layoutSent = false;
   if (!SLUG || !CODE) return;
 
   var KEY = "neo360-visit:" + SLUG;
@@ -164,7 +167,13 @@
   if (typeof origAcao === "function") {
     window.regAcao = function (chave) {
       origAcao(chave);
-      if (consent()) track("acao", { chave: chave });
+      if (!consent()) return;
+      // Com o aceite de medição, registra uma vez qual layout o cliente viu (comparação A/B).
+      if (!layoutSent && token) {
+        layoutSent = true;
+        track("acao", { chave: "layout_" + LAYOUT });
+      }
+      track("acao", { chave: chave });
     };
   }
 
@@ -361,7 +370,7 @@
     .then(function (room) {
       fillBroker(room);
       token = storage(true);
-      return call("POST", "/public/showroom/" + encodeURIComponent(SLUG) + "/" + encodeURIComponent(CODE) + "/visit");
+      return call("POST", "/public/showroom/" + encodeURIComponent(SLUG) + "/" + encodeURIComponent(CODE) + "/visit?layout=" + LAYOUT);
     })
     .then(function (v) {
       token = v.token;

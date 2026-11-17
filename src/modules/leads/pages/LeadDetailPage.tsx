@@ -149,6 +149,11 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <StageBadge stage={l.stage} pill />
+                {l.layout && (
+                  <span className="rounded-full bg-cream px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.06em] text-ink-muted" title="Layout da apresentação na primeira visita">
+                    Layout {l.layout.toUpperCase()}
+                  </span>
+                )}
                 <SignalIcons signals={l.signals} max={7} onSelect={(kind) => showActivity({ kind })} />
               </div>
               <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-4">

@@ -32,6 +32,8 @@ export interface Development {
   tour_url: string;
   /** Página própria do empreendimento (HTML servido pelo app). Vazia: o showroom usa o modelo padrão. */
   presentation_url: string;
+  /** Layout da apresentação quando o link não pede um (ADR-0019). */
+  default_layout?: "a" | "b";
   gallery: Image[];
   highlights: Highlight[];
   leads_count: number;

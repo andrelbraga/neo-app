@@ -5,6 +5,8 @@ import { AdminLeadsPage } from "@/modules/admin/pages/AdminLeadsPage";
 import { BrokersPage } from "@/modules/admin/pages/BrokersPage";
 import { DevelopmentFormPage } from "@/modules/admin/pages/DevelopmentFormPage";
 import { DevelopmentsPage } from "@/modules/admin/pages/DevelopmentsPage";
+import { UsersPage } from "@/modules/admin/pages/UsersPage";
+import { ChangePasswordPage } from "@/modules/auth/pages/ChangePasswordPage";
 import { LoginPage } from "@/modules/auth/pages/LoginPage";
 import { SignupPage } from "@/modules/auth/pages/SignupPage";
 import { BrokerHomePage } from "@/modules/broker-area/pages/BrokerHomePage";
@@ -26,6 +28,7 @@ export function AppRoutes() {
       <Route path="/e/:slug/:code" element={<ShowroomPage />} />
 
       <Route element={<ProtectedRoute />}>
+        <Route path="/trocar-senha" element={<ChangePasswordPage />} />
         <Route element={<RequirePermission permission="area.corretor" />}>
           <Route path="/painel" element={<PanelLayout area="corretor" />}>
             <Route index element={<BrokerHomePage />} />
@@ -41,6 +44,7 @@ export function AppRoutes() {
             <Route path="empreendimentos/novo" element={<DevelopmentFormPage />} />
             <Route path="empreendimentos/:id" element={<DevelopmentFormPage />} />
             <Route path="profissionais" element={<BrokersPage />} />
+            <Route path="usuarios" element={<UsersPage />} />
             <Route path="clientes" element={<AdminLeadsPage />} />
             <Route path="clientes/:id" element={<LeadDetailPage mode="admin" />} />
           </Route>

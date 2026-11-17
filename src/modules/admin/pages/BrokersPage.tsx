@@ -10,6 +10,7 @@ import { Badge, Button, Dialog, EmptyState, Field, Loading, PageHeader } from "@
 import { inputClass } from "@/shared/ui/styles";
 import { ResponsiveTable } from "@/shared/ui/ResponsiveTable";
 import { Avatar } from "@/shared/ui/visuals";
+import { PasswordInput } from "@/shared/ui/PasswordInput";
 
 interface Form {
   first_name: string;
@@ -188,7 +189,7 @@ export function BrokersPage() {
                   <input id="b-email" type="email" className={inputClass} value={editing.form.email} onChange={set("email")} required />
                 </Field>
                 <Field id="b-pass" label="Senha inicial" hint="Pelo menos 8 caracteres. Passe ao profissional por um canal seguro.">
-                  <input id="b-pass" type="password" className={inputClass} value={editing.form.password} onChange={set("password")} required minLength={8} />
+                  <PasswordInput id="b-pass" value={editing.form.password} onChange={set("password")} required minLength={8} autoComplete="new-password" />
                 </Field>
               </>
             )}

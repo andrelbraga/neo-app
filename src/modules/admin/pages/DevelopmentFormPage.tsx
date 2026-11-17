@@ -22,6 +22,7 @@ const blank: DevelopmentRequest = {
   cover_image_url: "",
   tour_url: "",
   presentation_url: "",
+  default_layout: "a" as "a" | "b",
   gallery: [],
   highlights: [],
 };
@@ -50,6 +51,7 @@ export function DevelopmentFormPage() {
         cover_image_url: d.cover_image_url,
         tour_url: d.tour_url,
         presentation_url: d.presentation_url,
+        default_layout: d.default_layout ?? "a",
         gallery: d.gallery,
         highlights: d.highlights,
       });
@@ -130,6 +132,12 @@ export function DevelopmentFormPage() {
             hint="Caminho de uma página HTML do próprio app, como /showroom/boa-vista/index.html. Preenchida, ela substitui o modelo padrão do showroom."
           >
             <input id="d-presentation" className={inputClass} value={form.presentation_url} onChange={set("presentation_url")} />
+          </Field>
+          <Field id="d-layout" label="Layout padrão da apresentação" hint="Vale para os links sem layout escolhido. O corretor pode mandar o link no outro layout; o painel compara a conversão dos dois.">
+            <select id="d-layout" className={inputClass} value={form.default_layout} onChange={(e) => setForm({ ...form, default_layout: e.target.value as "a" | "b" })}>
+              <option value="a">A · apresentação clássica</option>
+              <option value="b">B · estilo metrô</option>
+            </select>
           </Field>
         </Card>
 

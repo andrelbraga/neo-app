@@ -7,7 +7,10 @@ import { buttonClass } from "@/shared/ui/styles";
 export function ProtectedRoute() {
   const location = useLocation();
   const authenticated = useAuthStore((s) => s.isAuthenticated());
+  const mustChange = useAuthStore((s) => s.user?.must_change_password);
   if (!authenticated) return <Navigate to="/entrar" replace state={{ from: location.pathname }} />;
+  // Senha provisória: antes de qualquer tela, o usuário cria a própria senha (ADR-0020).
+  if (mustChange && location.pathname !== "/trocar-senha") return <Navigate to="/trocar-senha" replace />;
   return <Outlet />;
 }
 

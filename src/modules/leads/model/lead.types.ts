@@ -39,6 +39,8 @@ export interface Lead {
   sale_value: number | null;
   sale_proposal_id: string | null;
   outcome_note: string;
+  /** Layout da apresentação na primeira visita (ADR-0019). */
+  layout?: "a" | "b";
 }
 
 export interface LeadEvent {
@@ -76,6 +78,15 @@ export interface Summary {
   sales: number;
   sales_value: number;
   by_stage: Record<Stage, number>;
+  /** Conversão por layout da apresentação (ADR-0019). */
+  by_layout?: Record<"a" | "b", LayoutStats>;
+}
+
+export interface LayoutStats {
+  leads: number;
+  with_proposal: number;
+  sales: number;
+  sales_value: number;
 }
 
 /** Pedido de mudança de etapa. Venda fechada leva o valor; sem venda, o motivo em `note`. */
@@ -156,6 +167,8 @@ const actionLabel: Record<string, string> = {
   subir_contrato_teste: "Testou seguir para o contrato",
   voo_3d: "Sobrevoou o condomínio em 3D",
   dia_no_apto: "Viu um dia no apartamento",
+  layout_a: "Viu o layout A da apresentação",
+  layout_b: "Viu o layout B da apresentação",
   abriu_planta3d_viva: "Abriu a planta 3D pela planta viva",
 };
 

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { brokerService } from "@/modules/brokers/services/broker.service";
 import { developmentService } from "@/modules/developments/services/development.service";
 import { ActivityFeed, FunnelBars } from "@/modules/leads/components/ActivityFeed";
+import { LayoutComparison } from "@/modules/leads/components/LayoutComparison";
 import { LeadsTable } from "@/modules/leads/components/LeadParts";
 import { adminLeadService } from "@/modules/leads/services/lead.service";
 import { formatBRL } from "@/shared/lib/format";
@@ -67,6 +68,9 @@ export function AdminHomePage() {
             ))}
           </ol>
         </section>
+        <div className="md:col-span-2 xl:col-span-3">
+          <LayoutComparison summary={summary.data} />
+        </div>
         <div className="md:col-span-2 xl:col-span-1">
           <ActivityFeed items={activity.data} loading={activity.isPending} basePath="/admin/clientes" showBroker />
         </div>

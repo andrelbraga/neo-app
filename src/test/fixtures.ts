@@ -45,6 +45,7 @@ export const developmentFixture: Development = {
   cover_image_url: "/showroom/boa-vista/img/hero-gramado.jpg",
   tour_url: "/showroom/boa-vista/maquete.html?embed=1",
   presentation_url: "",
+  default_layout: "a",
   gallery: [{ url: "/showroom/boa-vista/img/fachada.jpg", caption: "Fachada" }],
   highlights: [{ label: "Área privativa", value: "54 m²" }],
   leads_count: 3,

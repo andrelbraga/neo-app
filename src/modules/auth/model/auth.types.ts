@@ -28,6 +28,21 @@ export interface User {
   role: Role;
   permissions: Permission[];
   broker?: Broker;
+  /** Senha provisória dada pelo admin: o usuário precisa criar a dele antes de seguir (ADR-0020). */
+  must_change_password?: boolean;
+}
+
+/** Conta na lista de usuários do admin. A senha não vem: só existe o hash. */
+export interface Account {
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  active: boolean;
+  broker_code: string;
+  must_change_password: boolean;
+  password_reset_at: string | null;
+  created_at: string;
 }
 
 export interface Session {

@@ -6,7 +6,9 @@ import { useAuthStore } from "@/modules/auth/store/auth.store";
 import { statusLabel, type Development } from "@/modules/developments/model/development.types";
 import { brokerLink, developmentService } from "@/modules/developments/services/development.service";
 import { ActivityFeed, FunnelBars } from "@/modules/leads/components/ActivityFeed";
+import { LayoutComparison } from "@/modules/leads/components/LayoutComparison";
 import { myLeadService } from "@/modules/leads/services/lead.service";
+import { cn } from "@/shared/lib/cn";
 import { formatBRL } from "@/shared/lib/format";
 import { waShare } from "@/shared/lib/whatsapp";
 import { buttonClass } from "@/shared/ui/styles";
@@ -21,7 +23,9 @@ function greeting(now = new Date()) {
 /** Cartão do empreendimento com o link exclusivo do corretor (RN-02.1, RN-02.4). */
 function LinkCard({ d, code }: { d: Development; code: string }) {
   const [copied, setCopied] = useState(false);
-  const link = brokerLink(d.slug, code);
+  // O corretor escolhe o layout da apresentação de cada envio; começa no padrão do empreendimento (ADR-0019).
+  const [layout, setLayout] = useState<"a" | "b">(d.default_layout ?? "a");
+  const link = brokerLink(d.slug, code, window.location.origin, layout);
   const message = `Olá! Separei para você o ${d.name}, em ${d.city}. Veja fotos, planta, condições e a maquete 3D: ${link}`;
   const copy = async () => {
     try {
@@ -49,6 +53,25 @@ function LinkCard({ d, code }: { d: Development; code: string }) {
         </div>
       </div>
       <div className="p-4">
+        {d.presentation_url && (
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted">Layout da apresentação</span>
+            <div className="inline-flex rounded-full border border-line bg-white p-0.5" role="group" aria-label="Layout da apresentação">
+              {(["a", "b"] as const).map((l) => (
+                <button
+                  key={l}
+                  type="button"
+                  aria-pressed={layout === l}
+                  onClick={() => setLayout(l)}
+                  className={cn("rounded-full px-3 py-1 text-xs font-semibold transition", layout === l ? "bg-forest text-white" : "text-ink-muted hover:text-ink")}
+                >
+                  {l.toUpperCase()}
+                  {d.default_layout === l && <span className="ml-1 font-normal opacity-70">padrão</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <label className="text-[11px] font-semibold uppercase tracking-wider text-ink-muted" htmlFor={`link-${d.id}`}>
           Seu link exclusivo
         </label>
@@ -113,6 +136,7 @@ export function BrokerHomePage() {
         <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-1">
           <ActivityFeed items={activity.data} loading={activity.isPending} basePath="/painel/clientes" />
           <FunnelBars summary={s} />
+          <LayoutComparison summary={s} />
         </div>
       </div>
     </div>

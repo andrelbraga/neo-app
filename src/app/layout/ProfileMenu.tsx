@@ -1,4 +1,4 @@
-import { Bell, BellRing, ChevronDown, FileSignature, LogOut, User } from "lucide-react";
+import { Bell, BellRing, ChevronDown, FileSignature, KeyRound, LogOut, User } from "lucide-react";
 import { useEffect, useId, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/shared/lib/cn";
@@ -101,6 +101,9 @@ export function ProfileMenu({ name, detail, newProposals: unread, clientsPath, p
               <User size={16} className="text-ink-muted" /> Meu perfil
             </Link>
           )}
+          <Link role="menuitem" to="/trocar-senha" onClick={close} className={item}>
+            <KeyRound size={16} className="text-ink-muted" /> Trocar senha
+          </Link>
           {notificationsOn ? (
             <span role="menuitem" aria-disabled="true" className={cn(item, "cursor-default text-ok hover:bg-transparent")}>
               <BellRing size={16} /> Avisos do navegador ligados

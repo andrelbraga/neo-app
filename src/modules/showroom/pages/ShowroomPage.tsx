@@ -1,7 +1,7 @@
 import { useQuery, type UseQueryResult } from "@tanstack/react-query";
 import { Box, MapPin, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { API_BASE_URL, apiErrorMessage } from "@/app/providers/api/client";
 import { statusLabel, type Image } from "@/modules/developments/model/development.types";
 import { formatPhone } from "@/shared/lib/format";
@@ -9,6 +9,7 @@ import { waChat } from "@/shared/lib/whatsapp";
 import { Button, Field, Loading, Logo } from "@/shared/ui/ui";
 import { inputClass, buttonClass } from "@/shared/ui/styles";
 import { WhatsAppButton } from "../components/WhatsAppButton";
+import { layoutFrom, presentationSrc } from "../lib/presentation";
 import { useVisit } from "../hooks/useVisit";
 import { showroomService, type Showroom } from "../services/showroom.service";
 
@@ -41,16 +42,17 @@ function Section({ id, onSeen, className, children }: { id: string; onSeen: (id:
 /** Página que o cliente abre pelo link exclusivo do corretor: /e/:slug/:code. */
 export function ShowroomPage() {
   const { slug = "", code = "" } = useParams();
+  const [search] = useSearchParams();
   const room = useQuery({ queryKey: ["showroom", slug, code], queryFn: () => showroomService.get(slug, code), retry: false });
   const presentation = room.data?.development.presentation_url;
 
   if (presentation) {
-    // Página própria do empreendimento (ADR-0008): a ponte dentro dela abre a visita e liga chat e proposta.
-    const params = new URLSearchParams({ slug, code, api: API_BASE_URL });
+    // Página própria do empreendimento (ADR-0008): a ponte dentro dela abre a visita e grava a proposta.
+    // Layout do link (`?layout=a|b`) ou, sem ele, o padrão do empreendimento escolhido pelo admin (ADR-0019).
     return (
       <iframe
         title={room.data!.development.name}
-        src={`${presentation}?${params}`}
+        src={presentationSrc(presentation, layoutFrom(search.get("layout") ?? room.data!.development.default_layout ?? null), { slug, code, api: API_BASE_URL })}
         className="fixed inset-0 h-[100dvh] w-full border-0"
         allow="fullscreen; xr-spatial-tracking; clipboard-write"
       />

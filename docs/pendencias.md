@@ -13,7 +13,7 @@ Severidade: **Bloqueante** impede operar com cliente real · **Alta** necessári
 | P-05 | **Aviso ao corretor de cliente novo e mensagem nova** fora do painel (push no navegador, WhatsApp ou e-mail) | Alta | parcial (16/11/2026) | Com o painel aberto, avisos ao vivo e aviso do navegador (RN-03.9). Com o painel fechado, nada chega: falta push (service worker) ou WhatsApp. E-mail descartado por ora (ADR-0004) |
 | P-06 | **Upload de imagens e modelos 3D no admin** (S3/R2, como a ADR-0014 do neonflow) | Média | aberta | Hoje o admin informa endereços (ADR-0007) |
 | P-07 | **Dados da incorporadora do Boa Vista**: razão social, CNPJ e se "Dwell" é o nome a exibir | Média | aberta | Nome tirado das referências "apresentação Dwell" no protótipo |
-| P-08 | **Recuperar senha** sem e-mail | Alta | aberta | Hoje só o admin resolve, cadastrando de novo; falta definir o canal |
+| P-08 | **Recuperar senha** sem e-mail | Alta | parcial (17/11/2026) | O admin redefine com senha provisória e o usuário troca no primeiro acesso (ADR-0020). Falta o usuário recuperar sozinho, que depende de um canal de envio (P-05) |
 | P-09 | **Modelos 3D completos**: 7 modelos da Biblioteca 3D (paisagismo, veículos, sedãs, araucária adulta, podocarpo) não estão no Drive; converter `.glb.js` (base64) para `.glb` binário com Draco | Baixa | aberta | A maquete atual usa só `bv3d/torre-a-aurora.js` |
 | P-10 | **Chat em tempo real** (SSE) quando o volume de conversas pedir | Baixa | descartada (17/11/2026) | O chat saiu: a conversa é pelo WhatsApp (ADR-0015) |
 | P-11 | **Unidade em oferta**: torre e número do apartamento à venda não confirmados (README da V4: "não se deve destacar um apartamento específico") | Média | aberta | O seed não cita unidade |
