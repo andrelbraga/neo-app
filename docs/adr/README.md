@@ -6,6 +6,7 @@ Decisões de arquitetura e produto no formato MADR ([template](template.md)).
 |---|---|---|
 | [ADR-0001](ADR-0001-registrar-decisoes-em-adr.md) | Registrar decisões em ADR | aceita |
 | [ADR-0002](ADR-0002-monorepo-api-e-app.md) | Stack do neonflow em um repositório com `api/` e `app/` | substituída pela ADR-0017 |
+| [ADR-0018](ADR-0018-deploy-no-projeto-neonflow.md) | Publicação no projeto neonflow do Railway, com o schema neo360 no Postgres dele | aceita |
 | [ADR-0003](ADR-0003-prototipo-congelado.md) | Protótipo Boa Vista congelado como evidência | aceita |
 | [ADR-0004](ADR-0004-chat-na-pagina-e-whatsapp.md) | Chat na página por consulta periódica, com WhatsApp ao lado, sem e-mail | substituída pela ADR-0015 |
 | [ADR-0016](ADR-0016-apresentacao-metro-e-cliente-pelo-telefone.md) | Apresentação em estilo metrô, proposta em formulário único e cliente pelo WhatsApp | aceita |
