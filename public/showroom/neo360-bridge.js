@@ -17,7 +17,7 @@
   var SLUG = Q.get("slug") || "";
   var CODE = Q.get("code") || "";
   var API = (Q.get("api") || "/api").replace(/\/$/, "");
-  // Layout da apresentação que o cliente viu (ADR-0019): A é o padrão, B é a versão em estilo metrô.
+  // Layout da apresentação que o cliente viu (ADR-0019): A é o padrão; B é a página da entrega v11 (ADR-0021).
   var LAYOUT = Q.get("layout") === "b" ? "b" : "a";
   var layoutSent = false;
   if (!SLUG || !CODE) return;
@@ -43,8 +43,24 @@
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j && j.data && j.data.error); return j.data; }); });
   }
 
+  // Layout B: medição própria da página (metrics/collector.js), com aceite e visita em andamento no navegador.
+  var LAYOUT_B = LAYOUT === "b";
+  var B_METRICS = "neo360-bv-metrics-v1";
+  var B_CHOICE = "neo360-bv-metrics-choice-v1";
+
   function consent() {
-    try { return typeof REG_OK !== "undefined" && REG_OK === true; } catch (e) { return false; }
+    try {
+      if (LAYOUT_B) return localStorage.getItem(B_CHOICE) === "yes";
+      return typeof REG_OK !== "undefined" && REG_OK === true;
+    } catch (e) { return false; }
+  }
+
+  // Visita atual da medição do layout B: o coletor grava a visita em andamento por último.
+  function bRow() {
+    try {
+      var rows = JSON.parse(localStorage.getItem(B_METRICS) || "[]");
+      return Array.isArray(rows) && rows.length ? rows[rows.length - 1] : null;
+    } catch (e) { return null; }
   }
 
   function track(kind, data, keepalive) {
@@ -164,7 +180,7 @@
 
   /* ---------- medição: só com o aceite da própria página ---------- */
   var origAcao = window.regAcao;
-  if (typeof origAcao === "function") {
+  if (!LAYOUT_B && typeof origAcao === "function") {
     window.regAcao = function (chave) {
       origAcao(chave);
       if (!consent()) return;
@@ -195,12 +211,34 @@
   document.addEventListener("visibilitychange", function () {
     if (document.visibilityState !== "hidden" || !consent()) return;
     try {
-      var t = JSON.stringify(REG.secoes);
+      var row = LAYOUT_B ? bRow() : null;
+      var secoes = LAYOUT_B ? row && row.sections : REG.secoes;
+      var rolagem = LAYOUT_B ? row && row.scroll : REG.rolagem;
+      if (!secoes) return;
+      var t = JSON.stringify(secoes);
       if (t === lastTime || t === "{}") return;
       lastTime = t;
-      track("tempo", { secoes: REG.secoes, rolagem: REG.rolagem }, true);
+      track("tempo", { secoes: secoes, rolagem: rolagem }, true);
     } catch (e) {}
   });
+
+  // Layout B: o coletor da página registra as ações sem passar por regAcao; a ponte manda as novas.
+  if (LAYOUT_B) {
+    var sentActions = {};
+    setInterval(function () {
+      if (!consent() || !token) return;
+      if (!layoutSent) {
+        layoutSent = true;
+        track("acao", { chave: "layout_b" });
+      }
+      var row = bRow();
+      Object.keys((row && row.actions) || {}).forEach(function (k) {
+        if (sentActions[k]) return;
+        sentActions[k] = true;
+        track("acao", { chave: k });
+      });
+    }, 3000);
+  }
 
   /* ---------- proposta e perfil: o cliente pediu retorno, então vão com nome e WhatsApp ---------- */
   function contact(name, phone) {
@@ -217,13 +255,14 @@
   // calc, CAMPANHA, veic, VEICS e nVeic são do script da apresentação; se não existirem, vai só o texto.
   function condicao() {
     try {
-      /* global calc, CAMPANHA, veic, VEICS, nVeic */
+      /* global calc, CAMPANHA, veic, VEICS, nVeic, allVehicles */
       var c = calc();
       var entN = parseInt(($("#p-entn") || {}).value, 10) || 1;
       var r = function (v) { return Math.round((Number(v) || 0) * 100) / 100; };
       var cut = function (v, n) { return String(v || "").trim().slice(0, n); };
       return {
-        preco: r(CAMPANHA.promo),
+        // No layout B o cliente propõe o valor (#p-preco) e o saldo sai dele.
+        preco: r(LAYOUT_B ? Number(($("#p-preco") || {}).value) : CAMPANHA.promo),
         preco_referencia: r(CAMPANHA.ref),
         campanha: cut(CAMPANHA.tipo, 60),
         validade: cut(CAMPANHA.validade, 20),
@@ -235,11 +274,15 @@
         reforcos: c.refN,
         reforco_valor: r(c.refV),
         chaves: r(c.chaves),
-        veiculos: veic
-          ? VEICS.slice(0, Math.min(3, nVeic())).map(function (v) {
-              return { modelo: cut(v.mod, 40), ano: cut(v.ano, 4), km: cut(v.km, 9), valor: r(v.valor) };
-            })
-          : [],
+        veiculos: !veic
+          ? []
+          : typeof allVehicles === "function"
+            ? allVehicles().slice(0, 3).map(function (v) {
+                return { modelo: cut(v.modelo, 40), ano: cut(v.ano, 4), km: cut(v.km, 9), valor: r(v.valor) };
+              })
+            : VEICS.slice(0, Math.min(3, nVeic())).map(function (v) {
+                return { modelo: cut(v.mod, 40), ano: cut(v.ano, 4), km: cut(v.km, 9), valor: r(v.valor) };
+              }),
         sujeita_aprovacao: c.ent < CAMPANHA.entMin || c.saldo < 0,
       };
     } catch (e) {
@@ -267,15 +310,17 @@
     };
     lastSummary = body.summary;
     var sig = JSON.stringify([body.summary, body.note, body.wants_contract, body.condition]);
-    if (!token || sig === lastSent) return Promise.resolve();
+    if (!token) return Promise.resolve(false);
+    if (sig === lastSent) return Promise.resolve(true);
     return call("POST", "/public/lead/proposals", body)
       .then(function () {
         lastSent = sig;
         hasContact = true;
         showSaved(body.name, digits(body.phone));
-        offerWhatsApp($("#nz-ok") ? "#nz-ok" : dados.autorizou_contrato ? "#p-aviso" : "#p-aviso-env");
+        offerWhatsApp($("#nz-ok") ? "#nz-ok" : LAYOUT_B || dados.autorizou_contrato ? "#p-aviso" : "#p-aviso-env");
+        return true;
       })
-      .catch(function () {});
+      .catch(function () { return false; });
   };
 
   // Depois do envio, o próximo passo é o WhatsApp do corretor, com a proposta resumida na mensagem.
@@ -346,7 +391,9 @@
       e.stopImmediatePropagation();
       var moved = down && e.clientX && Math.hypot(e.clientX - down[0], e.clientY - down[1]) > 8;
       down = null;
-      if (!moved) openWhatsApp("", "bolha");
+      // Clique feito pelo script da página (ex.: "Prefiro conversar com o corretor"), não pelo cliente:
+      // o WhatsApp já foi aberto por quem chamou.
+      if (!moved && e.isTrusted) openWhatsApp("", "bolha");
     }, true);
   }
 
@@ -365,10 +412,72 @@
     });
   }
 
+  /* ---------- layout B (ADR-0021): textos e envio da página da entrega v11 ---------- */
+  function adaptB() {
+    // Atalhos para dashboards, evidências e referências do pacote, que não fazem parte do app.
+    document.querySelectorAll('.synth-ribbon, .dash-go, a[href^="referencia-"], a[href="dashboard.html"], a[href="evolucao.html"]')
+      .forEach(function (el) { el.hidden = true; el.style.display = "none"; });
+
+    // A página foi escrita como protótipo sem envio. Com a ponte, proposta, perfil e medição chegam ao
+    // corretor; os avisos passam a dizer isso (RN-03.3, RN-03.8).
+    var first = firstName();
+    var texts = [
+      [".ndec > p:not([class])", "Ao registrar sua intenção, a proposta vai para " + first + " com seu nome e WhatsApp, e a conversa segue por lá. Nada aqui emite contrato ou reserva o imóvel."],
+      ["#negociar .ncard .nct span", "Seu contato, para " + first + " responder"],
+      ["#negociar .nlegal", "O resumo pode ser copiado, exportado ou impresso por você. A proposta só vai para o corretor quando você registra sua intenção."],
+      [".pf-ok span", "Autorizo enviar estas preferências ao meu corretor e salvá-las neste navegador."],
+      ["footer.foot p", "Informações fornecidas pela incorporadora. Valores, condições e imagens ilustrativas, sujeitos a confirmação. A proposta e o perfil vão para o seu corretor quando você os envia; a medição da navegação, só com o seu aceite."],
+    ];
+    texts.forEach(function (t) { var el = $(t[0]); if (el) el.textContent = t[1]; });
+    var pfTxt = Array.prototype.find.call(document.querySelectorAll("#perfil p"), function (p) { return /somente neste navegador/.test(p.textContent); });
+    if (pfTxt) pfTxt.textContent = "A proposta do Neo360 é dar continuidade ao atendimento com suas preferências, objetivos e condições de negociação. Com sua autorização, o perfil vai para o seu corretor.";
+    var pf = $("#pf-form");
+    if (pf) pf.addEventListener("submit", function () {
+      var msg = $("#pf-msg");
+      setTimeout(function () { if (msg) msg.textContent = "Preferências enviadas para " + first + "."; }, 0);
+    });
+
+    // Aviso de medição do coletor: aparece ao abrir a página e quando o cliente toca em "Medição deste navegador".
+    var consentText = "Registrar sua navegação nesta apresentação? Guardamos ações, rolagem e tempo por seção, sem texto digitado, e mandamos para " + first + " saber o que mais interessou a você.";
+    function fixConsent() { var p = $(".med-aviso p"); if (p && p.textContent !== consentText) p.textContent = consentText; }
+    fixConsent();
+    new MutationObserver(fixConsent).observe(document.body, { childList: true });
+
+    // Proposta: vai quando o cliente registra a intenção ("Sim, se a proposta for aprovada" ou "Ainda não"),
+    // com nome e WhatsApp obrigatórios (RN-03.8). setIntent é do sintetica.js da página.
+    var origIntent = window.setIntent;
+    if (typeof origIntent !== "function") return;
+    window.setIntent = function (i) {
+      var nome = ($("#p-nome") || {}).value || "";
+      var zap = ($("#p-zap") || {}).value || "";
+      var aviso = $("#p-aviso");
+      if (!nome.trim() || digits(zap).length < 10) {
+        if (aviso) { aviso.hidden = false; aviso.textContent = "Informe seu nome e WhatsApp para enviar a proposta a " + first + "."; }
+        if (typeof fechaFechamento === "function") fechaFechamento(false);
+        var campo = !nome.trim() ? $("#p-nome") : $("#p-zap");
+        if (campo) { campo.scrollIntoView({ block: "center" }); campo.focus({ preventScroll: true }); }
+        return;
+      }
+      if (typeof validProposal === "function" && !validProposal()) return;
+      origIntent(i);
+      var sent = window.regGravaProposta({
+        nome: nome,
+        whatsapp: zap,
+        resumo: typeof textoResumo === "function" ? textoResumo() : "",
+        observacao: ($("#p-obs") || {}).value || "",
+        autorizou_contrato: i === "sim",
+      });
+      sent.then(function (ok) {
+        if (aviso && ok) { aviso.hidden = false; aviso.textContent = "Proposta enviada para " + first + (i === "sim" ? ", com o pedido para seguir ao contrato se for aprovada." : "."); }
+      });
+    };
+  }
+
   /* ---------- início ---------- */
   call("GET", "/public/showroom/" + encodeURIComponent(SLUG) + "/" + encodeURIComponent(CODE))
     .then(function (room) {
       fillBroker(room);
+      if (LAYOUT_B) adaptB();
       token = storage(true);
       return call("POST", "/public/showroom/" + encodeURIComponent(SLUG) + "/" + encodeURIComponent(CODE) + "/visit?layout=" + LAYOUT);
     })

@@ -140,6 +140,7 @@ const sectionLabel: Record<string, string> = {
   "h-ind": "os números da região",
   "h-vid": "o vídeo de uso",
   "h-duv": "a seção de dúvidas",
+  estudos: "os estudos de investimento",
 };
 
 /** Cliques da apresentação do protótipo (regAcao), em português. */
@@ -170,6 +171,12 @@ const actionLabel: Record<string, string> = {
   layout_a: "Viu o layout A da apresentação",
   layout_b: "Viu o layout B da apresentação",
   abriu_planta3d_viva: "Abriu a planta 3D pela planta viva",
+  // Layout B, página da entrega v11 (ADR-0021)
+  veiculo_on: "Incluiu veículo na proposta",
+  veiculo_off: "Tirou o veículo da proposta",
+  fechou_fechamento: "Fechou o fechamento da proposta",
+  mexeu_simulador: "Mexeu no simulador",
+  exportou_rascunho: "Exportou o rascunho da proposta",
 };
 
 /** O que o cliente fez, em português, para a linha do tempo. */

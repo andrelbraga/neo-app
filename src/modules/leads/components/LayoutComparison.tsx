@@ -26,7 +26,7 @@ export function LayoutComparison({ summary }: { summary?: Summary }) {
           </span>
         )}
       </div>
-      <p className="mt-1 text-xs text-ink-muted">{key === "a" ? "apresentação clássica" : "estilo metrô"}</p>
+      <p className="mt-1 text-xs text-ink-muted">{key === "a" ? "apresentação clássica" : "página nova (v11)"}</p>
       <dl className="mt-3 space-y-2 text-sm">
         <div className="flex justify-between gap-2">
           <dt className="text-ink-muted">Clientes</dt>

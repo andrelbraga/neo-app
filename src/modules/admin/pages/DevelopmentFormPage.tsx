@@ -136,7 +136,7 @@ export function DevelopmentFormPage() {
           <Field id="d-layout" label="Layout padrão da apresentação" hint="Vale para os links sem layout escolhido. O corretor pode mandar o link no outro layout; o painel compara a conversão dos dois.">
             <select id="d-layout" className={inputClass} value={form.default_layout} onChange={(e) => setForm({ ...form, default_layout: e.target.value as "a" | "b" })}>
               <option value="a">A · apresentação clássica</option>
-              <option value="b">B · estilo metrô</option>
+              <option value="b">B · página nova (v11)</option>
             </select>
           </Field>
         </Card>

@@ -113,3 +113,14 @@ Feito: `/entrar` com sessão ativa mostra quem está conectado, com "Continuar" 
   - Olho em todos os campos de senha; "Trocar senha" no menu da conta.
 - Conferido no Chrome: lista sem senhas, provisória escondida até o olho, login com a provisória levado à troca, API com 403 antes e 200 depois da troca.
 
+## 17/11/2026 — Layout B com a página da entrega v11
+
+- ADR-0021 (substitui em parte a ADR-0019), P-16. `index-b.html` é o `dist/index.html` da v11 do Drive, idêntico ao arquivo mais a linha da ponte, com `sintetica.*`, `metrics/collector.js`, `planta.html`, `solar-study.js`, `assets/` (2 imagens) e `img/fundo-geada-referencia.jpeg`. Imagens e modelos são os do A. O estilo metrô sai do B.
+- Ponte com `layout=b`:
+  - medição pelo aceite do coletor da página;
+  - ações e tempo lidos da medição local dela;
+  - "Viu o layout B" com o aceite;
+  - proposta ao registrar a intenção, com nome e WhatsApp obrigatórios e o valor proposto como preço;
+  - avisos de "nada é enviado" corrigidos e atalhos de demonstração escondidos.
+- Correção nos dois layouts: segundo WhatsApp ao tocar em "Prefiro conversar com o corretor".
+- Admin, cartão "Layout A × B" e RN-03.15: o B passa a ser "página nova (v11)". Rótulos das ações novas e da seção "estudos" na jornada.

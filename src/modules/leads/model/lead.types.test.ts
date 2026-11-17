@@ -28,6 +28,9 @@ describe("eventLabel", () => {
     expect(eventLabel(e("acao", { chave: "voo_3d" }))).toBe("Sobrevoou o condomínio em 3D");
     expect(eventLabel(e("acao", { chave: "dia_no_apto" }))).toBe("Viu um dia no apartamento");
     expect(eventLabel(e("acao", { chave: "veiculos_2" }))).toBe("Escolheu a quantidade de veículos");
+    expect(eventLabel(e("acao", { chave: "mexeu_simulador" }))).toBe("Mexeu no simulador");
+    expect(eventLabel(e("acao", { chave: "veiculo_on" }))).toBe("Incluiu veículo na proposta");
+    expect(eventLabel(e("secao", { id: "estudos" }))).toBe("Viu os estudos de investimento");
     expect(eventLabel(e("acao", { chave: "?" }))).toBe("Interagiu com a página");
     expect(eventLabel(e("tempo"))).toBe("Tempo de leitura registrado");
   });
