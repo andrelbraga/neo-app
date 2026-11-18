@@ -130,3 +130,10 @@ Feito: `/entrar` com sessão ativa mostra quem está conectado, com "Continuar" 
 - ADR-0022, RN-03.15. `index.html` (A, padrão) passa a ser a página da v11; `index-b.html` (B), a apresentação anterior. "Crie seu perfil" e o painel de chat ficam escondidos nas duas páginas, e a conversa é pelo WhatsApp do corretor.
 - Ponte: reconhece a v11 pelo coletor de medição dela (`window.BVMetrics`), não pela letra do layout. As duas páginas mandam proposta, ações, seções e tempo ao corretor. Saíram os textos de perfil da v11.
 - Admin e cartão A × B: "A · página nova (v11)" e "B · apresentação clássica".
+
+## 17/11/2026 — Edição do corretor pelo admin com e-mail e botão "Editar"
+
+- RN-01.9, P-17. `PUT /api/admin/brokers/:id` aceita `email`: normalizado, validado e único (409 se for de outra conta). Vazio mantém o atual. A troca recusada não muda nada.
+- Admin, Profissionais: botão "Editar" em cada linha e em cada cartão do celular; a edição mostra o e-mail de acesso (a senha continua fora).
+- Exclusão de corretor fica fora por ora (P-17): a cascata apagaria clientes, propostas e vendas.
+- Testes: validação do e-mail, serviço, integração do repositório (troca e conflito) e `BrokersPage` (Editar visível e troca do e-mail).

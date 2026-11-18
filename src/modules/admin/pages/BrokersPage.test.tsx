@@ -71,4 +71,26 @@ describe("BrokersPage", () => {
     await user.click(screen.getByRole("button", { name: "Salvar" }));
     expect(svc.update).toHaveBeenCalledWith("b2", expect.objectContaining({ agency_id: null }));
   });
+
+  it("tem botão Editar visível e troca o e-mail de acesso", async () => {
+    const user = userEvent.setup();
+    svc.list.mockResolvedValue([brokerFixture]);
+    svc.update.mockResolvedValue(brokerFixture);
+    renderPage(<BrokersPage />);
+
+    const table = await screen.findByRole("table", { name: "Profissionais" });
+    const name = `${brokerFixture.first_name} ${brokerFixture.last_name}`;
+    await user.click(within(table).getByRole("button", { name: `Editar ${name}` }));
+    expect(screen.getByRole("dialog", { name: "Editar profissional" })).toBeInTheDocument();
+    expect(screen.queryByLabelText("Senha inicial")).not.toBeInTheDocument();
+    const email = screen.getByLabelText("E-mail");
+    expect(email).toHaveValue(brokerFixture.email);
+    await user.clear(email);
+    await user.type(email, "novo@x.com");
+    await user.click(screen.getByRole("button", { name: "Salvar" }));
+    expect(svc.update).toHaveBeenCalledWith(brokerFixture.id, expect.objectContaining({ email: "novo@x.com" }));
+    // Nos cartões (celular), cada profissional também tem o Editar.
+    const cards = screen.getByRole("list", { name: "Profissionais" });
+    expect(within(cards).getByRole("button", { name: `Editar ${name}` })).toBeInTheDocument();
+  });
 });

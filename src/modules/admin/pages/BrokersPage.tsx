@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { apiErrorMessage } from "@/app/providers/api/client";
@@ -7,7 +7,7 @@ import type { Broker } from "@/modules/auth/model/auth.types";
 import { brokerService, type Agency } from "@/modules/brokers/services/broker.service";
 import { formatPhone } from "@/shared/lib/format";
 import { Badge, Button, Dialog, EmptyState, Field, Loading, PageHeader } from "@/shared/ui/ui";
-import { inputClass } from "@/shared/ui/styles";
+import { buttonClass, inputClass } from "@/shared/ui/styles";
 import { ResponsiveTable } from "@/shared/ui/ResponsiveTable";
 import { Avatar } from "@/shared/ui/visuals";
 import { PasswordInput } from "@/shared/ui/PasswordInput";
@@ -57,7 +57,7 @@ function AgencySelect({ agencies, value, onChange }: { agencies: Agency[]; value
   );
 }
 
-/** Profissionais: o admin vê todos, cadastra, escolhe a imobiliária pré-cadastrada e desativa (RN-01.5, RN-01.6). */
+/** Profissionais: o admin vê todos, cadastra, edita (inclusive o e-mail de acesso), escolhe a imobiliária e desativa (RN-01.5, RN-01.6, RN-01.9). */
 export function BrokersPage() {
   const qc = useQueryClient();
   const list = useQuery({ queryKey: ["admin-brokers"], queryFn: brokerService.list });
@@ -69,7 +69,7 @@ export function BrokersPage() {
       const agency_id = form.agency_id || null;
       const profile = { first_name: form.first_name, last_name: form.last_name, phone: form.phone, creci: form.creci };
       return id
-        ? brokerService.update(id, { ...profile, agency_id, active: form.active })
+        ? brokerService.update(id, { ...profile, email: form.email, agency_id, active: form.active })
         : brokerService.create({ ...profile, email: form.email, password: form.password, agency_id });
     },
     onSuccess: () => {
@@ -127,20 +127,45 @@ export function BrokersPage() {
                 </span>
               ),
             },
-            { key: "codigo", header: "Código", width: "11%", cell: (b) => <span className="font-mono text-xs">{b.code}</span> },
+            { key: "codigo", header: "Código", width: "10%", cell: (b) => <span className="font-mono text-xs">{b.code}</span> },
             { key: "creci", header: "CRECI", width: "10%", cell: (b) => b.creci || "—" },
-            { key: "whatsapp", header: "WhatsApp", width: "15%", cell: (b) => formatPhone(b.phone) },
+            { key: "whatsapp", header: "WhatsApp", width: "14%", cell: (b) => formatPhone(b.phone) },
             {
               key: "imobiliaria",
               header: "Imobiliária",
-              width: "19%",
+              width: "15%",
               cell: (b) => (b.agency_name ? <span title={b.agency_name}>{b.agency_name}</span> : <span className="text-ink-muted">Autônomo</span>),
             },
             { key: "clientes", header: "Clientes", width: "9%", align: "center", cell: (b) => b.leads_count },
             { key: "situacao", header: "Situação", width: "11%", cell: (b) => (b.active ? <Badge>Ativo</Badge> : <Badge tone="gray">Desativado</Badge>) },
+            {
+              key: "acoes",
+              header: "",
+              width: "6%",
+              align: "right",
+              cell: (b) => (
+                <button
+                  type="button"
+                  aria-label={`Editar ${b.first_name} ${b.last_name}`}
+                  title="Editar"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    edit(b);
+                  }}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-line bg-cream-card text-forest transition hover:border-forest"
+                >
+                  <Pencil size={15} aria-hidden="true" />
+                </button>
+              ),
+            },
           ]}
           card={(b) => (
-            <button type="button" onClick={() => edit(b)} className="card card-hover flex h-full w-full flex-col gap-3 p-4 text-left">
+            <button
+              type="button"
+              aria-label={`Editar ${b.first_name} ${b.last_name}`}
+              onClick={() => edit(b)}
+              className="card card-hover flex h-full w-full flex-col gap-3 p-4 text-left"
+            >
               <span className="flex min-w-0 items-start gap-3">
                 <Avatar name={`${b.first_name} ${b.last_name}`} size="sm" />
                 <span className="min-w-0 flex-1">
@@ -163,6 +188,9 @@ export function BrokersPage() {
                   {b.creci || "—"} · {b.leads_count}
                 </dd>
               </dl>
+              <span className={buttonClass("outline", "mt-auto self-start px-4 py-1.5 text-xs")} aria-hidden="true">
+                <Pencil size={13} /> Editar
+              </span>
             </button>
           )}
         />
@@ -183,11 +211,11 @@ export function BrokersPage() {
             <Field id="b-creci" label="CRECI (opcional)">
               <input id="b-creci" className={inputClass} value={editing.form.creci} onChange={set("creci")} />
             </Field>
+            <Field id="b-email" label="E-mail" hint={editing.id ? "É o e-mail de acesso: o profissional passa a entrar com o novo." : undefined}>
+              <input id="b-email" type="email" className={inputClass} value={editing.form.email} onChange={set("email")} required />
+            </Field>
             {!editing.id && (
               <>
-                <Field id="b-email" label="E-mail">
-                  <input id="b-email" type="email" className={inputClass} value={editing.form.email} onChange={set("email")} required />
-                </Field>
                 <Field id="b-pass" label="Senha inicial" hint="Pelo menos 8 caracteres. Passe ao profissional por um canal seguro.">
                   <PasswordInput id="b-pass" value={editing.form.password} onChange={set("password")} required minLength={8} autoComplete="new-password" />
                 </Field>

@@ -8,6 +8,8 @@ export interface BrokerCreateRequest extends Profile {
 }
 
 export interface BrokerUpdateRequest extends Profile {
+  /** E-mail de acesso; o admin pode trocar (RN-01.9). */
+  email: string;
   agency_id: string | null;
   active: boolean;
 }
