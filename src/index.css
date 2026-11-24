@@ -23,35 +23,40 @@
     --sh-soft: 0 1px 2px rgba(29, 42, 34, 0.04), 0 8px 24px -12px rgba(29, 42, 34, 0.18);
     --sh-lift: 0 2px 4px rgba(29, 42, 34, 0.06), 0 18px 40px -16px rgba(29, 42, 34, 0.3);
   }
-  /* Painel e admin: paleta da referência (resources/design_tela.jpg), medida nos pixels. ADR-0013. */
+  /* Painel e admin: paleta da Central de trabalho (resources/Neo360_BoaVista_COMPLETO_v12, cockpit/style.css). ADR-0023. */
   .theme-sys {
-    --c-cream: 245 244 249; /* #F5F4F9 fundo lavanda */
+    --c-cream: 244 246 241; /* #F4F6F1 fundo */
     --c-cream-card: 255 255 255;
-    --c-ink: 39 38 44; /* #27262C */
-    --c-ink-muted: 124 123 140; /* cinza dos códigos e rótulos, escurecido para leitura */
-    --c-forest: 50 39 219; /* #3227DB índigo */
-    --c-forest-soft: 230 227 255; /* #E6E3FF aba e ícone ativos */
-    --c-forest-deep: 35 34 48; /* #232230 barra escura */
-    --c-teal: 76 161 215; /* #4CA1D7 azul "confirmado" */
-    --c-teal-soft: 214 228 255; /* #D6E4FF */
-    --c-gold: 224 165 38; /* amarelo "parcial", escurecido para texto */
-    --c-gold-soft: 255 243 217;
-    --c-ok: 75 135 75; /* #4B874B verde "concluído" */
-    --c-coral: 242 126 95; /* etiqueta coral do detalhe */
-    --c-coral-soft: 255 228 220; /* #FFE4DC */
-    --c-line: 236 235 242;
-    --sh-soft: 0 1px 2px rgba(39, 38, 44, 0.03), 0 6px 18px -10px rgba(50, 39, 219, 0.14);
-    --sh-lift: 0 2px 6px rgba(39, 38, 44, 0.05), 0 22px 44px -18px rgba(50, 39, 219, 0.28);
+    --c-ink: 25 62 53; /* #193E35 texto */
+    --c-ink-muted: 113 128 120; /* #718078 */
+    --c-forest: 36 91 73; /* #245B49 botão e item ativo */
+    --c-forest-soft: 216 238 226; /* #D8EEE2 menta do menu ativo */
+    --c-forest-deep: 25 63 53; /* #193F35 destaque escuro */
+    --c-teal: 74 127 149; /* azul acinzentado para "novo" */
+    --c-teal-soft: 220 234 239;
+    --c-gold: 145 112 54; /* #917036 texto da etiqueta dourada */
+    --c-gold-soft: 250 240 220; /* #FAF0DC */
+    --c-ok: 76 117 90; /* #4C755A */
+    --c-coral: 178 109 63; /* cobre: etapa proposta, sem parecer erro */
+    --c-coral-soft: 246 230 218;
+    --c-line: 224 231 223; /* #E0E7DF */
+    --sh-soft: 0 1px 2px rgba(25, 62, 53, 0.03);
+    --sh-lift: 0 2px 6px rgba(25, 62, 53, 0.05), 0 18px 36px -18px rgba(25, 62, 53, 0.25);
     @apply bg-cream text-ink;
   }
-  /* A referência usa só sem serifa, com títulos em negrito. */
+  /* Títulos em serifa, como na Central; números grandes (font-serif) também. */
   .theme-sys h1,
   .theme-sys h2,
-  .theme-sys h3,
   .theme-sys .font-serif {
+    font-family: Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+  }
+  /* h3 e rótulos pequenos em caixa alta (ex.: "Proposta" na ficha) ficam sem serifa. */
+  .theme-sys h3,
+  .theme-sys h2.uppercase {
     font-family: Inter, system-ui, sans-serif;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    font-weight: 650;
   }
   html {
     @apply bg-cream font-sans text-ink antialiased;
@@ -75,8 +80,13 @@
   .card {
     @apply rounded-2xl border border-line/80 bg-cream-card shadow-soft;
   }
+  /* Cartões da Central: brancos, borda fina e canto de 11 px. */
   .theme-sys .card {
-    @apply border-transparent;
+    border-color: rgb(var(--c-line));
+    border-radius: 11px;
+  }
+  .theme-sys .btn {
+    border-radius: 7px;
   }
   .card-hover {
     @apply transition duration-300 hover:-translate-y-0.5 hover:shadow-lift;
@@ -91,11 +101,27 @@
   .hero-grad {
     background: linear-gradient(135deg, #13271e 0%, #1d3a2d 45%, #2f6b5a 100%);
   }
+  /* As duas classes costumam estar no mesmo elemento (moldura, entrada): cobre os dois casos. */
+  .theme-sys.panel-bg,
   .theme-sys .panel-bg {
-    background: #f4f4fc;
+    background: #f4f6f1;
   }
+  /* Destaque verde da Central, com os anéis no canto superior direito. */
   .theme-sys .hero-grad {
-    background: linear-gradient(120deg, #232230 0%, #2a2190 48%, #3227db 100%);
+    background: #193f35;
+    border-radius: 13px;
+  }
+  .theme-sys .hero-grad::after {
+    content: "";
+    position: absolute;
+    width: 280px;
+    height: 280px;
+    border: 1px solid #ffffff17;
+    border-radius: 50%;
+    right: -70px;
+    top: -130px;
+    box-shadow: 0 0 0 35px #ffffff06, 0 0 0 70px #ffffff04;
+    pointer-events: none;
   }
   .skeleton {
     @apply relative overflow-hidden rounded-xl bg-line/50;

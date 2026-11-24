@@ -23,6 +23,7 @@ Decisões de arquitetura e produto no formato MADR ([template](template.md)).
 | [ADR-0010](ADR-0010-imobiliarias-pre-cadastradas.md) | Imobiliárias pré-cadastradas, com logo, escolhidas ao criar o profissional | aceita |
 | [ADR-0011](ADR-0011-etapas-da-apresentacao.md) | Apresentação organizada em etapas, com contato antes da proposta | aceita |
 | [ADR-0012](ADR-0012-apresentacao-em-capitulos.md) | Apresentação em capítulos, abertura guiada, planta viva e pagamento em linha do tempo | aceita |
-| [ADR-0013](ADR-0013-layout-do-painel-pela-referencia.md) | Painel e admin no layout e na paleta da referência de `resources/` | aceita |
+| [ADR-0013](ADR-0013-layout-do-painel-pela-referencia.md) | Painel e admin no layout e na paleta da referência de `resources/` | substituída pela ADR-0023 |
 | [ADR-0014](ADR-0014-proposta-em-secao-propria.md) | Proposta do cliente em seção própria, com a condição em números | aceita |
 | [ADR-0015](ADR-0015-ciclo-de-venda-pelo-whatsapp.md) | Ciclo de venda: proposta na plataforma, conversa e fechamento pelo WhatsApp | aceita |
+| [ADR-0023](ADR-0023-painel-no-layout-da-central.md) | Painel e admin no layout da Central de trabalho (entrega v12), com "ver como" no admin | aceita |

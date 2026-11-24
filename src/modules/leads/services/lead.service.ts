@@ -20,10 +20,10 @@ export const myLeadService = {
   activity: () => api.get<Activity[]>("/me/activity"),
 };
 
-/** Visão de todos os clientes no admin. */
+/** Visão de todos os clientes no admin. Com `broker`, só os de um corretor ("ver como", RN-01.10). */
 export const adminLeadService = {
   list: (f: LeadFilter = {}) => api.get<Lead[]>(`/admin/leads${query(f)}`),
   get: (id: string) => api.get<LeadDetail>(`/admin/leads/${id}`),
-  summary: () => api.get<Summary>("/admin/summary"),
-  activity: () => api.get<Activity[]>("/admin/activity"),
+  summary: (broker?: string) => api.get<Summary>(`/admin/summary${query({ broker })}`),
+  activity: (broker?: string) => api.get<Activity[]>(`/admin/activity${query({ broker })}`),
 };

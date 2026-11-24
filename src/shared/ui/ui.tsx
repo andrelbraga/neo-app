@@ -18,12 +18,13 @@ export function Field({ id, label, hint, className, children }: { id: string; la
   );
 }
 
-export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
+export function PageHeader({ title, subtitle, eyebrow, action }: { title: string; subtitle?: string; eyebrow?: string; action?: ReactNode }) {
   return (
     <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-3xl text-ink">{title}</h1>
-        {subtitle && <p className="mt-1 text-sm text-ink-muted">{subtitle}</p>}
+        {eyebrow && <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-ink-muted">{eyebrow}</span>}
+        <h1 className="mt-1 text-[34px] leading-tight text-ink md:text-[40px]">{title}</h1>
+        {subtitle && <p className="mt-2 text-sm text-ink-muted">{subtitle}</p>}
       </div>
       {action}
     </header>

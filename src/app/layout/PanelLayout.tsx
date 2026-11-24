@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import { Bell, BellRing, Building2, Home, KeyRound, LayoutGrid, LogOut, Search, User, Users } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { SeeAsSelect } from "@/modules/admin/components/SeeAsSelect";
+import { useSeeAsStore } from "@/modules/admin/store/seeAs.store";
 import { authService } from "@/modules/auth/services/auth.service";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
 import { useLiveUpdates } from "@/modules/leads/hooks/useLiveUpdates";
@@ -30,9 +32,9 @@ function sectionTitle(nav: typeof brokerNav, path: string) {
 }
 
 /**
- * Moldura do painel, no desenho da referência de layout (resources/design_tela.jpg, ADR-0013): barra superior
- * com título, busca e avisos; menu de ícones à esquerda; conteúdo sobre fundo lavanda. No celular, o menu é
- * uma pílula escura flutuante. Recarrega a conta ao abrir e acompanha os avisos ao vivo.
+ * Moldura do painel no desenho da Central de trabalho (ADR-0023): barra lateral com marca, ambiente (no admin,
+ * o "ver como" um corretor, RN-01.10) e menu com rótulo; barra superior com o caminho da página, busca e avisos.
+ * No celular, o menu é uma pílula escura flutuante. Recarrega a conta ao abrir e acompanha os avisos ao vivo.
  */
 export function PanelLayout({ area }: { area: "admin" | "corretor" }) {
   const navigate = useNavigate();
@@ -41,6 +43,8 @@ export function PanelLayout({ area }: { area: "admin" | "corretor" }) {
   const { user, setUser, clear } = useAuthStore();
   const me = useQuery({ queryKey: ["me"], queryFn: authService.me });
   const live = useLiveUpdates(area);
+  const { broker: seeAsBroker, set: setSeeAs } = useSeeAsStore();
+  const seeAs = area === "admin" ? seeAsBroker : null;
   const [q, setQ] = useState(params.get("q") ?? "");
   useEffect(() => {
     if (me.data) setUser(me.data);
@@ -51,6 +55,7 @@ export function PanelLayout({ area }: { area: "admin" | "corretor" }) {
   // Propostas dos clientes que ainda não foram abertas: o ponto vermelho do sino, do menu e do avatar.
   const unread = live.summary.data?.new_proposals ?? 0;
   const logout = () => {
+    setSeeAs(null);
     clear();
     navigate("/entrar", { replace: true });
   };
@@ -83,21 +88,62 @@ export function PanelLayout({ area }: { area: "admin" | "corretor" }) {
     </button>
   );
 
+  const areaTitle = area === "admin" ? "Neo360" : "Corretor";
+  const crumb = [areaTitle, seeAs ? `vendo como ${seeAs.name}` : null, sectionTitle(nav, pathname)].filter(Boolean).join(" / ");
+
   return (
-    <div className="theme-sys panel-bg min-h-screen">
-      <div className="flex min-h-screen flex-col bg-cream-card">
-        {/* Barra superior */}
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 bg-cream-card/95 px-4 backdrop-blur sm:px-5 lg:h-[72px] lg:pl-0">
-          <div className="flex shrink-0 items-center lg:w-[84px] lg:justify-center">
-            <Logo className="h-8 lg:h-9" />
-          </div>
-          <p className="min-w-0 truncate text-lg font-bold tracking-tight text-ink lg:text-xl">{sectionTitle(nav, pathname)}</p>
+    <div className="theme-sys panel-bg min-h-screen lg:grid lg:grid-cols-[242px_minmax(0,1fr)]">
+      {/* Barra lateral da Central (desktop): marca, ambiente, menu com rótulo e o pé com a conta */}
+      <aside className="sticky top-0 hidden h-screen flex-col border-r border-line bg-cream-card px-5 py-7 lg:flex">
+        <NavLink to={nav[0].to} className="block">
+          <Logo className="h-9" />
+          <span className="mt-2 block text-[10px] font-semibold tracking-[0.14em] text-ink-muted">CENTRAL DE TRABALHO</span>
+        </NavLink>
+        <p className="mb-2 mt-7 text-[10px] font-semibold tracking-[0.14em] text-ink-muted">SEU AMBIENTE</p>
+        {area === "admin" ? (
+          <SeeAsSelect />
+        ) : (
+          <div className="rounded-[7px] border border-line bg-cream px-2.5 py-2.5 text-xs text-ink">Corretor · {user?.broker?.code ?? "atendimento"}</div>
+        )}
+        <nav className="mt-5 flex flex-col gap-0.5" aria-label="Menu">
+          {nav.map(({ to, label, icon: Icon, end, badge }) => (
+            <NavLink
+              key={to}
+              to={to}
+              end={end}
+              className={({ isActive }) =>
+                cn(
+                  "relative flex items-center gap-3 rounded-[7px] px-3 py-[11px] text-sm transition",
+                  isActive ? "bg-forest-soft font-semibold text-forest-deep" : "text-ink-muted hover:bg-cream hover:text-ink",
+                )
+              }
+            >
+              <Icon size={18} className="shrink-0" />
+              <span className="flex-1">{label}</span>
+              {badge && unread > 0 && <span className="rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white">{unread}</span>}
+            </NavLink>
+          ))}
+        </nav>
+        <div className="mt-auto border-t border-line pt-4">
+          <p className="truncate text-xs font-semibold text-ink">{account.name}</p>
+          <p className="truncate text-[11px] text-ink-muted">{account.detail}</p>
+          <button type="button" onClick={logout} className="mt-3 inline-flex items-center gap-2 text-[11px] text-ink-muted transition hover:text-forest">
+            <LogOut size={13} /> Sair
+          </button>
+          <p className="mt-4 text-[10px] leading-relaxed text-ink-muted">Neo360 · Um lugar para cada parte da negociação.</p>
+        </div>
+      </aside>
+
+      <div className="flex min-h-screen min-w-0 flex-col">
+        {/* Barra superior: caminho da página, busca, avisos e conta */}
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-3 border-b border-line bg-cream-card/70 px-4 backdrop-blur sm:px-6 lg:h-[68px] lg:px-9">
+          <Logo className="h-8 lg:hidden" />
+          <p className="min-w-0 truncate text-xs text-ink-muted">{crumb}</p>
           <form onSubmit={search} role="search" className="ml-auto hidden md:block">
-            <label className="flex w-64 items-center gap-2 rounded-full border border-line bg-white py-1.5 pl-3 pr-1.5 transition focus-within:border-forest/40 focus-within:ring-4 focus-within:ring-forest-soft xl:w-80">
+            <label className="flex w-64 items-center gap-2 rounded-[7px] border border-line bg-white px-3 py-2 transition focus-within:border-forest/40 focus-within:ring-4 focus-within:ring-forest-soft xl:w-80">
               <Search size={15} className="shrink-0 text-ink-muted" />
               <span className="sr-only">Buscar cliente</span>
               <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cliente" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-ink-muted/70" />
-              <span className="shrink-0 rounded-full bg-cream px-2.5 py-1 text-[11px] font-semibold text-ink">Clientes</span>
             </label>
           </form>
           <div className="ml-auto flex items-center gap-1 md:ml-2">
@@ -106,60 +152,30 @@ export function PanelLayout({ area }: { area: "admin" | "corretor" }) {
           </div>
         </header>
 
-        <div className="flex min-h-0 flex-1">
-          {/* Menu de ícones (desktop) */}
-          {/* z-20: o menu fixo forma uma camada própria; acima do conteúdo (para os rótulos e o menu da conta sobreporem)
-              e abaixo da barra superior (z-30). */}
-          <aside className="sticky top-[72px] z-20 hidden h-[calc(100vh-72px)] w-[84px] shrink-0 flex-col items-center pb-5 pt-3 lg:flex">
-            <nav className="flex flex-col items-center gap-2" aria-label="Menu">
-              {nav.map(({ to, label, icon: Icon, end, badge }, i) => (
-                <div key={to} className="flex flex-col items-center gap-2">
-                  {i > 0 && i % 2 === 0 && <span aria-hidden="true" className="h-1 w-1 rounded-full bg-line" />}
-                  <NavLink
-                    to={to}
-                    end={end}
-                    aria-label={label}
-                    className={({ isActive }) =>
-                      cn(
-                        "group relative inline-flex h-11 w-11 items-center justify-center rounded-full transition",
-                        isActive ? "bg-forest-soft text-forest" : "text-ink-muted hover:bg-cream hover:text-ink",
-                      )
-                    }
-                  >
-                    <Icon size={19} />
-                    {badge && unread > 0 && <span className="absolute -top-0.5 right-0 h-2.5 w-2.5 animate-pop rounded-full bg-rose-500 ring-2 ring-white" />}
-                    <span
-                      role="tooltip"
-                      className="pointer-events-none absolute left-full top-1/2 z-40 ml-3 -translate-y-1/2 whitespace-nowrap rounded-lg bg-forest-deep px-2.5 py-1 text-xs font-medium text-white opacity-0 shadow-lift transition group-hover:opacity-100 group-focus-visible:opacity-100"
-                    >
-                      {label}
-                    </span>
-                  </NavLink>
-                </div>
-              ))}
-            </nav>
-            <div className="mt-auto flex flex-col items-center gap-3">
-              <ProfileMenu variant="rail" {...account} />
-              <button type="button" onClick={logout} aria-label="Sair" title="Sair" className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-cream text-ink-muted transition hover:bg-forest-soft hover:text-forest">
-                <LogOut size={16} />
-              </button>
-            </div>
-          </aside>
-
-          {/* Conteúdo sobre o fundo lavanda, com o canto superior arredondado como na referência */}
-          <main className="min-w-0 flex-1 bg-cream px-4 pb-28 pt-5 sm:px-6 lg:rounded-tl-[28px] lg:px-7 lg:pb-10 lg:pt-7 2xl:px-10">
-            <div className="mx-auto w-full max-w-[1600px]">
-              <form onSubmit={search} role="search" className="mb-4 md:hidden">
-                <label className="flex items-center gap-2 rounded-full border border-line bg-white px-3 py-2">
-                  <Search size={15} className="text-ink-muted" />
-                  <span className="sr-only">Buscar cliente</span>
-                  <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cliente" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
-                </label>
-              </form>
-              <Outlet />
-            </div>
-          </main>
-        </div>
+        <main className="flex-1 px-4 pb-28 pt-6 sm:px-6 lg:px-9 lg:pb-10 lg:pt-9">
+          <div className="mx-auto w-full max-w-[1600px]">
+            {area === "admin" && <SeeAsSelect className="mb-4 lg:hidden" />}
+            {seeAs && (
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[9px] border border-gold/30 bg-gold-soft px-4 py-3 text-sm text-ink">
+                <span>
+                  <b>Visualizando como {seeAs.name}.</b> Visão geral e clientes mostram só os dele. Somente leitura.
+                </span>
+                <button type="button" onClick={() => setSeeAs(null)} className="text-xs font-semibold text-forest underline">
+                  Voltar à visão Neo360
+                </button>
+              </div>
+            )}
+            <form onSubmit={search} role="search" className="mb-4 md:hidden">
+              <label className="flex items-center gap-2 rounded-[7px] border border-line bg-white px-3 py-2">
+                <Search size={15} className="text-ink-muted" />
+                <span className="sr-only">Buscar cliente</span>
+                <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar cliente" className="min-w-0 flex-1 bg-transparent text-sm outline-none" />
+              </label>
+            </form>
+            <Outlet />
+          </div>
+        </main>
+        <footer className="hidden border-t border-line px-9 py-4 text-[11px] text-ink-muted lg:block">Neo360 · Um lugar para cada parte da negociação.</footer>
       </div>
 
       {/* Menu do celular: pílula escura flutuante, no estilo da barra de ações da referência */}

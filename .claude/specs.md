@@ -137,3 +137,19 @@ Feito: `/entrar` com sessão ativa mostra quem está conectado, com "Continuar" 
 - Admin, Profissionais: botão "Editar" em cada linha e em cada cartão do celular; a edição mostra o e-mail de acesso (a senha continua fora).
 - Exclusão de corretor fica fora por ora (P-17): a cascata apagaria clientes, propostas e vendas.
 - Testes: validação do e-mail, serviço, integração do repositório (troca e conflito) e `BrokersPage` (Editar visível e troca do e-mail).
+
+## 24/11/2026 — Painel e admin no layout da Central de trabalho
+
+Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/dashboard.html` e implementar esse layout no app. Escolhas do usuário: visual da Central (ADR-0023, substitui a ADR-0013), só as telas que já existem e "ver como" no admin.
+
+- ADR-0023: `.theme-sys` com a paleta da Central (verde `#245B49`, menta, dourado, fundo `#F4F6F1`), títulos em Georgia, cartões com borda fina e canto de 11 px, botões com canto de 7 px (`btn` em `buttonClass`).
+- `PanelLayout`: barra lateral de 242 px (marca, "Seu ambiente", menu com rótulo, conta e sair) e barra superior com o caminho da página, busca, sino e conta. `PageHeader` com rótulo opcional e título de 40 px. Início do corretor e visão geral do admin com o destaque verde e o botão dourado.
+- RN-01.10 "ver como": `?broker=` em `GET /api/admin/summary` e `/admin/activity`; `SeeAsSelect` e `useSeeAsStore` (sessionStorage); visão geral e clientes do admin filtram pelo corretor escolhido e o ranking sai; faixa "Visualizando como" com volta à visão Neo360.
+- Testes: `TestAdminSeeAs` (handler), `TestAdminService` com corretor, `AdminHomePage.test.tsx`. App: typecheck, lint e 80 testes; API: `go test ./...`.
+- Fora: Convites, Campanhas, Negociações, Financeiro, Participantes, Página e Histórico da Central (P-04, P-13; o convite com cadastro prévio do cliente mexe no dono do lead).
+- Conferência no Chrome headless (24/11/2026), 14 telas em 1440 e 390 px (admin, admin vendo como corretor, ficha, empreendimentos, profissionais, corretor, entrar): sem estouro de largura e sem erro no console. Correções feitas a partir dela:
+  - o fundo `.theme-sys .panel-bg` não pegava quando as duas classes estão no mesmo elemento; passou a valer `.theme-sys.panel-bg`;
+  - a etapa proposta em cobre, em vez do vermelho que parecia erro;
+  - no "ver como", os cartões da plataforma (corretores ativos, empreendimentos) viram propostas novas e em negociação do corretor, e o feed ocupa o lugar do ranking;
+  - o seletor mostra só o nome;
+  - os rótulos `h2` em caixa alta da ficha ficam sem serifa.
