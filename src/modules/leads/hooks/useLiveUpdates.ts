@@ -27,8 +27,8 @@ export function useLiveUpdates(area: "corretor" | "admin") {
   const navigate = useNavigate();
   const base = area === "admin" ? "/admin/clientes" : "/painel/clientes";
   const svc = area === "admin" ? adminLeadService : myLeadService;
-  const activity = useQuery({ queryKey: [area, "activity"], queryFn: svc.activity, refetchInterval: INTERVAL });
-  const summary = useQuery({ queryKey: [area, "summary"], queryFn: svc.summary, refetchInterval: INTERVAL });
+  const activity = useQuery({ queryKey: [area, "activity"], queryFn: () => svc.activity(), refetchInterval: INTERVAL });
+  const summary = useQuery({ queryKey: [area, "summary"], queryFn: () => svc.summary(), refetchInterval: INTERVAL });
   const seen = useRef<Set<string> | null>(null);
   const [permission, setPermission] = useState(typeof Notification === "undefined" ? "denied" : Notification.permission);
 

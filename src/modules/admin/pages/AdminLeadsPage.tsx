@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { Columns3, List } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useSeeAsStore } from "@/modules/admin/store/seeAs.store";
 import { brokerService } from "@/modules/brokers/services/broker.service";
 import { developmentService } from "@/modules/developments/services/development.service";
 import { KanbanBoard } from "@/modules/leads/components/KanbanBoard";
@@ -15,7 +16,10 @@ import { Skeleton } from "@/shared/ui/visuals";
 
 /** Todos os clientes, em quadro (só leitura) ou lista, com filtro por corretor, empreendimento e etapa. */
 export function AdminLeadsPage() {
-  const [filter, setFilter] = useState<LeadFilter>({});
+  // Começa no corretor do "ver como" (RN-01.10) e acompanha a troca feita na barra lateral.
+  const seeAs = useSeeAsStore((s) => s.broker?.id);
+  const [filter, setFilter] = useState<LeadFilter>(seeAs ? { broker: seeAs } : {});
+  useEffect(() => setFilter((f) => ({ ...f, broker: seeAs })), [seeAs]);
   const [view, setView] = useState<"quadro" | "lista">("lista");
   const leads = useQuery({ queryKey: ["admin-leads", filter], queryFn: () => adminLeadService.list(filter), refetchInterval: 15_000 });
   const brokers = useQuery({ queryKey: ["admin-brokers"], queryFn: brokerService.list });

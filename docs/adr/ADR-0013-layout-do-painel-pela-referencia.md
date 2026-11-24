@@ -1,6 +1,6 @@
 # ADR-0013 — Painel e admin no layout e na paleta da referência `resources/design_tela.jpg`
 
-- **Status:** aceita
+- **Status:** substituída pela ADR-0023 (24/11/2026)
 - **Data:** 17/11/2026
 - **Decisores:** responsável pelo produto (CLI)
 - **Relacionados:** ADR-0005, ADR-0008, ADR-0012

@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { BadgeCheck, Check, Copy, ExternalLink, FileSignature, Handshake, Share2, Users } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuthStore } from "@/modules/auth/store/auth.store";
 import { statusLabel, type Development } from "@/modules/developments/model/development.types";
@@ -104,14 +105,19 @@ export function BrokerHomePage() {
 
   return (
     <div className="space-y-6">
-      <section className="hero-grad relative animate-rise overflow-hidden rounded-3xl p-6 text-cream shadow-lift md:p-8">
-        <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-teal-soft/20 blur-3xl" />
-        <div className="absolute -bottom-20 left-1/3 h-56 w-56 rounded-full bg-gold/20 blur-3xl" />
-        <p className="relative text-sm text-cream/75">{greeting()},</p>
-        <h1 className="relative mt-1 text-3xl md:text-4xl">{broker?.first_name ?? "corretor"}</h1>
-        <p className="relative mt-2 max-w-xl text-sm text-cream/80">
-          Envie seu link, acompanhe quem abriu, receba a proposta e feche pelo WhatsApp. Seu código é <b className="rounded bg-white/15 px-1.5 py-0.5 font-mono text-cream">{broker?.code}</b>.
-        </p>
+      <section className="hero-grad relative flex animate-rise flex-wrap items-center justify-between gap-6 overflow-hidden p-7 text-cream md:px-8">
+        <div className="relative">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-forest-soft/80">
+            {greeting()}, {broker?.first_name ?? "corretor"}
+          </span>
+          <h1 className="mt-1.5 text-3xl md:text-[34px]">Seu próximo atendimento começa aqui.</h1>
+          <p className="mt-2 max-w-xl text-sm text-cream/75">
+            Envie seu link, acompanhe quem abriu, receba a proposta e feche pelo WhatsApp. Seu código é <b className="rounded bg-white/15 px-1.5 py-0.5 font-mono text-cream">{broker?.code}</b>.
+          </p>
+        </div>
+        <Link to="/painel/clientes" className={buttonClass("primary", "relative border-0 bg-gold-soft text-forest-deep hover:bg-gold-soft/90")}>
+          Ver meus clientes →
+        </Link>
       </section>
 
       <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
