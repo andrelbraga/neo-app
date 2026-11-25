@@ -1295,7 +1295,7 @@ async function regGravaProposta(dados){
   if(REG_OK !== null) return;
   const box = document.createElement('div');
   box.className = 'med-aviso'; box.setAttribute('role', 'region'); box.setAttribute('aria-label', 'Aviso de medição');
-  box.innerHTML = '<p>Podemos registrar, sem seu nome e sem o que você digita, quais partes desta página você abre e por quanto tempo? Isso ajuda a melhorar a apresentação. Você pode recusar.</p><div class="med-bts"><button type="button" data-med="sim">Aceitar</button><button type="button" data-med="nao">Recusar</button></div>';
+  box.innerHTML = '<p>Podemos registrar como você navega nesta apresentação: as seções que vê, o tempo em cada parte e o que abre. Assim o corretor que te enviou esta página sabe o que mais te interessou. Os dados ficam com o corretor e com a Neo360. Não registramos o que você digita. Você pode recusar.</p><div class="med-bts"><button type="button" data-med="sim">Aceitar</button><button type="button" data-med="nao">Recusar</button></div>';
   document.body.appendChild(box);
   box.addEventListener('click', e => {
     const b = e.target.closest('[data-med]'); if(!b) return;

@@ -218,3 +218,10 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
   - prévia ao vivo com A/B e Computador/Celular; clique no texto da prévia abre o campo;
   - "Publicar" e "Descartar".
 - Conferido no Chrome com a página real e uma API simulada: editor carregado com as seções, título trocado, 3D e simulador ocultos e rodapé novo nos layouts A e B. Testes: API (cobertura 95,4%), app com 108 testes.
+
+## 24/11/2026 — P-20: aviso de medição corrigido
+
+- O aviso de medição dizia "Os dados não são enviados a um servidor" (A) e "sem seu nome [...] ajuda a melhorar a apresentação" (B). Com o aceite, a navegação vai para a ficha do cliente.
+- Texto novo nos dois layouts: o que é registrado (seções, tempo, o que abre), para quê (o corretor saber o que interessou), com quem os dados ficam (o corretor e a Neo360) e que o que o cliente digita não é registrado. No A, "Apagar registros deste aparelho" e "Medição ativa: o corretor vê como você navega nesta página.". No B, sem "parar quando quiser", porque o B não tem esse controle.
+- P-20 fica parcial: base legal (P-01), o B sem como parar depois de aceitar e os rodapés de A e B (editáveis no editor da página).
+- Teste: `collector.test.ts`. Conferido no Chrome a 390 px nos dois layouts.
