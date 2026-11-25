@@ -1,26 +1,22 @@
 import { useQuery } from "@tanstack/react-query";
-import { Columns3, List } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useSeeAsStore } from "@/modules/admin/store/seeAs.store";
 import { brokerService } from "@/modules/brokers/services/broker.service";
 import { developmentService } from "@/modules/developments/services/development.service";
-import { KanbanBoard } from "@/modules/leads/components/KanbanBoard";
 import { LeadsTable } from "@/modules/leads/components/LeadParts";
 import { matchesLead, stageLabel, stages, type LeadFilter } from "@/modules/leads/model/lead.types";
 import { adminLeadService } from "@/modules/leads/services/lead.service";
-import { cn } from "@/shared/lib/cn";
 import { inputClass } from "@/shared/ui/styles";
 import { PageHeader } from "@/shared/ui/ui";
 import { Skeleton } from "@/shared/ui/visuals";
 
-/** Todos os clientes, em quadro (só leitura) ou lista, com filtro por corretor, empreendimento e etapa. */
+/** Todos os clientes em lista (só leitura), com filtro por corretor, empreendimento e etapa. */
 export function AdminLeadsPage() {
   // Começa no corretor do "ver como" (RN-01.10) e acompanha a troca feita na barra lateral.
   const seeAs = useSeeAsStore((s) => s.broker?.id);
   const [filter, setFilter] = useState<LeadFilter>(seeAs ? { broker: seeAs } : {});
   useEffect(() => setFilter((f) => ({ ...f, broker: seeAs })), [seeAs]);
-  const [view, setView] = useState<"quadro" | "lista">("lista");
   const leads = useQuery({ queryKey: ["admin-leads", filter], queryFn: () => adminLeadService.list(filter), refetchInterval: 15_000 });
   const brokers = useQuery({ queryKey: ["admin-brokers"], queryFn: brokerService.list });
   const developments = useQuery({ queryKey: ["admin-developments"], queryFn: developmentService.list });
@@ -33,25 +29,7 @@ export function AdminLeadsPage() {
     <>
       <PageHeader
         title="Clientes"
-        subtitle="Cada cliente tem um dono: o corretor do link da primeira visita."
-        action={
-          <div className="inline-flex rounded-full border border-line bg-white p-1" role="group" aria-label="Modo de exibição">
-            {[
-              { id: "lista" as const, label: "Lista", icon: List },
-              { id: "quadro" as const, label: "Quadro", icon: Columns3 },
-            ].map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                type="button"
-                aria-pressed={view === id}
-                onClick={() => setView(id)}
-                className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition", view === id ? "bg-forest text-cream" : "text-ink-muted hover:text-forest")}
-              >
-                <Icon size={15} /> {label}
-              </button>
-            ))}
-          </div>
-        }
+        subtitle="Cada cliente tem um dono: quem trouxe primeiro, pelo link ou pelo cadastro."
       />
       <div className="mb-5 grid gap-3 sm:grid-cols-3">
         <select aria-label="Corretor" className={inputClass} value={filter.broker ?? ""} onChange={set("broker")}>
@@ -81,8 +59,6 @@ export function AdminLeadsPage() {
       </div>
       {leads.isPending ? (
         <Skeleton className="h-64" />
-      ) : view === "quadro" ? (
-        <KanbanBoard leads={rows} basePath="/admin/clientes" showBroker />
       ) : (
         <LeadsTable leads={rows} basePath="/admin/clientes" showBroker />
       )}

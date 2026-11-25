@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { cn } from "@/shared/lib/cn";
 import { formatPhone, timeAgo } from "@/shared/lib/format";
@@ -63,11 +64,26 @@ export function NewProposalsBadge({ count }: { count: number }) {
   );
 }
 
-/** Lista de clientes: tabela no desktop, cartões no celular e no tablet. `showBroker` mostra o dono (visão do admin). */
-export function LeadsTable({ leads, basePath, showBroker = false }: { leads: Lead[]; basePath: string; showBroker?: boolean }) {
+/**
+ * Lista de clientes: tabela no desktop, cartões no celular e no tablet. `showBroker` mostra o dono (visão do
+ * admin); `actions` põe o menu ⋮ no fim da linha (corretor).
+ */
+export function LeadsTable({
+  leads,
+  basePath,
+  showBroker = false,
+  actions,
+  empty,
+}: {
+  leads: Lead[];
+  basePath: string;
+  showBroker?: boolean;
+  actions?: (l: Lead) => ReactNode;
+  empty?: ReactNode;
+}) {
   const navigate = useNavigate();
   if (leads.length === 0) {
-    return <EmptyState title="Nenhum cliente ainda" text="Quando alguém abrir um link, ele aparece aqui com o que viu na página." />;
+    return empty ?? <EmptyState title="Nenhum cliente ainda" text="Quando alguém abrir um link, ele aparece aqui com o que viu na página." />;
   }
   const columns: Column<Lead>[] = [
     {
@@ -110,6 +126,7 @@ export function LeadsTable({ leads, basePath, showBroker = false }: { leads: Lea
     { key: "interesse", header: "Interesse", width: "14%", cell: (l) => <SignalIcons signals={l.signals} max={4} /> },
     { key: "etapa", header: "Etapa", width: showBroker ? "13%" : "16%", cell: (l) => <StageBadge stage={l.stage} /> },
     { key: "atividade", header: "Atividade", width: "13%", align: "right", cell: (l) => <span className="text-ink-muted">{timeAgo(l.last_activity_at)}</span> },
+    ...(actions ? [{ key: "acoes", header: "Ações", width: "72px", align: "right" as const, cell: (l: Lead) => actions(l) }] : []),
   ];
   return (
     <ResponsiveTable
@@ -119,31 +136,35 @@ export function LeadsTable({ leads, basePath, showBroker = false }: { leads: Lea
       rowKey={(l) => l.id}
       onRowClick={(l) => navigate(`${basePath}/${l.id}`)}
       card={(l) => (
-        <Link to={`${basePath}/${l.id}`} className={cn("card card-hover flex h-full flex-col gap-3 p-4", l.new_proposals > 0 && "ring-2 ring-rose-300")}>
-          <span className="flex min-w-0 items-start gap-3">
-            <Avatar name={leadName(l)} size="sm" />
-            <span className="min-w-0 flex-1">
-              <span className="block truncate font-semibold text-ink">{leadName(l)}</span>
-              <span className="block truncate text-xs text-ink-muted">
-                {l.development_name}
-                {l.phone && ` · ${formatPhone(l.phone)}`}
-              </span>
-              {showBroker && (
+        <div className="relative h-full">
+          <Link to={`${basePath}/${l.id}`} className={cn("card card-hover flex h-full flex-col gap-3 p-4", l.new_proposals > 0 && "ring-2 ring-rose-300")}>
+            <span className="flex min-w-0 items-start gap-3">
+              <Avatar name={leadName(l)} size="sm" />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-semibold text-ink">{leadName(l)}</span>
                 <span className="block truncate text-xs text-ink-muted">
-                  {l.broker_name} · {l.broker_code}
+                  {l.development_name}
+                  {l.phone && ` · ${formatPhone(l.phone)}`}
                 </span>
-              )}
+                {showBroker && (
+                  <span className="block truncate text-xs text-ink-muted">
+                    {l.broker_name} · {l.broker_code}
+                  </span>
+                )}
+              </span>
+              <NewProposalsBadge count={l.new_proposals} />
+              {actions && <span className="w-7 shrink-0" aria-hidden="true" />}
             </span>
-            <NewProposalsBadge count={l.new_proposals} />
-          </span>
-          <span className="mt-auto flex items-center justify-between gap-2">
-            <span className="flex min-w-0 items-center gap-2">
-              <StageBadge stage={l.stage} />
-              <SignalIcons signals={l.signals} max={4} />
+            <span className="mt-auto flex items-center justify-between gap-2">
+              <span className="flex min-w-0 items-center gap-2">
+                <StageBadge stage={l.stage} />
+                <SignalIcons signals={l.signals} max={4} />
+              </span>
+              <small className="shrink-0 text-xs text-ink-muted">{timeAgo(l.last_activity_at)}</small>
             </span>
-            <small className="shrink-0 text-xs text-ink-muted">{timeAgo(l.last_activity_at)}</small>
-          </span>
-        </Link>
+          </Link>
+          {actions && <div className="absolute right-2 top-2">{actions(l)}</div>}
+        </div>
       )}
     />
   );

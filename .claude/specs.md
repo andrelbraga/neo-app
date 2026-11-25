@@ -176,3 +176,17 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
   - showroom e ponte passam o `convite` para a visita.
 - Testes: API com lint, unitários e integração (cobertura de `internal/` em 95,2%); app com 88 testes. Não foi conferido de ponta a ponta no navegador: o modo automático recusou a migration no banco de desenvolvimento.
 - Documentos compartilhados sincronizados: o `neo-api` recebeu ADR-0021, ADR-0022, P-16 e os textos da RN-03.15 e da ADR-0019, que só existiam no `neo-app`.
+
+## 24/11/2026 — Cliente editável e arquivável, só lista e mensagens por perfil e tom
+
+- ADR-0025, RN-03.17 a RN-03.20, RN-03.6 revista, P-19.
+- V11: `leads.profile` (moradia, investimento, veraneio ou vazio), `leads.archived_at` e `message_templates`.
+- API:
+  - `PATCH /api/me/leads/:id` edita nome, WhatsApp e perfil, com o WhatsApp único do cadastro e o evento `edicao`;
+  - `DELETE /api/me/leads/:id` arquiva e `POST .../restore` restaura; o arquivado sai da lista (`?arquivados=1` lista eles), do resumo, do feed e da comparação A × B; proposta nova do cliente tira do arquivo;
+  - `GET /api/me/message-templates` devolve os doze modelos; `PUT` e `DELETE /api/me/message-templates/:perfil/:tom` salvam ou voltam ao padrão.
+- App:
+  - quadro de arrastar removido (corretor e admin); lista com menu ⋮ (Abrir ficha, Editar, Mensagem no WhatsApp, Mover para, Arquivar ou Restaurar) e filtro Ativos | Arquivados;
+  - ficha com editar, arquivar ou restaurar, perfil e aviso de arquivado; "Mensagem no WhatsApp" escolhe perfil e tom e deixa editar o texto antes de abrir;
+  - "Meus modelos" (`/painel/mensagens`) para o corretor ajustar os textos, com `{nome}`, `{empreendimento}`, `{link}` e `{corretor}`.
+- Testes: API com lint, unitários e integração (cobertura de `internal/` em 95,3%); app com 96 testes. Não foi conferido no navegador.

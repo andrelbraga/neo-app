@@ -6,7 +6,7 @@ import { adminLeadService, myLeadService } from "../services/lead.service";
 import { LeadDetailPage } from "./LeadDetailPage";
 
 vi.mock("../services/lead.service", () => ({
-  myLeadService: { get: vi.fn(), setStage: vi.fn(), adjust: vi.fn(), list: vi.fn() },
+  myLeadService: { get: vi.fn(), setStage: vi.fn(), adjust: vi.fn(), list: vi.fn(), templates: vi.fn(), update: vi.fn(), archive: vi.fn(), restore: vi.fn() },
   adminLeadService: { get: vi.fn(), list: vi.fn() },
 }));
 
@@ -32,17 +32,61 @@ describe("LeadDetailPage", () => {
     expect(screen.getByText(/R\$\s?370\.000 · entrada de R\$\s?200\.000/)).toBeInTheDocument();
     const interest = screen.getByRole("region", { name: "Interesse" });
     expect(within(interest).getByText("Visitas").nextSibling).toHaveTextContent("2");
-    expect(screen.getByRole("link", { name: "Conversar no WhatsApp" }).getAttribute("href")).toContain("wa.me/5554977776666");
+    expect(screen.getAllByRole("button", { name: "Mensagem no WhatsApp" }).length).toBeGreaterThan(0);
   });
 
-  // RN-03.16: o cliente cadastrado pelo corretor recebe o convite com o link próprio dele.
-  it("no cliente cadastrado pelo corretor, o WhatsApp leva o convite", async () => {
-    my.get.mockResolvedValue({ ...leadDetailFixture, origin: "corretor", invite_code: "abc234" });
+  // RN-03.20: a mensagem começa no perfil do cliente; o corretor escolhe o tom e edita antes de abrir o WhatsApp.
+  it("monta a mensagem pelo perfil e tom, editável, com o convite do cliente cadastrado", async () => {
+    const user = userEvent.setup();
+    my.get.mockResolvedValue({ ...leadDetailFixture, origin: "corretor", invite_code: "abc234", profile: "investimento" });
+    my.templates.mockResolvedValue([
+      { profile: "investimento", tone: "proximo", body: "Oi, {nome}! {link}", custom: false },
+      { profile: "investimento", tone: "direto", body: "{nome}, invista: {link}", custom: true },
+      { profile: "geral", tone: "direto", body: "Geral {nome}", custom: false },
+    ]);
     openAsBroker();
-    const link = await screen.findByRole("link", { name: "Enviar convite no WhatsApp" });
-    expect(decodeURIComponent(link.getAttribute("href")!)).toContain("Olá, Maria! Separei para você o");
-    expect(decodeURIComponent(link.getAttribute("href")!)).toContain("?convite=abc234");
+    expect(await screen.findByText("Investimento")).toBeInTheDocument();
     expect(screen.getByText("Cadastrado por você em")).toBeInTheDocument();
+    await user.click(screen.getAllByRole("button", { name: "Mensagem no WhatsApp" })[0]);
+    const dialog = screen.getByRole("dialog", { name: "Mensagem para Maria" });
+    const text = within(dialog).getByLabelText("Mensagem");
+    await waitFor(() => expect(text).toHaveValue(`Oi, Maria! ${window.location.origin}/e/boa-vista-residencial/FAB-0427?convite=abc234`));
+    await user.click(within(dialog).getByRole("radio", { name: "Direto" }));
+    expect(text).toHaveValue(`Maria, invista: ${window.location.origin}/e/boa-vista-residencial/FAB-0427?convite=abc234`);
+    await user.selectOptions(within(dialog).getByLabelText("Perfil do cliente"), "geral");
+    expect(text).toHaveValue("Geral Maria");
+    await user.clear(text);
+    await user.type(text, "Texto meu");
+    expect(decodeURIComponent(within(dialog).getByRole("link", { name: "Abrir no WhatsApp" }).getAttribute("href")!)).toBe("https://wa.me/5554977776666?text=Texto meu");
+  });
+
+  // RN-03.18 e RN-03.19: editar e arquivar pela ficha.
+  it("edita nome, WhatsApp e perfil e arquiva o cliente", async () => {
+    const user = userEvent.setup();
+    my.update.mockResolvedValue({ ...leadDetailFixture, name: "Maria Souza" });
+    my.archive.mockResolvedValue({ ...leadDetailFixture, archived_at: "2026-11-24T10:00:00Z" });
+    openAsBroker();
+    await user.click(await screen.findByRole("button", { name: "Editar cliente" }));
+    const dialog = screen.getByRole("dialog", { name: "Editar cliente" });
+    await user.clear(within(dialog).getByLabelText("Nome do cliente"));
+    await user.type(within(dialog).getByLabelText("Nome do cliente"), "Maria Souza");
+    await user.selectOptions(within(dialog).getByLabelText("Perfil de compra"), "veraneio");
+    await user.click(within(dialog).getByRole("button", { name: "Salvar" }));
+    await waitFor(() => expect(my.update).toHaveBeenCalledWith("l1", { name: "Maria Souza", phone: "(54) 97777-6666", profile: "veraneio" }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Editar cliente" })).not.toBeInTheDocument());
+
+    await user.click(screen.getByRole("button", { name: "Arquivar cliente" }));
+    await waitFor(() => expect(my.archive).toHaveBeenCalledWith("l1"));
+  });
+
+  it("mostra o aviso e o restaurar no cliente arquivado", async () => {
+    const user = userEvent.setup();
+    my.get.mockResolvedValue({ ...leadDetailFixture, archived_at: "2026-11-24T10:00:00Z" });
+    my.restore.mockResolvedValue({ ...leadDetailFixture, archived_at: null });
+    openAsBroker();
+    expect(await screen.findByText(/Cliente arquivado em/)).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Restaurar cliente" }));
+    await waitFor(() => expect(my.restore).toHaveBeenCalledWith("l1"));
   });
 
   it("mostra as propostas formatadas e permite ajustar e enviar pelo WhatsApp", async () => {

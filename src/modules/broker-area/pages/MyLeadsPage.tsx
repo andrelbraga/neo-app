@@ -1,54 +1,35 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Columns3, List, Search, UserPlus } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Archive, Search, UserPlus, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { toast } from "sonner";
-import { apiErrorMessage } from "@/app/providers/api/client";
-import { KanbanBoard } from "@/modules/leads/components/KanbanBoard";
+import { LeadActionsMenu } from "@/modules/leads/components/LeadActionsMenu";
 import { LeadsTable } from "@/modules/leads/components/LeadParts";
-import { leadName, matchesLead, stageLabel, type Lead, type StageChange } from "@/modules/leads/model/lead.types";
+import { matchesLead } from "@/modules/leads/model/lead.types";
 import { myLeadService } from "@/modules/leads/services/lead.service";
 import { cn } from "@/shared/lib/cn";
-import { Button, PageHeader } from "@/shared/ui/ui";
+import { Button, EmptyState, PageHeader } from "@/shared/ui/ui";
 import { Skeleton } from "@/shared/ui/visuals";
 import { AddClientsDialog } from "../components/AddClientsDialog";
 
-/** Clientes do corretor no funil (quadro arrastável) ou em lista. Atualiza sozinho. */
+/** Clientes do corretor em lista, com o menu ⋮ por cliente (ADR-0025). Atualiza sozinho. */
 export function MyLeadsPage() {
-  const qc = useQueryClient();
   const [params, setParams] = useSearchParams();
-  const view = params.get("ver") === "lista" ? "lista" : "quadro";
+  const archived = params.get("ver") === "arquivados";
   const [q, setQ] = useState(params.get("q") ?? "");
   const [adding, setAdding] = useState(false);
   useEffect(() => setQ(params.get("q") ?? ""), [params]);
-  const key = ["my-leads"];
-  const leads = useQuery({ queryKey: key, queryFn: () => myLeadService.list(), refetchInterval: 10_000 });
-  const filtered = useMemo(() => (leads.data ?? []).filter((l) => matchesLead(l, q)), [leads.data, q]);
-
-  const move = useMutation({
-    mutationFn: ({ lead, change }: { lead: Lead; change: StageChange }) => myLeadService.setStage(lead.id, change),
-    onMutate: async ({ lead, change }) => {
-      await qc.cancelQueries({ queryKey: key });
-      const before = qc.getQueryData<Lead[]>(key);
-      qc.setQueryData<Lead[]>(key, (list) => list?.map((l) => (l.id === lead.id ? { ...l, stage: change.stage, sale_value: change.sale_value ?? null } : l)));
-      return { before };
-    },
-    onSuccess: (_, { lead, change }) => {
-      toast.success(`${leadName(lead)} → ${stageLabel[change.stage]}`);
-      qc.invalidateQueries({ queryKey: key });
-    },
-    onError: (e, _, ctx) => {
-      qc.setQueryData(key, ctx?.before);
-      toast.error(apiErrorMessage(e));
-    },
-    onSettled: () => qc.invalidateQueries({ queryKey: ["corretor", "summary"] }),
+  const leads = useQuery({
+    queryKey: ["my-leads", archived ? "arquivados" : "ativos"],
+    queryFn: () => myLeadService.list(archived ? { arquivados: "1" } : {}),
+    refetchInterval: 10_000,
   });
+  const filtered = useMemo(() => (leads.data ?? []).filter((l) => matchesLead(l, q)), [leads.data, q]);
 
   return (
     <>
       <PageHeader
         title="Meus clientes"
-        subtitle="Arraste o cartão ou use “Mover para”. Quem mandou proposta nova aparece em destaque."
+        subtitle="Use o menu ⋮ de cada cliente para editar, mandar mensagem, mudar de etapa ou arquivar. Quem mandou proposta nova aparece em destaque."
         action={
           <Button onClick={() => setAdding(true)}>
             <UserPlus size={16} /> Adicionar clientes
@@ -67,17 +48,20 @@ export function MyLeadsPage() {
             className="w-full rounded-full border border-line bg-white py-2.5 pl-10 pr-4 text-sm outline-none transition focus:border-teal focus:ring-4 focus:ring-teal-soft/40"
           />
         </label>
-        <div className="inline-flex rounded-full border border-line bg-white p-1" role="group" aria-label="Modo de exibição">
+        <div className="inline-flex rounded-full border border-line bg-white p-1" role="group" aria-label="Clientes ativos ou arquivados">
           {[
-            { id: "quadro", label: "Quadro", icon: Columns3 },
-            { id: "lista", label: "Lista", icon: List },
+            { id: "ativos", label: "Ativos", icon: Users },
+            { id: "arquivados", label: "Arquivados", icon: Archive },
           ].map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               type="button"
-              aria-pressed={view === id}
-              onClick={() => setParams(id === "lista" ? { ver: "lista" } : {})}
-              className={cn("inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition", view === id ? "bg-forest text-cream" : "text-ink-muted hover:text-forest")}
+              aria-pressed={(id === "arquivados") === archived}
+              onClick={() => setParams(id === "arquivados" ? { ver: "arquivados" } : {})}
+              className={cn(
+                "inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm transition",
+                (id === "arquivados") === archived ? "bg-forest text-cream" : "text-ink-muted hover:text-forest",
+              )}
             >
               <Icon size={15} /> {label}
             </button>
@@ -85,15 +69,18 @@ export function MyLeadsPage() {
         </div>
       </div>
       {leads.isPending ? (
-        <div className="grid gap-4 lg:grid-cols-4">
-          {[0, 1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-64" />
-          ))}
-        </div>
-      ) : view === "quadro" ? (
-        <KanbanBoard leads={filtered} basePath="/painel/clientes" onMove={(lead, change) => move.mutate({ lead, change })} />
+        <Skeleton className="h-64" />
       ) : (
-        <LeadsTable leads={filtered} basePath="/painel/clientes" />
+        <LeadsTable
+          leads={filtered}
+          basePath="/painel/clientes"
+          actions={(l) => <LeadActionsMenu lead={l} basePath="/painel/clientes" />}
+          empty={
+            archived ? (
+              <EmptyState title="Nenhum cliente arquivado" text="Arquivar tira o cliente da lista sem apagar nada; ele volta pelo menu ⋮." />
+            ) : undefined
+          }
+        />
       )}
     </>
   );
