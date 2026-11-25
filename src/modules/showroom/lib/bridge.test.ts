@@ -67,3 +67,86 @@ describe("chegada exclusiva da apresentação (ADR-0026)", () => {
     expect(screen.getByText("Que bom te ver de novo.")).toBeVisible();
   });
 });
+
+// Página parecida com a apresentação real: seções com chave, o 3D e o rodapé.
+const page = `
+  <section aria-labelledby="h-planta"><p class="eyebrow">Planta e visão 3D</p><h2 id="h-planta">Uma planta<br>para a sua vida</h2>
+    <button data-vis="apto3d"><span class="tile-img"></span><span class="tile-t">Planta 3D</span></button>
+    <div id="vapto"><p>Vista de cima</p></div><label>Hora <input></label></section>
+  <section aria-labelledby="h-sim"><h2 id="h-sim">Simulador</h2><p>Monte as <b>condições</b>.</p></section>
+  <footer class="foot"><p>Protótipo privado.</p></footer>`;
+
+describe("página editável pelo admin (ADR-0027)", () => {
+  beforeEach(() => {
+    document.head.innerHTML = "";
+    sessionStorage.clear();
+    localStorage.clear();
+  });
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("a página pública aplica a configuração publicada: seção oculta, 3D desligado e textos trocados", async () => {
+    document.body.innerHTML = page;
+    room.development = {
+      ...room.development,
+      page_config: {
+        sections: { "h-sim": { hidden: true }, chegada: { hidden: true } },
+        blocks: { "3d.apartamento": false },
+        texts: [
+          { section: "rodape", from: "Protótipo privado.", to: "Valores sujeitos a confirmação.\nConsulte o corretor." },
+          { section: "h-planta", from: "Planta e visão 3D", to: "" },
+        ],
+      },
+    } as typeof room.development;
+    run("Rodrigo");
+    await waitFor(() => expect(document.querySelector('[aria-labelledby="h-sim"]')).toHaveAttribute("data-neo-off"));
+    expect(document.querySelector('[data-vis="apto3d"]')).toHaveAttribute("data-neo-off");
+    expect(document.querySelector("#vapto")).toHaveAttribute("data-neo-off");
+    expect(document.querySelector("footer p")!.innerHTML).toBe("Valores sujeitos a confirmação.<br>Consulte o corretor.");
+    expect(document.querySelector(".eyebrow")).toHaveAttribute("data-neo-off");
+    await new Promise((r) => setTimeout(r, 20));
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+    delete (room.development as { page_config?: unknown }).page_config;
+  });
+
+  it("no editor (?cms=1) conta seções, textos e blocos, aplica ao vivo e avisa o texto clicado", async () => {
+    document.body.innerHTML = page;
+    window.history.pushState({}, "", "/showroom/boa-vista/index.html?cms=1&slug=bv");
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const posted: Record<string, unknown>[] = [];
+    const spy = vi.spyOn(window, "postMessage").mockImplementation((m: unknown) => void posted.push(m as Record<string, unknown>));
+    new Function(code)();
+    const outline = posted.find((m) => m.type === "outline")!.sections as { key: string; texts: { text: string }[]; blocks: { key: string }[] }[];
+    expect(outline.map((s) => s.key)).toEqual(["chegada", "h-planta", "h-sim", "rodape"]);
+    const planta = outline[1];
+    expect(planta.texts.map((t) => t.text)).toEqual(["Planta e visão 3D", "Uma planta\npara a sua vida", "Planta 3D", "Vista de cima"]);
+    expect(planta.blocks.map((b) => b.key)).toEqual(["3d.apartamento"]);
+    expect(outline[2].texts.map((t) => t.text)).toEqual(["Simulador", "Monte as condições."]);
+    expect(fetchMock).not.toHaveBeenCalled();
+
+    const send = (data: unknown) => window.dispatchEvent(new MessageEvent("message", { data, origin: window.location.origin, source: window }));
+    send({
+      source: "neo-cms",
+      type: "config",
+      config: { sections: { "h-sim": { hidden: true } }, blocks: {}, texts: [{ section: "h-planta", from: "Uma planta\npara a sua vida", to: "Sua planta" }] },
+    });
+    expect(document.querySelector('[aria-labelledby="h-sim"]')).toHaveAttribute("data-neo-off");
+    expect(document.querySelector("#h-planta")!.textContent).toBe("Sua planta");
+    send({ source: "neo-cms", type: "config", config: { sections: {}, blocks: {}, texts: [] } });
+    expect(document.querySelector('[aria-labelledby="h-sim"]')).not.toHaveAttribute("data-neo-off");
+    expect(document.querySelector("#h-planta")!.innerHTML).toBe("Uma planta<br>para a sua vida");
+
+    window.dispatchEvent(
+      new MessageEvent("message", {
+        data: { source: "neo-cms", type: "config", config: { sections: { "h-sim": { hidden: true } } } },
+        origin: "https://outro.site",
+        source: window,
+      }),
+    );
+    expect(document.querySelector('[aria-labelledby="h-sim"]')).not.toHaveAttribute("data-neo-off");
+
+    document.querySelector<HTMLElement>("footer p")!.click();
+    expect(posted.at(-1)).toMatchObject({ source: "neo-cms", type: "select", section: "rodape", from: "Protótipo privado." });
+    spy.mockRestore();
+  });
+});

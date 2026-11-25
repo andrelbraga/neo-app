@@ -1,5 +1,6 @@
 import { api } from "@/app/providers/api/client";
 import type { Development, DevelopmentRequest } from "../model/development.types";
+import type { PageConfig } from "../model/page";
 
 export const developmentService = {
   /** Os publicados, que o corretor pode ofertar. */
@@ -8,6 +9,8 @@ export const developmentService = {
   get: (id: string) => api.get<Development>(`/admin/developments/${id}`),
   create: (r: DevelopmentRequest) => api.post<Development>("/admin/developments", r),
   update: (id: string, r: DevelopmentRequest) => api.put<Development>(`/admin/developments/${id}`, r),
+  /** Publica a edição da página de apresentação (ADR-0027). */
+  savePage: (id: string, c: PageConfig) => api.put<Development>(`/admin/developments/${id}/page`, c),
 };
 
 /** Link exclusivo do corretor para um empreendimento (RN-02.1). */

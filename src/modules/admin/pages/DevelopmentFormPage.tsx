@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, LayoutTemplate, Plus, Trash2 } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -7,7 +7,7 @@ import { apiErrorMessage } from "@/app/providers/api/client";
 import { statusLabel, type DevelopmentRequest, type DevelopmentStatus } from "@/modules/developments/model/development.types";
 import { developmentService } from "@/modules/developments/services/development.service";
 import { Button, Card, Field, Loading, PageHeader } from "@/shared/ui/ui";
-import { inputClass } from "@/shared/ui/styles";
+import { buttonClass, inputClass } from "@/shared/ui/styles";
 
 const blank: DevelopmentRequest = {
   slug: "",
@@ -82,7 +82,16 @@ export function DevelopmentFormPage() {
       <Link to="/admin/empreendimentos" className="mb-4 inline-flex items-center gap-1 text-sm text-ink-muted hover:text-forest">
         <ArrowLeft size={15} /> Empreendimentos
       </Link>
-      <PageHeader title={id ? form.name || "Empreendimento" : "Novo empreendimento"} />
+      <PageHeader
+        title={id ? form.name || "Empreendimento" : "Novo empreendimento"}
+        action={
+          id && form.presentation_url ? (
+            <Link to={`/admin/empreendimentos/${id}/pagina`} className={buttonClass("outline")}>
+              <LayoutTemplate size={16} /> Editar página
+            </Link>
+          ) : undefined
+        }
+      />
       <form onSubmit={submit} className="space-y-4">
         <Card className="grid gap-4 sm:grid-cols-2">
           <Field id="d-name" label="Nome">

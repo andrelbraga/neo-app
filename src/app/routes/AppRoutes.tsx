@@ -1,3 +1,4 @@
+import { PageEditorPage } from "@/modules/admin/pages/PageEditorPage";
 import { Route, Routes } from "react-router-dom";
 import { PanelLayout } from "@/app/layout/PanelLayout";
 import { AdminHomePage } from "@/modules/admin/pages/AdminHomePage";
@@ -45,6 +46,7 @@ export function AppRoutes() {
             <Route path="empreendimentos" element={<DevelopmentsPage />} />
             <Route path="empreendimentos/novo" element={<DevelopmentFormPage />} />
             <Route path="empreendimentos/:id" element={<DevelopmentFormPage />} />
+            <Route path="empreendimentos/:id/pagina" element={<PageEditorPage />} />
             <Route path="profissionais" element={<BrokersPage />} />
             <Route path="usuarios" element={<UsersPage />} />
             <Route path="clientes" element={<AdminLeadsPage />} />

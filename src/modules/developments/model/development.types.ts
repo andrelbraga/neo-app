@@ -1,3 +1,5 @@
+import type { PageConfig } from "./page";
+
 export type DevelopmentStatus = "lancamento" | "em_obras" | "pronto";
 
 export const statusLabel: Record<DevelopmentStatus, string> = {
@@ -36,9 +38,11 @@ export interface Development {
   default_layout?: "a" | "b";
   gallery: Image[];
   highlights: Highlight[];
+  /** Edição da página de apresentação pelo admin (ADR-0027). */
+  page_config?: PageConfig;
   leads_count: number;
   created_at: string;
   updated_at: string;
 }
 
-export type DevelopmentRequest = Omit<Development, "id" | "developer_name" | "leads_count" | "created_at" | "updated_at">;
+export type DevelopmentRequest = Omit<Development, "id" | "developer_name" | "leads_count" | "created_at" | "updated_at" | "page_config">;
