@@ -184,10 +184,10 @@ describe("título do cartão da proposta e rodapé da apresentação", () => {
     await waitFor(() => expect(document.querySelector(".nct span")).toHaveTextContent("Faça sua proposta"));
   });
 
-  it.each(["index.html", "index-b.html"])("%s não tem os atalhos de demonstração no rodapé", (file) => {
+  it.each(["index.html", "index-b.html"])("%s não tem os atalhos de demonstração", (file) => {
     const html = readFileSync(resolve(dir, file), "utf8");
     expect(html).toContain("<span>Monte sua proposta personalizada</span>");
-    for (const text of ["dash-go\">", "synth-ribbon\">", "Evidências · Dev", "Testar convite personalizado", "Canal Neo360", "quatro dashboards"]) {
+    for (const text of ["dash-go\">", "synth-ribbon\">", "Evidências · Dev", "Testar convite personalizado", "Canal Neo360", "quatro dashboards", "referencia-", "Simulação livre anterior"]) {
       expect(html).not.toContain(text);
     }
   });

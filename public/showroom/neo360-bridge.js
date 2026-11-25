@@ -701,10 +701,6 @@
 
   /* ---------- página v11 (ADR-0021, ADR-0022): textos e envio ---------- */
   function adaptV11() {
-    // Atalhos para as referências do pacote, que não fazem parte do app.
-    document.querySelectorAll('a[href^="referencia-"]')
-      .forEach(function (el) { el.hidden = true; el.style.display = "none"; });
-
     // A página foi escrita como protótipo sem envio. Com a ponte, proposta e medição chegam ao
     // corretor; os avisos passam a dizer isso (RN-03.3, RN-03.8). O perfil e o chat estão fora da página (ADR-0022).
     var first = firstName();

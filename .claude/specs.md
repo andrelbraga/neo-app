@@ -248,7 +248,7 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 ## 25/11/2026 — Título do cartão da proposta e rodapé sem atalhos de demonstração
 
 - O cartão da proposta (layout A) mostrava "Seu contato, para {corretor} responder", texto que a ponte punha por cima do HTML. A troca saiu da ponte e fica "Monte sua proposta personalizada", o texto da página nos layouts A e B.
-- Rodapé sem os atalhos do protótipo: a faixa "SINTÉTICA · Ambiente de demonstração", "Central Neo360 · quatro dashboards" e "Evidências · Dev" (A) e "Dashboard" (B) saíram do HTML. A ponte deixou de esconder esses elementos e só esconde os links para `referencia-`.
+- Rodapé sem os atalhos do protótipo: a faixa "SINTÉTICA · Ambiente de demonstração", "Central Neo360 · quatro dashboards" e "Evidências · Dev" (A) e "Dashboard" (B) saíram do HTML. O link "Simulação livre anterior ↗" do resumo da proposta (A), que levava ao pacote antigo em `referencia-sites/`, também saiu. A ponte não precisa mais esconder nenhum desses elementos.
 - Editor da página (ADR-0027) em conformidade: o editor lê o HTML sem a ponte, então antes mostrava os atalhos na prévia e listava um título diferente do que o cliente via. Agora o editor e a página do cliente mostram o mesmo texto, e trocar o título no editor vale para o cliente.
 - "Testar convite personalizado" e "Canal Neo360" só existem no pacote v12 (`resources/`), não na apresentação do app.
-- Testes: `bridge.test.ts` (título mantido, troca do editor aplicada, rodapé de A e B sem atalhos); app com typecheck, lint e 118 testes.
+- Testes: `bridge.test.ts` (título mantido, troca do editor aplicada, A e B sem atalhos de demonstração); app com typecheck, lint e 118 testes.
