@@ -190,3 +190,7 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
   - ficha com editar, arquivar ou restaurar, perfil e aviso de arquivado; "Mensagem no WhatsApp" escolhe perfil e tom e deixa editar o texto antes de abrir;
   - "Meus modelos" (`/painel/mensagens`) para o corretor ajustar os textos, com `{nome}`, `{empreendimento}`, `{link}` e `{corretor}`.
 - Testes: API com lint, unitários e integração (cobertura de `internal/` em 95,3%); app com 96 testes. Não foi conferido no navegador.
+
+## 24/11/2026 — Correção: menu ⋮ da lista sem opções visíveis
+
+- O menu abria dentro da célula da tabela, que corta o que passa da borda (`truncate`), e ficava invisível. Agora abre num portal no `body`, com posição fixa junto ao botão; abre para cima quando falta espaço embaixo e fecha ao rolar ou redimensionar. Teste novo em `MyLeadsPage.test.tsx`.
