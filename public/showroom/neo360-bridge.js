@@ -422,8 +422,6 @@
         logo.replaceChildren(mark, label);
       }
     }
-    var dash = $(".dash-go");
-    if (dash) dash.hidden = true;
     try { parent.document.title = room.development.name + " · " + broker.name; } catch (e) {}
 
     addWhatsApp();
@@ -703,16 +701,11 @@
 
   /* ---------- página v11 (ADR-0021, ADR-0022): textos e envio ---------- */
   function adaptV11() {
-    // Atalhos para dashboards, evidências e referências do pacote, que não fazem parte do app.
-    document.querySelectorAll('.synth-ribbon, .dash-go, a[href^="referencia-"], a[href="dashboard.html"], a[href="evolucao.html"]')
-      .forEach(function (el) { el.hidden = true; el.style.display = "none"; });
-
     // A página foi escrita como protótipo sem envio. Com a ponte, proposta e medição chegam ao
     // corretor; os avisos passam a dizer isso (RN-03.3, RN-03.8). O perfil e o chat estão fora da página (ADR-0022).
     var first = firstName();
     var texts = [
       [".ndec > p:not([class])", "Ao registrar sua intenção, a proposta vai para " + first + " com seu nome e WhatsApp, e a conversa segue por lá. Nada aqui emite contrato ou reserva o imóvel."],
-      ["#negociar .ncard .nct span", "Seu contato, para " + first + " responder"],
       ["#negociar .nlegal", "O resumo pode ser copiado, exportado ou impresso por você. A proposta só vai para o corretor quando você registra sua intenção."],
       ["footer.foot p", "Informações fornecidas pela incorporadora. Valores, condições e imagens ilustrativas, sujeitos a confirmação. A proposta vai para o seu corretor quando você a envia; a medição da navegação, só com o seu aceite."],
     ];
