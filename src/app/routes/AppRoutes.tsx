@@ -10,6 +10,7 @@ import { ChangePasswordPage } from "@/modules/auth/pages/ChangePasswordPage";
 import { LoginPage } from "@/modules/auth/pages/LoginPage";
 import { SignupPage } from "@/modules/auth/pages/SignupPage";
 import { BrokerHomePage } from "@/modules/broker-area/pages/BrokerHomePage";
+import { MessageTemplatesPage } from "@/modules/broker-area/pages/MessageTemplatesPage";
 import { MyLeadsPage } from "@/modules/broker-area/pages/MyLeadsPage";
 import { ProfilePage } from "@/modules/broker-area/pages/ProfilePage";
 import { HomePage } from "@/modules/landing/pages/HomePage";
@@ -34,6 +35,7 @@ export function AppRoutes() {
             <Route index element={<BrokerHomePage />} />
             <Route path="clientes" element={<MyLeadsPage />} />
             <Route path="clientes/:id" element={<LeadDetailPage mode="corretor" />} />
+            <Route path="mensagens" element={<MessageTemplatesPage />} />
             <Route path="perfil" element={<ProfilePage />} />
           </Route>
         </Route>

@@ -1,5 +1,19 @@
 import { api } from "@/app/providers/api/client";
-import type { Activity, ApiProposal, ImportReport, Lead, LeadDetail, LeadFilter, NewClient, StageChange, Summary } from "../model/lead.types";
+import type {
+  Activity,
+  ApiProposal,
+  ImportReport,
+  Lead,
+  LeadDetail,
+  LeadFilter,
+  LeadUpdate,
+  MessageTemplate,
+  MessageTone,
+  NewClient,
+  StageChange,
+  Summary,
+  TemplateProfile,
+} from "../model/lead.types";
 
 function query(f: LeadFilter): string {
   const p = new URLSearchParams();
@@ -18,6 +32,15 @@ export const myLeadService = {
     api.post<ApiProposal>(`/me/leads/${id}/proposals`, body),
   summary: () => api.get<Summary>("/me/summary"),
   activity: () => api.get<Activity[]>("/me/activity"),
+  /** Edita nome, WhatsApp e perfil (RN-03.18). */
+  update: (id: string, u: LeadUpdate) => api.patch<Lead>(`/me/leads/${id}`, u),
+  /** "Excluir" é arquivar: nada se perde e dá para restaurar (RN-03.19). */
+  archive: (id: string) => api.delete<Lead>(`/me/leads/${id}`),
+  restore: (id: string) => api.post<Lead>(`/me/leads/${id}/restore`),
+  /** Modelos de mensagem do corretor, por perfil e tom (RN-03.20). */
+  templates: () => api.get<MessageTemplate[]>("/me/message-templates"),
+  saveTemplate: (profile: TemplateProfile, tone: MessageTone, body: string) => api.put<MessageTemplate>(`/me/message-templates/${profile}/${tone}`, { body }),
+  resetTemplate: (profile: TemplateProfile, tone: MessageTone) => api.delete<MessageTemplate>(`/me/message-templates/${profile}/${tone}`),
   /** Cadastra um cliente à mão (RN-03.16). */
   create: (c: NewClient) => api.post<Lead>("/me/leads", c),
   /** Planilha CSV de clientes: `dryRun` só confere; sem ele, cadastra as linhas válidas. */

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Bell, BellRing, Building2, Home, KeyRound, LayoutGrid, LogOut, Search, User, Users } from "lucide-react";
+import { Bell, BellRing, Building2, Home, KeyRound, LayoutGrid, LogOut, MessageSquareText, Search, User, Users } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { SeeAsSelect } from "@/modules/admin/components/SeeAsSelect";
@@ -14,6 +14,7 @@ import { ProfileMenu } from "./ProfileMenu";
 const brokerNav = [
   { to: "/painel", label: "Início", icon: Home, end: true },
   { to: "/painel/clientes", label: "Meus clientes", icon: Users, badge: true },
+  { to: "/painel/mensagens", label: "Meus modelos", icon: MessageSquareText },
   { to: "/painel/perfil", label: "Meu perfil", icon: User },
 ];
 

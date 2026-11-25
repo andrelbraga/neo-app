@@ -45,6 +45,7 @@ export const api = {
   put: async <T>(url: string, body?: unknown, headers?: Record<string, string>) =>
     (await axiosInstance.put<ApiResponse<T>>(url, body, { headers })).data.data,
   patch: async <T>(url: string, body?: unknown) => (await axiosInstance.patch<ApiResponse<T>>(url, body)).data.data,
+  delete: async <T>(url: string) => (await axiosInstance.delete<ApiResponse<T>>(url)).data.data,
 };
 
 export function apiErrorMessage(error: unknown, fallback = "Não foi possível concluir a operação."): string {

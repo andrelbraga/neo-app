@@ -45,6 +45,40 @@ export interface Lead {
   origin?: "link" | "corretor";
   /** Código do link de convite do cliente cadastrado pelo corretor. */
   invite_code?: string;
+  /** Perfil de compra (RN-03.17); vazio é "sem perfil". */
+  profile?: Profile;
+  /** Quando o corretor arquivou o cliente (RN-03.19); nulo nos ativos. */
+  archived_at?: string | null;
+}
+
+/** Perfis de compra que o corretor escolhe na ficha (RN-03.17). */
+export type Profile = "" | "moradia" | "investimento" | "veraneio";
+export const profiles: Profile[] = ["", "moradia", "investimento", "veraneio"];
+export const profileLabel: Record<Profile, string> = { "": "Sem perfil", moradia: "Moradia", investimento: "Investimento", veraneio: "Veraneio" };
+
+/** Tons das mensagens do WhatsApp (RN-03.20). */
+export type MessageTone = "formal" | "proximo" | "direto";
+export const tones: MessageTone[] = ["formal", "proximo", "direto"];
+export const toneLabel: Record<MessageTone, string> = { formal: "Formal", proximo: "Próximo", direto: "Direto" };
+
+/** Perfil dos modelos: "geral" vale para quem não tem perfil. */
+export type TemplateProfile = "geral" | Exclude<Profile, "">;
+export const templateProfiles: TemplateProfile[] = ["geral", "moradia", "investimento", "veraneio"];
+export const templateProfileLabel: Record<TemplateProfile, string> = { geral: "Sem perfil", moradia: "Moradia", investimento: "Investimento", veraneio: "Veraneio" };
+
+/** Modelo de mensagem: o texto do corretor (`custom`) ou o padrão. */
+export interface MessageTemplate {
+  profile: TemplateProfile;
+  tone: MessageTone;
+  body: string;
+  custom: boolean;
+}
+
+/** Edição do cliente pelo corretor (RN-03.18). */
+export interface LeadUpdate {
+  name: string;
+  phone: string;
+  profile: Profile;
 }
 
 /** Cliente que o corretor cadastra à mão (RN-03.16). */
@@ -150,6 +184,8 @@ export interface Activity {
 
 export interface LeadFilter {
   stage?: string;
+  /** "1" lista os arquivados (RN-03.19). */
+  arquivados?: string;
   development?: string;
   broker?: string;
 }
@@ -240,6 +276,12 @@ export function eventLabel(e: Pick<LeadEvent, "kind" | "data">): string {
       if (!antes) return "Deixou nome e WhatsApp";
       const old = [antes.nome, antes.whatsapp && formatPhone(antes.whatsapp)].filter(Boolean).join(" · ");
       return `Trocou nome ou WhatsApp (antes: ${old})`;
+    }
+    case "edicao": {
+      // Edição do corretor (RN-03.18): mostra o que era antes.
+      const antes = e.data.antes as { nome?: string; whatsapp?: string } | undefined;
+      const old = [antes?.nome, antes?.whatsapp && formatPhone(antes.whatsapp)].filter(Boolean).join(" · ");
+      return old ? `Você editou nome ou WhatsApp (antes: ${old})` : "Você editou o cliente";
     }
     case "proposta":
       return e.data.autorizou_contrato ? "Enviou proposta e pediu o contrato" : "Enviou uma proposta";

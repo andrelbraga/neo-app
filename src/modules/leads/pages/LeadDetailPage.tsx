@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight, CalendarDays, Clock3, FileSignature, MessageCircle, Phone, PencilLine, Plus, Star, X } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowRight, CalendarDays, Clock3, FileSignature, MessageCircle, Pencil, Phone, PencilLine, Plus, Star, Tag, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { cn } from "@/shared/lib/cn";
@@ -14,11 +14,13 @@ import { SignalIcons, StageBadge } from "../components/LeadParts";
 import { ProposalEditor } from "../components/ProposalEditor";
 import { ProposalSheet } from "../components/ProposalSheet";
 import { StageControl } from "../components/StageControl";
+import { useArchive } from "../hooks/useArchive";
 import { formatDuration, metricsOf, topActions } from "../model/journey";
-import { leadName } from "../model/lead.types";
+import { leadName, profileLabel } from "../model/lead.types";
 import { proposalsOf, type Proposal } from "../model/proposal";
 import { adminLeadService, myLeadService } from "../services/lead.service";
-import { inviteMessage } from "../model/invite";
+import { EditLeadDialog } from "../components/EditLeadDialog";
+import { MessageComposer } from "../components/MessageComposer";
 
 /** Informação com ícone num círculo branco, como as datas do pedido na referência de layout. */
 function InfoChip({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
@@ -60,6 +62,9 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
   const [tab, setTab] = useState<Tab>("resumo");
   const [filter, setFilter] = useState<JourneyFilter | undefined>();
   const [editing, setEditing] = useState<{ base?: Proposal } | null>(null);
+  // Edição do cliente e mensagem no WhatsApp com tom e perfil (ADR-0025).
+  const [dialog, setDialog] = useState<"editar" | "mensagem" | null>(null);
+  const archive = useArchive();
   const broker = mode === "corretor";
   const back = broker ? "/painel/clientes" : "/admin/clientes";
   const lead = useQuery({ queryKey: ["lead", mode, id], queryFn: () => (broker ? myLeadService.get(id) : adminLeadService.get(id)), refetchInterval: 15_000 });
@@ -83,7 +88,6 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
 
   const l = lead.data;
   const name = leadName(l);
-  const firstName = l.name.split(" ")[0];
   const proposals = proposalsOf(l.proposals ?? []);
   const numberOf = (pid: string | null) => (pid && proposals.some((p) => p.id === pid) ? proposals.length - proposals.findIndex((p) => p.id === pid) : undefined);
   const latest = proposals[0];
@@ -92,9 +96,6 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
     .filter((a) => a.key)
     .slice(0, 4);
   const wa = broker && l.phone ? (text: string) => waChat(l.phone, text) : undefined;
-  // Cliente cadastrado pelo corretor (RN-03.16): a primeira mensagem é o convite com o link próprio dele.
-  const invite = l.origin === "corretor" ? inviteMessage(l) : "";
-  const greeting = invite || `Olá, ${firstName}! Aqui é do ${l.development_name}. Vi que você conheceu o empreendimento pelo meu link.`;
   const tabs: { id: Tab; label: string; count?: number; alert?: boolean }[] = [
     { id: "resumo", label: "Resumo" },
     { id: "propostas", label: "Propostas", count: proposals.length, alert: l.new_proposals > 0 },
@@ -126,10 +127,25 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
             ))}
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            {wa && (
-              <a href={wa(greeting)} target="_blank" rel="noreferrer" aria-label="Chamar no WhatsApp" title="Chamar no WhatsApp" className={cn(iconBtn, "hidden sm:inline-flex")}>
-                <MessageCircle size={16} />
-              </a>
+            {broker && (
+              <>
+                <button type="button" onClick={() => setDialog("mensagem")} aria-label="Mensagem no WhatsApp" title="Mensagem no WhatsApp" className={cn(iconBtn, "hidden sm:inline-flex")}>
+                  <MessageCircle size={16} />
+                </button>
+                <button type="button" onClick={() => setDialog("editar")} aria-label="Editar cliente" title="Editar cliente" className={iconBtn}>
+                  <Pencil size={16} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => archive.mutate(l)}
+                  disabled={archive.isPending}
+                  aria-label={l.archived_at ? "Restaurar cliente" : "Arquivar cliente"}
+                  title={l.archived_at ? "Restaurar cliente" : "Arquivar cliente"}
+                  className={iconBtn}
+                >
+                  {l.archived_at ? <ArchiveRestore size={16} /> : <Archive size={16} />}
+                </button>
+              </>
             )}
             {l.phone && (
               <a href={`tel:+${l.phone}`} aria-label="Ligar" title={formatPhone(l.phone)} className={cn(iconBtn, "hidden sm:inline-flex")}>
@@ -143,6 +159,12 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
         </div>
 
         <div className="space-y-7 p-4 sm:p-6 lg:p-8">
+          {l.archived_at && (
+            <p role="status" className="rounded-2xl bg-cream px-4 py-3 text-sm text-ink">
+              Cliente arquivado em {formatDateTime(l.archived_at)}. Ele não aparece na lista nem nos números; propostas e histórico continuam aqui.
+              {broker && " Restaure pelo botão de arquivo no topo."}
+            </p>
+          )}
           <header className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_260px]">
             <div className="min-w-0">
               <h1 className="truncate text-3xl text-ink sm:text-[34px]">{name}</h1>
@@ -152,6 +174,11 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <StageBadge stage={l.stage} pill />
+                {l.profile && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-gold-soft px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.06em] text-gold" title="Perfil de compra">
+                    <Tag size={11} /> {profileLabel[l.profile]}
+                  </span>
+                )}
                 {l.layout && (
                   <span className="rounded-full bg-cream px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.06em] text-ink-muted" title="Layout da apresentação na primeira visita">
                     Layout {l.layout.toUpperCase()}
@@ -183,10 +210,10 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
                   <small className="mt-1 block text-xs text-ink-muted">O dono é quem trouxe o cliente primeiro (link ou cadastro) e não muda.</small>
                 </p>
               )}
-              {wa && (
-                <a href={wa(greeting)} target="_blank" rel="noreferrer" className={buttonClass("whatsapp", "mt-4 w-full px-3 py-2 text-xs")}>
-                  <MessageCircle size={14} /> {invite ? "Enviar convite no WhatsApp" : "Conversar no WhatsApp"}
-                </a>
+              {broker && (
+                <button type="button" onClick={() => setDialog("mensagem")} className={buttonClass("whatsapp", "mt-4 w-full px-3 py-2 text-xs")}>
+                  <MessageCircle size={14} /> Mensagem no WhatsApp
+                </button>
               )}
             </aside>
           </header>
@@ -303,6 +330,8 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
       </article>
 
       {editing && <ProposalEditor leadId={l.id} base={editing.base} onClose={() => setEditing(null)} onSaved={() => setTab("propostas")} />}
+      {dialog === "editar" && <EditLeadDialog lead={l} onClose={() => setDialog(null)} />}
+      {dialog === "mensagem" && <MessageComposer lead={l} onClose={() => setDialog(null)} />}
     </div>
   );
 }
