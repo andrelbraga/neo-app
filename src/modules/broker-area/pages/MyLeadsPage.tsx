@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Columns3, List, Search } from "lucide-react";
+import { Columns3, List, Search, UserPlus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
@@ -9,8 +9,9 @@ import { LeadsTable } from "@/modules/leads/components/LeadParts";
 import { leadName, matchesLead, stageLabel, type Lead, type StageChange } from "@/modules/leads/model/lead.types";
 import { myLeadService } from "@/modules/leads/services/lead.service";
 import { cn } from "@/shared/lib/cn";
-import { PageHeader } from "@/shared/ui/ui";
+import { Button, PageHeader } from "@/shared/ui/ui";
 import { Skeleton } from "@/shared/ui/visuals";
+import { AddClientsDialog } from "../components/AddClientsDialog";
 
 /** Clientes do corretor no funil (quadro arrastável) ou em lista. Atualiza sozinho. */
 export function MyLeadsPage() {
@@ -18,6 +19,7 @@ export function MyLeadsPage() {
   const [params, setParams] = useSearchParams();
   const view = params.get("ver") === "lista" ? "lista" : "quadro";
   const [q, setQ] = useState(params.get("q") ?? "");
+  const [adding, setAdding] = useState(false);
   useEffect(() => setQ(params.get("q") ?? ""), [params]);
   const key = ["my-leads"];
   const leads = useQuery({ queryKey: key, queryFn: () => myLeadService.list(), refetchInterval: 10_000 });
@@ -44,7 +46,16 @@ export function MyLeadsPage() {
 
   return (
     <>
-      <PageHeader title="Meus clientes" subtitle="Arraste o cartão ou use “Mover para”. Quem mandou proposta nova aparece em destaque." />
+      <PageHeader
+        title="Meus clientes"
+        subtitle="Arraste o cartão ou use “Mover para”. Quem mandou proposta nova aparece em destaque."
+        action={
+          <Button onClick={() => setAdding(true)}>
+            <UserPlus size={16} /> Adicionar clientes
+          </Button>
+        }
+      />
+      {adding && <AddClientsDialog onClose={() => setAdding(false)} />}
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <label className="relative min-w-[14rem] flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />

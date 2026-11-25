@@ -15,3 +15,8 @@ export const developmentService = {
 export function brokerLink(slug: string, code: string, origin = window.location.origin, layout?: "a" | "b"): string {
   return `${origin}/e/${slug}/${code}${layout ? `?layout=${layout}` : ""}`;
 }
+
+/** Link de convite de um cliente cadastrado pelo corretor (RN-03.16): o link exclusivo com o código do cliente. */
+export function inviteLink(slug: string, code: string, invite: string, origin = window.location.origin): string {
+  return `${brokerLink(slug, code, origin)}?convite=${encodeURIComponent(invite)}`;
+}

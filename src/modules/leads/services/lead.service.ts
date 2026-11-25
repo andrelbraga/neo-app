@@ -1,5 +1,5 @@
 import { api } from "@/app/providers/api/client";
-import type { Activity, ApiProposal, Lead, LeadDetail, LeadFilter, StageChange, Summary } from "../model/lead.types";
+import type { Activity, ApiProposal, ImportReport, Lead, LeadDetail, LeadFilter, NewClient, StageChange, Summary } from "../model/lead.types";
 
 function query(f: LeadFilter): string {
   const p = new URLSearchParams();
@@ -18,6 +18,16 @@ export const myLeadService = {
     api.post<ApiProposal>(`/me/leads/${id}/proposals`, body),
   summary: () => api.get<Summary>("/me/summary"),
   activity: () => api.get<Activity[]>("/me/activity"),
+  /** Cadastra um cliente à mão (RN-03.16). */
+  create: (c: NewClient) => api.post<Lead>("/me/leads", c),
+  /** Planilha CSV de clientes: `dryRun` só confere; sem ele, cadastra as linhas válidas. */
+  importCsv: (developmentId: string, file: File, dryRun: boolean) => {
+    const form = new FormData();
+    form.set("development_id", developmentId);
+    form.set("dry_run", String(dryRun));
+    form.set("file", file);
+    return api.post<ImportReport>("/me/leads/import", form, { "Content-Type": "multipart/form-data" });
+  },
 };
 
 /** Visão de todos os clientes no admin. Com `broker`, só os de um corretor ("ver como", RN-01.10). */
