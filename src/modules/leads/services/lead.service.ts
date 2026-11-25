@@ -41,6 +41,8 @@ export const myLeadService = {
   templates: () => api.get<MessageTemplate[]>("/me/message-templates"),
   saveTemplate: (profile: TemplateProfile, tone: MessageTone, body: string) => api.put<MessageTemplate>(`/me/message-templates/${profile}/${tone}`, { body }),
   resetTemplate: (profile: TemplateProfile, tone: MessageTone) => api.delete<MessageTemplate>(`/me/message-templates/${profile}/${tone}`),
+  /** Registra a mensagem que o corretor confirmou ter enviado pelo WhatsApp (RN-03.22); novo vai para em atendimento. */
+  messageSent: (id: string, body: { profile: TemplateProfile; tone: MessageTone }) => api.post<Lead>(`/me/leads/${id}/message-sent`, body),
   /** Cadastra um cliente à mão (RN-03.16). */
   create: (c: NewClient) => api.post<Lead>("/me/leads", c),
   /** Planilha CSV de clientes: `dryRun` só confere; sem ele, cadastra as linhas válidas. */

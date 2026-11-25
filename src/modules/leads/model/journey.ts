@@ -1,7 +1,10 @@
 import { eventLabel, readingTime, type LeadEvent } from "./lead.types";
 
-/** Clique "enviou a proposta" da página: repete o registro da proposta, que já aparece como evento próprio. */
-const redundant = (e: Pick<LeadEvent, "kind" | "data">) => e.kind === "acao" && e.data.chave === "enviou_proposta";
+/**
+ * Fora da jornada: o clique "enviou a proposta" da página, que repete o registro da proposta, e a mensagem
+ * enviada pelo corretor (RN-03.22), que não é visita do cliente.
+ */
+const redundant = (e: Pick<LeadEvent, "kind" | "data">) => (e.kind === "acao" && e.data.chave === "enviou_proposta") || e.kind === "mensagem_enviada";
 
 /** Tempo sem atividade que encerra uma visita, como a sessão do Google Analytics. */
 export const SESSION_GAP_MS = 30 * 60 * 1000;

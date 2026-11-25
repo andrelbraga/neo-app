@@ -6,7 +6,7 @@ import { adminLeadService, myLeadService } from "../services/lead.service";
 import { LeadDetailPage } from "./LeadDetailPage";
 
 vi.mock("../services/lead.service", () => ({
-  myLeadService: { get: vi.fn(), setStage: vi.fn(), adjust: vi.fn(), list: vi.fn(), templates: vi.fn(), update: vi.fn(), archive: vi.fn(), restore: vi.fn() },
+  myLeadService: { get: vi.fn(), setStage: vi.fn(), adjust: vi.fn(), list: vi.fn(), templates: vi.fn(), update: vi.fn(), archive: vi.fn(), restore: vi.fn(), messageSent: vi.fn() },
   adminLeadService: { get: vi.fn(), list: vi.fn() },
 }));
 
@@ -58,6 +58,13 @@ describe("LeadDetailPage", () => {
     await user.clear(text);
     await user.type(text, "Texto meu");
     expect(decodeURIComponent(within(dialog).getByRole("link", { name: "Abrir no WhatsApp" }).getAttribute("href")!)).toBe("https://wa.me/5554977776666?text=Texto meu");
+
+    // RN-03.22: depois de abrir o WhatsApp, o corretor confirma o envio, que fica registrado.
+    my.messageSent.mockResolvedValue(leadDetailFixture);
+    await user.click(within(dialog).getByRole("link", { name: "Abrir no WhatsApp" }));
+    await user.click(within(dialog).getByRole("button", { name: "Sim, enviei" }));
+    await waitFor(() => expect(my.messageSent).toHaveBeenCalledWith("l1", { profile: "geral", tone: "direto" }));
+    await waitFor(() => expect(screen.queryByRole("dialog", { name: "Mensagem para Maria" })).not.toBeInTheDocument());
   });
 
   // RN-03.18 e RN-03.19: editar e arquivar pela ficha.

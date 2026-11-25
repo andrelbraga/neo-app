@@ -23,6 +23,8 @@ describe("sessionsOf", () => {
     expect(s[1]).toMatchObject({ via: "", keyEvents: 1 });
     expect(s[2]).toMatchObject({ via: "ANA-0002", minutes: 2 });
     expect(sessionsOf([])).toEqual([]);
+    // RN-03.22: a mensagem do corretor não é visita do cliente.
+    expect(sessionsOf([ev(9, "mensagem_enviada", "2026-11-18T09:00:00Z", { perfil: "geral", tom: "formal" })])).toEqual([]);
   });
 });
 
