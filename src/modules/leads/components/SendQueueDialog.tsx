@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/shared/lib/cn";
 import { formatDayMonth } from "@/shared/lib/format";
 import { waChat } from "@/shared/lib/whatsapp";
@@ -11,43 +11,34 @@ import { fillTemplate, findTemplate, templateProfileOf } from "../model/message"
 import { myLeadService } from "../services/lead.service";
 
 /**
- * Fila de envio pelo WhatsApp (ADR-0028, RN-03.22). Sem a API do WhatsApp, a plataforma prepara a mensagem de
- * cada cliente (modelo do perfil dele no tom escolhido, com o link próprio) e abre o WhatsApp um por um; o
- * corretor envia lá e confirma aqui. A confirmação fica registrada e tira o cliente de "novo".
+ * Fila de envio pelo WhatsApp (ADR-0028, RN-03.22). O corretor marca os clientes na lista; aqui escolhe o tom.
+ * Sem a API do WhatsApp, a plataforma prepara a mensagem de cada cliente (modelo do perfil dele no tom escolhido,
+ * com o link próprio) e abre o WhatsApp um por um; o corretor envia lá e confirma aqui. A confirmação fica
+ * registrada e tira o cliente de "novo".
  */
-export function SendQueueDialog({ leads, onClose }: { leads: Lead[]; onClose: () => void }) {
+export function SendQueueDialog({ leads, onClose }: { leads: Lead[]; onClose: (sent: number) => void }) {
   const qc = useQueryClient();
-  const withPhone = useMemo(() => leads.filter((l) => l.phone), [leads]);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [tone, setTone] = useState<MessageTone>("proximo");
-  const [queue, setQueue] = useState<Lead[] | null>(null);
+  const [started, setStarted] = useState(false);
   const [sent, setSent] = useState(0);
 
   const close = () => {
     if (sent > 0) void qc.invalidateQueries({ queryKey: ["my-leads"] });
-    onClose();
+    onClose(sent);
   };
 
-  if (queue) {
+  if (started) {
     return (
-      <Dialog title="Enviar mensagens" onClose={close}>
-        <QueueRunner queue={queue} tone={tone} onSent={() => setSent((n) => n + 1)} sent={sent} onDone={close} />
+      <Dialog title="Enviar WhatsApp" onClose={close}>
+        <QueueRunner queue={leads} tone={tone} onSent={() => setSent((n) => n + 1)} sent={sent} onDone={close} />
       </Dialog>
     );
   }
 
-  const allOn = withPhone.length > 0 && withPhone.every((l) => selected.has(l.id));
-  const toggle = (id: string) =>
-    setSelected((s) => {
-      const next = new Set(s);
-      if (!next.delete(id)) next.add(id);
-      return next;
-    });
-
   return (
-    <Dialog title="Enviar mensagens" onClose={close}>
+    <Dialog title="Enviar WhatsApp" onClose={close}>
       <p className="text-sm text-ink-muted">
-        Escolha os clientes e o tom. Cada mensagem usa o seu modelo do perfil do cliente, com o link dele, e abre no WhatsApp para você enviar.
+        Escolha o tom. Cada mensagem usa o seu modelo do perfil do cliente, com o link dele, e abre no WhatsApp para você enviar.
       </p>
       <div className="mt-4 inline-flex rounded-full border border-line bg-white p-1" role="radiogroup" aria-label="Tom da mensagem">
         {tones.map((t) => (
@@ -64,30 +55,20 @@ export function SendQueueDialog({ leads, onClose }: { leads: Lead[]; onClose: ()
         ))}
       </div>
 
-      <div className="mt-4 flex items-center justify-between gap-3 border-b border-line pb-2">
-        <label className="inline-flex items-center gap-2 text-sm font-semibold text-ink">
-          <input type="checkbox" checked={allOn} onChange={() => setSelected(allOn ? new Set() : new Set(withPhone.map((l) => l.id)))} />
-          Selecionar todos ({withPhone.length})
-        </label>
-        {leads.length > withPhone.length && <small className="text-xs text-ink-muted">{leads.length - withPhone.length} sem WhatsApp ficam de fora</small>}
-      </div>
-      <ul className="max-h-72 divide-y divide-line overflow-y-auto" aria-label="Clientes para enviar">
-        {withPhone.map((l) => (
-          <li key={l.id}>
-            <label className="flex cursor-pointer items-center gap-3 py-2.5">
-              <input type="checkbox" checked={selected.has(l.id)} onChange={() => toggle(l.id)} aria-label={leadName(l)} />
-              <span className="min-w-0 flex-1">
-                <b className="block truncate text-sm text-ink">{leadName(l)}</b>
-                <span className="block truncate text-xs text-ink-muted">
-                  {l.development_name} · {templateProfileLabel[templateProfileOf(l)]}
-                </span>
+      <ul className="mt-4 max-h-72 divide-y divide-line overflow-y-auto border-y border-line" aria-label="Clientes da fila">
+        {leads.map((l) => (
+          <li key={l.id} className="flex items-center gap-3 py-2.5">
+            <span className="min-w-0 flex-1">
+              <b className="block truncate text-sm text-ink">{leadName(l)}</b>
+              <span className="block truncate text-xs text-ink-muted">
+                {l.development_name} · {templateProfileLabel[templateProfileOf(l)]}
               </span>
-              {l.last_message_at && (
-                <small className="shrink-0 rounded-full bg-gold-soft px-2 py-0.5 text-[11px] font-semibold text-gold">
-                  enviado em {formatDayMonth(l.last_message_at)}
-                </small>
-              )}
-            </label>
+            </span>
+            {l.last_message_at && (
+              <small className="shrink-0 rounded-full bg-gold-soft px-2 py-0.5 text-[11px] font-semibold text-gold">
+                enviado em {formatDayMonth(l.last_message_at)}
+              </small>
+            )}
           </li>
         ))}
       </ul>
@@ -96,8 +77,8 @@ export function SendQueueDialog({ leads, onClose }: { leads: Lead[]; onClose: ()
         Muitas mensagens iguais em sequência podem fazer o WhatsApp sinalizar o seu número. Personalize quando puder.
       </p>
       <div className="mt-4 flex justify-end">
-        <Button disabled={selected.size === 0} onClick={() => setQueue(withPhone.filter((l) => selected.has(l.id)))}>
-          <MessageCircle size={16} /> Começar ({selected.size})
+        <Button disabled={leads.length === 0} onClick={() => setStarted(true)}>
+          <MessageCircle size={16} /> Começar ({leads.length})
         </Button>
       </div>
     </Dialog>

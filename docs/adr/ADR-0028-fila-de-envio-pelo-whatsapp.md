@@ -27,7 +27,8 @@ Opção 2. Decisões do usuário (25/11/2026): a confirmação leva **novo → e
   - O evento é do corretor: não conta como atividade do cliente, não é sinal de interesse e não entra no feed ao vivo.
   - A lista e a ficha trazem `last_message_at`, o último envio confirmado.
 - **App:**
-  - "Enviar mensagens" em Meus clientes (ativos, com a busca aplicada): o corretor marca os clientes e o tom. Quem não tem WhatsApp fica de fora, com aviso.
+  - Em Meus clientes (ativos), cada cliente tem um checkbox, e o cabeçalho marca todos os visíveis. Quem não tem WhatsApp fica com o checkbox desligado. Com alguém marcado, aparece a barra "N selecionados · Limpar · Enviar WhatsApp". Mudar a busca ou a aba limpa a seleção. Pedido do usuário (25/11/2026): "Na lista dos clientes quero que tenha checkboxes e com a opção de enviar WhatsApp".
+  - "Enviar WhatsApp" abre a fila com os marcados: o corretor escolhe o tom e começa.
   - A fila mostra um cliente por vez, com a mensagem do modelo do perfil dele (RN-03.20) e o link próprio, editável. "Abrir no WhatsApp", depois "Sim, enviei", "Abrir de novo" ou "Pular". No fim, um resumo.
   - A mensagem avulsa da ficha e do menu ⋮ também pede a confirmação.
   - A mensagem enviada não entra na jornada do cliente (não é visita).

@@ -19,34 +19,39 @@ export function MyLeadsPage() {
   const [q, setQ] = useState(params.get("q") ?? "");
   const [adding, setAdding] = useState(false);
   const [sending, setSending] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   useEffect(() => setQ(params.get("q") ?? ""), [params]);
+  // Mudar a busca ou a aba limpa a seleção: só fica marcado o que está na tela.
+  useEffect(() => setSelected(new Set()), [q, archived]);
   const leads = useQuery({
     queryKey: ["my-leads", archived ? "arquivados" : "ativos"],
     queryFn: () => myLeadService.list(archived ? { arquivados: "1" } : {}),
     refetchInterval: 10_000,
   });
   const filtered = useMemo(() => (leads.data ?? []).filter((l) => matchesLead(l, q)), [leads.data, q]);
+  const chosen = useMemo(() => filtered.filter((l) => l.phone && selected.has(l.id)), [filtered, selected]);
 
   return (
     <>
       <PageHeader
         title="Meus clientes"
-        subtitle="Use o menu ⋮ de cada cliente para editar, mandar mensagem, mudar de etapa ou arquivar. Quem mandou proposta nova aparece em destaque."
+        subtitle="Marque clientes para enviar WhatsApp em sequência, ou use o menu ⋮ de cada um para editar, mandar mensagem, mudar de etapa ou arquivar. Quem mandou proposta nova aparece em destaque."
         action={
-          <div className="flex flex-wrap gap-2">
-            {!archived && (
-              <Button variant="outline" onClick={() => setSending(true)} disabled={filtered.length === 0}>
-                <MessageCircle size={16} /> Enviar mensagens
-              </Button>
-            )}
-            <Button onClick={() => setAdding(true)}>
-              <UserPlus size={16} /> Adicionar clientes
-            </Button>
-          </div>
+          <Button onClick={() => setAdding(true)}>
+            <UserPlus size={16} /> Adicionar clientes
+          </Button>
         }
       />
       {adding && <AddClientsDialog onClose={() => setAdding(false)} />}
-      {sending && <SendQueueDialog leads={filtered} onClose={() => setSending(false)} />}
+      {sending && (
+        <SendQueueDialog
+          leads={chosen}
+          onClose={(sent) => {
+            setSending(false);
+            if (sent > 0) setSelected(new Set());
+          }}
+        />
+      )}
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <label className="relative min-w-[14rem] flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
@@ -85,12 +90,30 @@ export function MyLeadsPage() {
           leads={filtered}
           basePath="/painel/clientes"
           actions={(l) => <LeadActionsMenu lead={l} basePath="/painel/clientes" />}
+          selection={archived ? undefined : { selected, onChange: setSelected }}
           empty={
             archived ? (
               <EmptyState title="Nenhum cliente arquivado" text="Arquivar tira o cliente da lista sem apagar nada; ele volta pelo menu ⋮." />
             ) : undefined
           }
         />
+      )}
+      {chosen.length > 0 && (
+        <div
+          role="region"
+          aria-label="Clientes selecionados"
+          className="sticky bottom-4 z-20 mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-forest px-5 py-3 text-cream shadow-lift"
+        >
+          <b className="text-sm">{chosen.length === 1 ? "1 selecionado" : `${chosen.length} selecionados`}</b>
+          <span className="flex gap-2">
+            <Button variant="ghost" className="text-cream hover:text-cream/80" onClick={() => setSelected(new Set())}>
+              Limpar
+            </Button>
+            <Button variant="whatsapp" onClick={() => setSending(true)}>
+              <MessageCircle size={16} /> Enviar WhatsApp
+            </Button>
+          </span>
+        </div>
       )}
     </>
   );

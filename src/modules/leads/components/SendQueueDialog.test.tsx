@@ -10,7 +10,6 @@ vi.mock("../services/lead.service", () => ({ myLeadService: { templates: vi.fn()
 const my = vi.mocked(myLeadService);
 const maria = { ...leadFixture, profile: "moradia" as const, last_message_at: "2026-11-20T15:00:00Z" };
 const joao = { ...leadFixture, id: "l2", name: "João Lima", phone: "54911112222", profile: "" as const, last_message_at: null };
-const semFone = { ...leadFixture, id: "l3", name: "Visitante", phone: "" };
 
 describe("SendQueueDialog (ADR-0028)", () => {
   beforeEach(() => {
@@ -22,18 +21,15 @@ describe("SendQueueDialog (ADR-0028)", () => {
     my.messageSent.mockResolvedValue(leadFixture);
   });
 
-  it("escolhe clientes e tom, abre um por um e registra só o que o corretor confirma", async () => {
+  it("mostra os clientes marcados, escolhe o tom, abre um por um e registra só o que o corretor confirma", async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();
-    renderPage(<SendQueueDialog leads={[maria, joao, semFone]} onClose={onClose} />);
+    renderPage(<SendQueueDialog leads={[maria, joao]} onClose={onClose} />);
 
-    const list = screen.getByRole("list", { name: "Clientes para enviar" });
-    expect(within(list).getAllByRole("checkbox")).toHaveLength(2);
-    expect(screen.getByText("1 sem WhatsApp ficam de fora")).toBeInTheDocument();
+    const list = screen.getByRole("list", { name: "Clientes da fila" });
+    expect(within(list).getAllByRole("listitem")).toHaveLength(2);
     expect(within(list).getByText("enviado em 20/11")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Começar/ })).toBeDisabled();
 
-    await user.click(screen.getByLabelText("Selecionar todos (2)"));
     await user.click(screen.getByRole("radio", { name: "Direto" }));
     await user.click(screen.getByRole("button", { name: "Começar (2)" }));
 
@@ -54,14 +50,13 @@ describe("SendQueueDialog (ADR-0028)", () => {
     expect(screen.getByText("1 mensagem enviada de 2.")).toBeInTheDocument();
     expect(my.messageSent).toHaveBeenCalledTimes(1);
     await user.click(screen.getByRole("button", { name: "Concluir" }));
-    expect(onClose).toHaveBeenCalled();
+    expect(onClose).toHaveBeenCalledWith(1);
   });
 
   it("avisa quando não consegue registrar e deixa abrir de novo", async () => {
     const user = userEvent.setup();
     my.messageSent.mockRejectedValue(new Error("rede"));
     renderPage(<SendQueueDialog leads={[maria]} onClose={vi.fn()} />);
-    await user.click(screen.getByLabelText("Maria"));
     await user.click(screen.getByRole("button", { name: "Começar (1)" }));
     await waitFor(() => expect(screen.getByLabelText("Mensagem")).not.toBeDisabled());
     await user.click(screen.getByRole("link", { name: "Abrir no WhatsApp" }));

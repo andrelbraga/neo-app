@@ -3,7 +3,7 @@ import { cn } from "@/shared/lib/cn";
 
 export interface Column<T> {
   key: string;
-  header: string;
+  header: ReactNode;
   /** Largura da coluna no desktop (ex.: "24%"). As larguras somadas devem dar 100%. */
   width: string;
   align?: "left" | "center" | "right";

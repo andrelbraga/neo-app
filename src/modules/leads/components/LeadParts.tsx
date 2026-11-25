@@ -64,9 +64,15 @@ export function NewProposalsBadge({ count }: { count: number }) {
   );
 }
 
+/** Seleção de clientes na lista (ADR-0028): só quem tem WhatsApp pode ser marcado. */
+export interface LeadSelection {
+  selected: Set<string>;
+  onChange: (next: Set<string>) => void;
+}
+
 /**
  * Lista de clientes: tabela no desktop, cartões no celular e no tablet. `showBroker` mostra o dono (visão do
- * admin); `actions` põe o menu ⋮ no fim da linha (corretor).
+ * admin); `actions` põe o menu ⋮ no fim da linha (corretor); `selection` põe um checkbox no começo (corretor).
  */
 export function LeadsTable({
   leads,
@@ -74,22 +80,25 @@ export function LeadsTable({
   showBroker = false,
   actions,
   empty,
+  selection,
 }: {
   leads: Lead[];
   basePath: string;
   showBroker?: boolean;
   actions?: (l: Lead) => ReactNode;
   empty?: ReactNode;
+  selection?: LeadSelection;
 }) {
   const navigate = useNavigate();
   if (leads.length === 0) {
     return empty ?? <EmptyState title="Nenhum cliente ainda" text="Quando alguém abrir um link, ele aparece aqui com o que viu na página." />;
   }
   const columns: Column<Lead>[] = [
+    ...(selection ? [selectColumn(leads, selection)] : []),
     {
       key: "cliente",
       header: "Cliente",
-      width: showBroker ? "26%" : "30%",
+      width: showBroker ? "26%" : selection ? "27%" : "30%",
       cell: (l) => (
         <span className="flex min-w-0 items-center gap-3">
           <Avatar name={leadName(l)} size="sm" />
@@ -137,7 +146,15 @@ export function LeadsTable({
       onRowClick={(l) => navigate(`${basePath}/${l.id}`)}
       card={(l) => (
         <div className="relative h-full">
-          <Link to={`${basePath}/${l.id}`} className={cn("card card-hover flex h-full flex-col gap-3 p-4", l.new_proposals > 0 && "ring-2 ring-rose-300")}>
+          {selection && (
+            <span className="absolute left-4 top-6 z-10">
+              <LeadCheckbox lead={l} selection={selection} />
+            </span>
+          )}
+          <Link
+            to={`${basePath}/${l.id}`}
+            className={cn("card card-hover flex h-full flex-col gap-3 p-4", selection && "pl-11", l.new_proposals > 0 && "ring-2 ring-rose-300")}
+          >
             <span className="flex min-w-0 items-start gap-3">
               <Avatar name={leadName(l)} size="sm" />
               <span className="min-w-0 flex-1">
@@ -168,4 +185,45 @@ export function LeadsTable({
       )}
     />
   );
+}
+
+function LeadCheckbox({ lead, selection }: { lead: Lead; selection: LeadSelection }) {
+  const toggle = () => {
+    const next = new Set(selection.selected);
+    if (!next.delete(lead.id)) next.add(lead.id);
+    selection.onChange(next);
+  };
+  return (
+    <input
+      type="checkbox"
+      className="size-4 accent-forest"
+      checked={selection.selected.has(lead.id)}
+      disabled={!lead.phone}
+      title={lead.phone ? undefined : "Sem WhatsApp cadastrado"}
+      aria-label={`Selecionar ${leadName(lead)}`}
+      onClick={(e) => e.stopPropagation()}
+      onKeyDown={(e) => e.stopPropagation()}
+      onChange={toggle}
+    />
+  );
+}
+
+function selectColumn(leads: Lead[], selection: LeadSelection): Column<Lead> {
+  const ids = leads.filter((l) => l.phone).map((l) => l.id);
+  const allOn = ids.length > 0 && ids.every((id) => selection.selected.has(id));
+  return {
+    key: "selecionar",
+    width: "44px",
+    header: (
+      <input
+        type="checkbox"
+        className="size-4 accent-forest"
+        checked={allOn}
+        disabled={ids.length === 0}
+        aria-label="Selecionar todos com WhatsApp"
+        onChange={() => selection.onChange(allOn ? new Set() : new Set(ids))}
+      />
+    ),
+    cell: (l) => <LeadCheckbox lead={l} selection={selection} />,
+  };
 }
