@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react";
+import { fireEvent, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { myLeadService } from "@/modules/leads/services/lead.service";
 import { leadDetailFixture, leadFixture } from "@/test/fixtures";
@@ -28,6 +28,17 @@ describe("MyLeadsPage (ADR-0025)", () => {
     expect(await screen.findByRole("table", { name: "Clientes" })).toBeInTheDocument();
     expect(screen.queryByRole("region", { name: /Etapa / })).not.toBeInTheDocument();
     expect(my.list).toHaveBeenCalledWith({});
+  });
+
+  // A célula da tabela corta o que passa da borda: o menu abre fora dela, preso ao botão.
+  it("abre o menu fora da tabela, com posição fixa, e fecha ao rolar a página", async () => {
+    const user = userEvent.setup();
+    open();
+    const menu = await menuOf(user);
+    expect(screen.getByRole("table", { name: "Clientes" })).not.toContainElement(menu);
+    expect(menu.style.position).toBe("fixed");
+    fireEvent.scroll(window);
+    await waitFor(() => expect(screen.queryByRole("menu")).not.toBeInTheDocument());
   });
 
   it("o menu ⋮ move de etapa sem abrir a ficha", async () => {
