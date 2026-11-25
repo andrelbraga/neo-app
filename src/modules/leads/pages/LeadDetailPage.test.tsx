@@ -35,6 +35,16 @@ describe("LeadDetailPage", () => {
     expect(screen.getByRole("link", { name: "Conversar no WhatsApp" }).getAttribute("href")).toContain("wa.me/5554977776666");
   });
 
+  // RN-03.16: o cliente cadastrado pelo corretor recebe o convite com o link próprio dele.
+  it("no cliente cadastrado pelo corretor, o WhatsApp leva o convite", async () => {
+    my.get.mockResolvedValue({ ...leadDetailFixture, origin: "corretor", invite_code: "abc234" });
+    openAsBroker();
+    const link = await screen.findByRole("link", { name: "Enviar convite no WhatsApp" });
+    expect(decodeURIComponent(link.getAttribute("href")!)).toContain("Olá, Maria! Separei para você o");
+    expect(decodeURIComponent(link.getAttribute("href")!)).toContain("?convite=abc234");
+    expect(screen.getByText("Cadastrado por você em")).toBeInTheDocument();
+  });
+
   it("mostra as propostas formatadas e permite ajustar e enviar pelo WhatsApp", async () => {
     const user = userEvent.setup();
     my.adjust.mockResolvedValue({ ...leadDetailFixture.proposals[0], id: "p3", author: "corretor", based_on: "p2" });

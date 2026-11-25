@@ -18,6 +18,7 @@ import { formatDuration, metricsOf, topActions } from "../model/journey";
 import { leadName } from "../model/lead.types";
 import { proposalsOf, type Proposal } from "../model/proposal";
 import { adminLeadService, myLeadService } from "../services/lead.service";
+import { inviteMessage } from "../model/invite";
 
 /** Informação com ícone num círculo branco, como as datas do pedido na referência de layout. */
 function InfoChip({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
@@ -91,7 +92,9 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
     .filter((a) => a.key)
     .slice(0, 4);
   const wa = broker && l.phone ? (text: string) => waChat(l.phone, text) : undefined;
-  const greeting = `Olá, ${firstName}! Aqui é do ${l.development_name}. Vi que você conheceu o empreendimento pelo meu link.`;
+  // Cliente cadastrado pelo corretor (RN-03.16): a primeira mensagem é o convite com o link próprio dele.
+  const invite = l.origin === "corretor" ? inviteMessage(l) : "";
+  const greeting = invite || `Olá, ${firstName}! Aqui é do ${l.development_name}. Vi que você conheceu o empreendimento pelo meu link.`;
   const tabs: { id: Tab; label: string; count?: number; alert?: boolean }[] = [
     { id: "resumo", label: "Resumo" },
     { id: "propostas", label: "Propostas", count: proposals.length, alert: l.new_proposals > 0 },
@@ -157,7 +160,11 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
                 <SignalIcons signals={l.signals} max={7} onSelect={(kind) => showActivity({ kind })} />
               </div>
               <dl className="mt-6 flex flex-wrap gap-x-8 gap-y-4">
-                <InfoChip icon={<CalendarDays size={16} />} label="Chegou em" value={formatDateTime(l.created_at)} />
+                <InfoChip
+                  icon={<CalendarDays size={16} />}
+                  label={l.origin === "corretor" ? (broker ? "Cadastrado por você em" : "Cadastrado pelo corretor em") : "Chegou em"}
+                  value={formatDateTime(l.created_at)}
+                />
                 <InfoChip icon={<Clock3 size={16} />} label="Última atividade" value={timeAgo(l.last_activity_at)} />
               </dl>
             </div>
@@ -173,12 +180,12 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
               {!broker && (
                 <p className="mt-3 border-t border-line pt-3 text-sm text-ink">
                   {l.broker_name} · {l.broker_code}
-                  <small className="mt-1 block text-xs text-ink-muted">O dono é o corretor do link da primeira visita e não muda.</small>
+                  <small className="mt-1 block text-xs text-ink-muted">O dono é quem trouxe o cliente primeiro (link ou cadastro) e não muda.</small>
                 </p>
               )}
               {wa && (
                 <a href={wa(greeting)} target="_blank" rel="noreferrer" className={buttonClass("whatsapp", "mt-4 w-full px-3 py-2 text-xs")}>
-                  <MessageCircle size={14} /> Conversar no WhatsApp
+                  <MessageCircle size={14} /> {invite ? "Enviar convite no WhatsApp" : "Conversar no WhatsApp"}
                 </a>
               )}
             </aside>

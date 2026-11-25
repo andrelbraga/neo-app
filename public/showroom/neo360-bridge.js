@@ -19,6 +19,8 @@
   var API = (Q.get("api") || "/api").replace(/\/$/, "");
   // Layout da apresentação que o cliente viu (ADR-0019): A é a página da entrega v11 (padrão), B a anterior (ADR-0022).
   var LAYOUT = Q.get("layout") === "b" ? "b" : "a";
+  // Código do link de convite do cliente cadastrado pelo corretor (RN-03.16): a visita cai na ficha dele.
+  var CONVITE = Q.get("convite") || "";
   var layoutSent = false;
   if (!SLUG || !CODE) return;
 
@@ -472,7 +474,7 @@
       fillBroker(room);
       if (V11) adaptV11();
       token = storage(true);
-      return call("POST", "/public/showroom/" + encodeURIComponent(SLUG) + "/" + encodeURIComponent(CODE) + "/visit?layout=" + LAYOUT);
+      return call("POST", "/public/showroom/" + encodeURIComponent(SLUG) + "/" + encodeURIComponent(CODE) + "/visit?layout=" + LAYOUT + (CONVITE ? "&convite=" + encodeURIComponent(CONVITE) : ""));
     })
     .then(function (v) {
       token = v.token;

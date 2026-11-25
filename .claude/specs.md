@@ -161,3 +161,18 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - `railway config apply` aplicado nos dois serviços. O plan seguinte diz "already up to date", e os serviços foram publicados de novo a partir do GitHub (`f266fd6` e `bb99460`).
 - Para mudar build ou health check, edite o arquivo e rode `railway config plan` e depois `railway config apply`. Na API, rode com `GOARCH=arm64`, porque este ambiente tem `GOARCH=amd64` global.
 - A pasta `neo-app` estava ligada ao projeto `ae2aa453` e foi religada ao `8d27127a` (production).
+## 24/11/2026 — Clientes cadastrados pelo corretor (à mão ou por CSV)
+
+- ADR-0024, RN-03.16, RN-03.1 revista, P-18. Ponto de partida: a tela de convites da v12 (`dashboard.html#convites`).
+- V10: `leads.origin` (`link` ou `corretor`) e `leads.invite_code`.
+- API:
+  - `POST /api/me/leads` cadastra um cliente;
+  - `POST /api/me/leads/import` (multipart `file`, `development_id`, `dry_run`) confere ou cadastra a planilha, com a situação de cada linha: pronta, sem nome, WhatsApp inválido, repetida na planilha, já é seu cliente ou já cadastrada no empreendimento;
+  - a visita aceita `?convite=`: o navegador ganha um token ligado à ficha cadastrada (cadastro juntado, como na ADR-0016), e a primeira visita grava o layout.
+- WhatsApp normalizado sem o 55 do país. Um WhatsApp já cadastrado no empreendimento é recusado sem dizer de quem é. A comparação A × B só conta o cliente cadastrado depois que ele abre o link.
+- App:
+  - "Adicionar clientes" em Meus clientes, com as abas "Um cliente" e "Planilha CSV", conferência antes de cadastrar e modelo para baixar;
+  - na ficha do cliente cadastrado, "Enviar convite no WhatsApp" com o link próprio dele e "Cadastrado por você em";
+  - showroom e ponte passam o `convite` para a visita.
+- Testes: API com lint, unitários e integração (cobertura de `internal/` em 95,2%); app com 88 testes. Não foi conferido de ponta a ponta no navegador: o modo automático recusou a migration no banco de desenvolvimento.
+- Documentos compartilhados sincronizados: o `neo-api` recebeu ADR-0021, ADR-0022, P-16 e os textos da RN-03.15 e da ADR-0019, que só existiam no `neo-app`.

@@ -41,6 +41,46 @@ export interface Lead {
   outcome_note: string;
   /** Layout da apresentação na primeira visita (ADR-0019). */
   layout?: "a" | "b";
+  /** "link": chegou pelo link do corretor; "corretor": o corretor cadastrou (RN-03.16). */
+  origin?: "link" | "corretor";
+  /** Código do link de convite do cliente cadastrado pelo corretor. */
+  invite_code?: string;
+}
+
+/** Cliente que o corretor cadastra à mão (RN-03.16). */
+export interface NewClient {
+  development_id: string;
+  name: string;
+  phone: string;
+}
+
+export type ImportStatus = "ok" | "nome_invalido" | "telefone_invalido" | "repetido_no_arquivo" | "ja_e_seu" | "ja_cadastrado";
+
+/** Situação de cada linha da planilha, em português, para a conferência. */
+export const importStatusLabel: Record<ImportStatus, string> = {
+  ok: "Pronto para cadastrar",
+  nome_invalido: "Sem nome",
+  telefone_invalido: "WhatsApp inválido: use DDD e número",
+  repetido_no_arquivo: "Repetido na planilha",
+  ja_e_seu: "Já é seu cliente",
+  ja_cadastrado: "Já cadastrado neste empreendimento",
+};
+
+export interface ImportRow {
+  line: number;
+  name: string;
+  phone: string;
+  status: ImportStatus;
+  lead_id?: string;
+}
+
+/** Conferência (dry_run) ou resultado da importação da planilha. */
+export interface ImportReport {
+  dry_run: boolean;
+  total: number;
+  valid: number;
+  created: number;
+  rows: ImportRow[];
 }
 
 export interface LeadEvent {

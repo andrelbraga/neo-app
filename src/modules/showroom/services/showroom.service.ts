@@ -47,7 +47,9 @@ const header = (token: string) => ({ "X-Visitor-Token": token });
 
 export const showroomService = {
   get: (slug: string, code: string) => api.get<Showroom>(`/public/showroom/${slug}/${code}`),
-  visit: (slug: string, code: string, token: string) => api.post<Visit>(`/public/showroom/${slug}/${code}/visit`, undefined, header(token)),
+  /** `invite` é o código do link de convite do cliente cadastrado pelo corretor (RN-03.16). */
+  visit: (slug: string, code: string, token: string, invite = "") =>
+    api.post<Visit>(`/public/showroom/${slug}/${code}/visit${invite ? `?convite=${encodeURIComponent(invite)}` : ""}`, undefined, header(token)),
   track: (token: string, kind: PageEvent, data: Record<string, unknown> = {}) =>
     api.post<{ ok: boolean }>("/public/lead/events", { kind, data }, header(token)),
   contact: (token: string, name: string, phone: string) => api.put<Visit>("/public/lead/contact", { name, phone }, header(token)),

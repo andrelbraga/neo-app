@@ -45,6 +45,8 @@ export function ShowroomPage() {
   const [search] = useSearchParams();
   const room = useQuery({ queryKey: ["showroom", slug, code], queryFn: () => showroomService.get(slug, code), retry: false });
   const presentation = room.data?.development.presentation_url;
+  // Link de convite do cliente cadastrado pelo corretor (RN-03.16): a visita cai na ficha dele.
+  const invite = search.get("convite") ?? "";
 
   if (presentation) {
     // Página própria do empreendimento (ADR-0008): a ponte dentro dela abre a visita e grava a proposta.
@@ -52,18 +54,18 @@ export function ShowroomPage() {
     return (
       <iframe
         title={room.data!.development.name}
-        src={presentationSrc(presentation, layoutFrom(search.get("layout") ?? room.data!.development.default_layout ?? null), { slug, code, api: API_BASE_URL })}
+        src={presentationSrc(presentation, layoutFrom(search.get("layout") ?? room.data!.development.default_layout ?? null), { slug, code, api: API_BASE_URL, ...(invite ? { convite: invite } : {}) })}
         className="fixed inset-0 h-[100dvh] w-full border-0"
         allow="fullscreen; xr-spatial-tracking; clipboard-write"
       />
     );
   }
-  return <TemplateShowroom room={room} slug={slug} code={code} />;
+  return <TemplateShowroom room={room} slug={slug} code={code} invite={invite} />;
 }
 
 /** Modelo padrão do showroom, para empreendimentos sem página própria. */
-function TemplateShowroom({ room, slug, code }: { room: UseQueryResult<Showroom>; slug: string; code: string }) {
-  const { visit, setVisit, track } = useVisit(slug, code, room.isSuccess);
+function TemplateShowroom({ room, slug, code, invite }: { room: UseQueryResult<Showroom>; slug: string; code: string; invite: string }) {
+  const { visit, setVisit, track } = useVisit(slug, code, room.isSuccess, invite);
   const [tourOpen, setTourOpen] = useState(false);
   const [photo, setPhoto] = useState<Image | null>(null);
   const [name, setName] = useState("");

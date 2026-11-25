@@ -38,14 +38,14 @@ describe("ShowroomPage", () => {
     expect(await screen.findByRole("heading", { name: "Invista em Gramado" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "Fabiano Souza" })).toBeInTheDocument();
     expect(screen.getByText("54 m²")).toBeInTheDocument();
-    await waitFor(() => expect(svc.visit).toHaveBeenCalledWith("boa-vista-residencial", "FAB-0427", ""));
+    await waitFor(() => expect(svc.visit).toHaveBeenCalledWith("boa-vista-residencial", "FAB-0427", "", ""));
     await waitFor(() => expect(visitorToken.get("boa-vista-residencial")).toBe("tok-1"));
   });
 
   it("volta com o mesmo token na segunda visita", async () => {
     visitorToken.set("boa-vista-residencial", "tok-antigo");
     open();
-    await waitFor(() => expect(svc.visit).toHaveBeenCalledWith("boa-vista-residencial", "FAB-0427", "tok-antigo"));
+    await waitFor(() => expect(svc.visit).toHaveBeenCalledWith("boa-vista-residencial", "FAB-0427", "tok-antigo", ""));
   });
 
   it("registra o tour 3D e o clique no WhatsApp", async () => {
@@ -106,6 +106,19 @@ describe("ShowroomPage", () => {
     expect(src.searchParams.get("code")).toBe("FAB-0427");
     expect(src.searchParams.get("api")).toContain("/api");
     expect(svc.visit).not.toHaveBeenCalled();
+  });
+
+  // RN-03.16: o link de convite leva o código do cliente cadastrado para a visita.
+  it("passa o código do convite para a visita e para a apresentação", async () => {
+    renderPage(<ShowroomPage />, { path: "/e/:slug/:code", route: "/e/boa-vista-residencial/FAB-0427?convite=abc234" });
+    await waitFor(() => expect(svc.visit).toHaveBeenCalledWith("boa-vista-residencial", "FAB-0427", "", "abc234"));
+  });
+
+  it("leva o convite à apresentação própria do empreendimento", async () => {
+    svc.get.mockResolvedValue({ development: { ...developmentFixture, presentation_url: "/showroom/boa-vista/index.html" }, broker });
+    renderPage(<ShowroomPage />, { path: "/e/:slug/:code", route: "/e/boa-vista-residencial/FAB-0427?convite=abc234" });
+    const src = new URL((await screen.findByTitle("Boa Vista Residencial")).getAttribute("src")!, "http://x");
+    expect(src.searchParams.get("convite")).toBe("abc234");
   });
 
   it("avisa quando o link não existe", async () => {
