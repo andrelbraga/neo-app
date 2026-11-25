@@ -154,6 +154,13 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
   - o seletor mostra só o nome;
   - os rótulos `h2` em caixa alta da ficha ficam sem serifa.
 
+## 24/11/2026 — Configuração do Railway como código (IaC)
+
+- O `railway.json` (obsoleto a partir de 01/12/2026) saiu dos dois repositórios. A API passou a usar `.railway/railway.go`, um módulo Go próprio que não toca o `go.mod` da API. O app passou a usar `.railway/railway.ts`, com o pacote `railway` como dependência de desenvolvimento. ADR-0018 atualizada.
+- O arquivo repete o que valia: build pelo Dockerfile, health check (`/api/health` com 60 s na API e `/` com 30 s no app) e uma réplica em `iad`. Nenhum valor de variável fica no repositório: a API preserva `ALLOWED_ORIGINS`, `APP_ENV`, `DATABASE_URL`, `DB_SCHEMA` e `JWT_SECRET` pelo nome, e o app deixa as variáveis fora do arquivo.
+- `railway config apply` aplicado nos dois serviços. O plan seguinte diz "already up to date", e os serviços foram publicados de novo a partir do GitHub (`f266fd6` e `bb99460`).
+- Para mudar build ou health check, edite o arquivo e rode `railway config plan` e depois `railway config apply`. Na API, rode com `GOARCH=arm64`, porque este ambiente tem `GOARCH=amd64` global.
+- A pasta `neo-app` estava ligada ao projeto `ae2aa453` e foi religada ao `8d27127a` (production).
 ## 24/11/2026 — Clientes cadastrados pelo corretor (à mão ou por CSV)
 
 - ADR-0024, RN-03.16, RN-03.1 revista, P-18. Ponto de partida: a tela de convites da v12 (`dashboard.html#convites`).
