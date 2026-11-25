@@ -6,7 +6,7 @@ import { renderPage } from "@/test/render";
 import { MyLeadsPage } from "./MyLeadsPage";
 
 vi.mock("@/modules/leads/services/lead.service", () => ({
-  myLeadService: { list: vi.fn(), get: vi.fn(), setStage: vi.fn(), archive: vi.fn(), restore: vi.fn(), update: vi.fn(), templates: vi.fn() },
+  myLeadService: { list: vi.fn(), get: vi.fn(), setStage: vi.fn(), archive: vi.fn(), restore: vi.fn(), update: vi.fn(), templates: vi.fn(), messageSent: vi.fn() },
 }));
 
 const my = vi.mocked(myLeadService);
@@ -89,5 +89,21 @@ describe("MyLeadsPage (ADR-0025)", () => {
     my.list.mockResolvedValue([]);
     open("/painel/clientes?ver=arquivados");
     expect(await screen.findByText("Nenhum cliente arquivado")).toBeInTheDocument();
+  });
+
+  // ADR-0028: a fila de envio parte da lista de ativos, com a busca aplicada.
+  it("Enviar mensagens abre a fila com os clientes da lista", async () => {
+    const user = userEvent.setup();
+    my.templates.mockResolvedValue([]);
+    open();
+    await user.click(await screen.findByRole("button", { name: "Enviar mensagens" }));
+    const dialog = screen.getByRole("dialog", { name: "Enviar mensagens" });
+    expect(within(dialog).getByLabelText("Maria")).toBeInTheDocument();
+  });
+
+  it("arquivados não têm fila de envio", async () => {
+    open("/painel/clientes?ver=arquivados");
+    await screen.findByRole("table", { name: "Clientes" });
+    expect(screen.queryByRole("button", { name: "Enviar mensagens" })).not.toBeInTheDocument();
   });
 });

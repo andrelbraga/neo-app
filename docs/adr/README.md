@@ -31,3 +31,4 @@ Decisões de arquitetura e produto no formato MADR ([template](template.md)).
 | [ADR-0025](ADR-0025-crud-do-cliente-e-mensagens-por-perfil.md) | Cliente editável e arquivável, lista no lugar do quadro e mensagens do WhatsApp por perfil e tom | aceita |
 | [ADR-0026](ADR-0026-chegada-exclusiva-do-cliente.md) | A apresentação abre com um convite pessoal ao cliente (saudação pelo nome, corretor e empreendimento) | aceita |
 | [ADR-0027](ADR-0027-editor-da-pagina-de-apresentacao.md) | Editor da página de apresentação no admin: seções, blocos (3D) e textos, com prévia ao vivo e publicar | aceita |
+| [ADR-0028](ADR-0028-fila-de-envio-pelo-whatsapp.md) | Fila de envio pelo WhatsApp sem a API da Meta: o corretor escolhe os clientes, envia um por um e confirma | aceita |

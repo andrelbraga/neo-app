@@ -18,6 +18,13 @@ export function formatDateTime(iso: string): string {
   return dateTime.format(new Date(iso));
 }
 
+const dayMonth = new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "2-digit", timeZone: "America/Sao_Paulo" });
+
+/** "24/11". */
+export function formatDayMonth(iso: string): string {
+  return dayMonth.format(new Date(iso));
+}
+
 /** "agora", "há 5 min", "há 3 h", "há 2 dias". */
 export function timeAgo(iso: string, now = Date.now()): string {
   const min = Math.floor((now - new Date(iso).getTime()) / 60_000);

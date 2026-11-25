@@ -1,11 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { cn } from "@/shared/lib/cn";
 import { waChat } from "@/shared/lib/whatsapp";
 import { buttonClass, inputClass } from "@/shared/ui/styles";
-import { Dialog, Field } from "@/shared/ui/ui";
+import { Button, Dialog, Field } from "@/shared/ui/ui";
 import { leadName, templateProfileLabel, templateProfiles, toneLabel, tones, type Lead, type MessageTone, type TemplateProfile } from "../model/lead.types";
 import { fillTemplate, findTemplate, templateProfileOf } from "../model/message";
 import { myLeadService } from "../services/lead.service";
@@ -13,7 +13,7 @@ import { myLeadService } from "../services/lead.service";
 /**
  * Mensagem para o cliente no WhatsApp (RN-03.20). Começa no perfil do cliente; o corretor escolhe o tom, pode
  * trocar o perfil desta mensagem e editar o texto antes de abrir o WhatsApp. A edição vale só para este envio;
- * os modelos ficam em "Meus modelos".
+ * os modelos ficam em "Meus modelos". Depois de abrir o WhatsApp, o corretor confirma o envio (RN-03.22).
  */
 export function MessageComposer({ lead, onClose }: { lead: Lead; onClose: () => void }) {
   const templates = useQuery({
@@ -23,6 +23,16 @@ export function MessageComposer({ lead, onClose }: { lead: Lead; onClose: () => 
   const [profile, setProfile] = useState<TemplateProfile>(templateProfileOf(lead));
   const [tone, setTone] = useState<MessageTone>("proximo");
   const [text, setText] = useState("");
+  const [opened, setOpened] = useState(false);
+  const qc = useQueryClient();
+  const confirm = useMutation({
+    mutationFn: () => myLeadService.messageSent(lead.id, { profile, tone }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: ["my-leads"] });
+      void qc.invalidateQueries({ queryKey: ["lead", "corretor", lead.id] });
+      onClose();
+    },
+  });
   const body = findTemplate(templates.data, profile, tone)?.body;
   useEffect(() => {
     if (body !== undefined) setText(fillTemplate(body, lead));
@@ -65,24 +75,39 @@ export function MessageComposer({ lead, onClose }: { lead: Lead; onClose: () => 
           disabled={templates.isPending}
         />
       </Field>
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-        <Link to="/painel/mensagens" className="text-sm font-semibold text-forest hover:underline">
-          Editar meus modelos
-        </Link>
-        {lead.phone ? (
-          <a
-            href={waChat(lead.phone, text)}
-            target="_blank"
-            rel="noreferrer"
-            className={buttonClass("whatsapp", !text.trim() ? "pointer-events-none opacity-50" : undefined)}
-            onClick={onClose}
-          >
-            <MessageCircle size={16} /> Abrir no WhatsApp
-          </a>
-        ) : (
-          <p className="text-sm text-ink-muted">Este cliente ainda não tem WhatsApp. Edite o cliente para incluir.</p>
-        )}
-      </div>
+      {opened ? (
+        <div className="mt-5 rounded-xl border border-line bg-cream p-4" role="group" aria-label="Confirmar envio">
+          <b className="block text-sm text-ink">Enviou a mensagem para {leadName(lead)}?</b>
+          {confirm.isError && <p className="mt-1 text-sm text-rose-700">Não deu para registrar. Tente de novo.</p>}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button onClick={() => confirm.mutate()} disabled={confirm.isPending}>
+              Sim, enviei
+            </Button>
+            <Button variant="ghost" onClick={onClose}>
+              Não enviei
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+          <Link to="/painel/mensagens" className="text-sm font-semibold text-forest hover:underline">
+            Editar meus modelos
+          </Link>
+          {lead.phone ? (
+            <a
+              href={waChat(lead.phone, text)}
+              target="_blank"
+              rel="noreferrer"
+              className={buttonClass("whatsapp", !text.trim() ? "pointer-events-none opacity-50" : undefined)}
+              onClick={() => setOpened(true)}
+            >
+              <MessageCircle size={16} /> Abrir no WhatsApp
+            </a>
+          ) : (
+            <p className="text-sm text-ink-muted">Este cliente ainda não tem WhatsApp. Edite o cliente para incluir.</p>
+          )}
+        </div>
+      )}
     </Dialog>
   );
 }

@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { Archive, Search, UserPlus, Users } from "lucide-react";
+import { Archive, MessageCircle, Search, UserPlus, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { LeadActionsMenu } from "@/modules/leads/components/LeadActionsMenu";
 import { LeadsTable } from "@/modules/leads/components/LeadParts";
+import { SendQueueDialog } from "@/modules/leads/components/SendQueueDialog";
 import { matchesLead } from "@/modules/leads/model/lead.types";
 import { myLeadService } from "@/modules/leads/services/lead.service";
 import { cn } from "@/shared/lib/cn";
@@ -17,6 +18,7 @@ export function MyLeadsPage() {
   const archived = params.get("ver") === "arquivados";
   const [q, setQ] = useState(params.get("q") ?? "");
   const [adding, setAdding] = useState(false);
+  const [sending, setSending] = useState(false);
   useEffect(() => setQ(params.get("q") ?? ""), [params]);
   const leads = useQuery({
     queryKey: ["my-leads", archived ? "arquivados" : "ativos"],
@@ -31,12 +33,20 @@ export function MyLeadsPage() {
         title="Meus clientes"
         subtitle="Use o menu ⋮ de cada cliente para editar, mandar mensagem, mudar de etapa ou arquivar. Quem mandou proposta nova aparece em destaque."
         action={
-          <Button onClick={() => setAdding(true)}>
-            <UserPlus size={16} /> Adicionar clientes
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            {!archived && (
+              <Button variant="outline" onClick={() => setSending(true)} disabled={filtered.length === 0}>
+                <MessageCircle size={16} /> Enviar mensagens
+              </Button>
+            )}
+            <Button onClick={() => setAdding(true)}>
+              <UserPlus size={16} /> Adicionar clientes
+            </Button>
+          </div>
         }
       />
       {adding && <AddClientsDialog onClose={() => setAdding(false)} />}
+      {sending && <SendQueueDialog leads={filtered} onClose={() => setSending(false)} />}
       <div className="mb-5 flex flex-wrap items-center gap-3">
         <label className="relative min-w-[14rem] flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-muted" />
