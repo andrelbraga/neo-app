@@ -34,5 +34,5 @@ Depois, o usuário trocou para a própria conta do Railway e indicou o projeto `
 ## Consequências
 
 - O primeiro admin é criado pelo dono da conta, dentro do serviço (`railway ssh --service neo-api`, depois `./create-admin`), com e-mail e senha que só ele conhece.
-- A configuração do Railway em `railway.json` está marcada como obsoleta pelo Railway (vale até 01/12/2026). É preciso migrar para `.railway/railway.ts` (`railway config migrate`) antes dessa data.
+- A configuração do Railway em `railway.json` foi marcada como obsoleta pelo Railway (valia até 01/12/2026). Migrada em 24/11/2026 (`railway config migrate`): a API usa `.railway/railway.go` (módulo Go próprio, variáveis preservadas pelo nome com `railway.Preserve()`) e o app usa `.railway/railway.ts` (pacote `railway` como dependência de desenvolvimento, variáveis fora do arquivo). Mudanças de build e health check passam por `railway config plan` e `railway config apply`.
 - Testado localmente: as 7 migrations rodaram num schema isolado, com histórico próprio, sem tocar no `public`.
