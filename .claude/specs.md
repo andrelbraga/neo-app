@@ -203,3 +203,18 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
   - cartão com a capa, "Seu próximo lugar em {cidade}." e "Conhecer esta oportunidade →".
 - Uma vez por sessão do navegador; quem volta lê "Que bom te ver de novo." O título da aba vira "{empreendimento} · preparado para {nome}". Fecha no botão ou no Esc.
 - Testes: `bridge.test.ts` roda a ponte com a API simulada (primeiro teste automatizado da ponte). Conferido em prints do Chrome em 390 px e 1440 px com uma API simulada; não foi conferido com a API real.
+
+## 24/11/2026 — Editor da página de apresentação no admin (mini CMS)
+
+- ADR-0027, RN-02.6, P-20. V12: `developments.page_config` (seções ocultas, blocos desligados e textos trocados); `PUT /api/admin/developments/:id/page` publica; a configuração vem com o empreendimento no showroom.
+- Ponte:
+  - aplica a configuração na página do cliente (layouts A e B, mesmas chaves de seção);
+  - no editor (`?cms=1`), conta seções, textos e blocos, aplica ao vivo e avisa o texto clicado;
+  - textos achados pelo original, com `<br>` como quebra de linha;
+  - blocos: planta 3D, condomínio em 3D e posição do sol;
+  - a chegada exclusiva pode ser desligada.
+- Admin: `/admin/empreendimentos/:id/pagina` ("Editar página" no cadastro), no modelo Shopify/WordPress:
+  - seções com o olho, blocos com interruptor e textos com "Restaurar";
+  - prévia ao vivo com A/B e Computador/Celular; clique no texto da prévia abre o campo;
+  - "Publicar" e "Descartar".
+- Conferido no Chrome com a página real e uma API simulada: editor carregado com as seções, título trocado, 3D e simulador ocultos e rodapé novo nos layouts A e B. Testes: API (cobertura 95,4%), app com 108 testes.

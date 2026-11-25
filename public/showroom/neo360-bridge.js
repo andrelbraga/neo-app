@@ -22,7 +22,8 @@
   // Código do link de convite do cliente cadastrado pelo corretor (RN-03.16): a visita cai na ficha dele.
   var CONVITE = Q.get("convite") || "";
   var layoutSent = false;
-  if (!SLUG || !CODE) return;
+  var CMS = Q.get("cms") === "1";
+  if (!CMS && (!SLUG || !CODE)) return;
 
   var KEY = "neo360-visit:" + SLUG;
   var token = "";
@@ -79,6 +80,173 @@
   }
   function firstName() { return broker ? broker.name.split(" ")[0] : ""; }
 
+  /* ---------- página editável pelo admin (ADR-0027) ---------- */
+  // O admin oculta seções, desliga blocos (como o 3D) e troca textos. A configuração vem com o empreendimento
+  // e vale nos layouts A e B. Cada texto trocado é achado pelo texto original dentro da seção: se a página
+  // mudar e o original sumir, a troca não se aplica. Tudo entra por textContent.
+  var PAGE_OFF = "data-neo-off";
+  // Blocos que dá para desligar sem tirar a seção inteira.
+  var PAGE_BLOCKS = [
+    { key: "3d.apartamento", label: "Planta 3D do apartamento", sel: ['[data-vis="apto3d"]', "#vapto"] },
+    { key: "3d.condominio", label: "Condomínio em 3D (maquete)", sel: ['[data-vis="maq"]', "#vmaq"] },
+    { key: "3d.sol", label: "Posição do sol no 3D", sel: ["#sol-ctl"] },
+  ];
+  // Nomes das seções no editor; sem nome aqui, vale o título da seção.
+  var PAGE_NAMES = {
+    chegada: "Chegada exclusiva (abertura com o nome do cliente)", topo: "Topo", apresentacao: "Abertura",
+    "h-galeria": "Galeria de fotos", "h-planta": "Planta e 3D", "h-emp": "Torres, vagas e áreas", "h-sim": "Simulador de condições",
+    "h-neg": "Proposta", "seu-consultor": "Cartão do corretor", "imobiliaria-parceira": "Imobiliária parceira",
+    "incorporadora-responsavel": "Incorporadora", "crie-seu-perfil": "Convite para criar perfil", "h-quem": "Quem constrói",
+    "h-ind": "Números da região", "h-vid": "Como usar esta página", "h-duv": "Dúvidas", "h-proj": "O projeto", "h-viva": "Ambientes do apartamento",
+    "o-lugar": "O lugar", rodape: "Rodapé",
+  };
+  // Textos que a ponte preenche com o corretor do link: não são editáveis.
+  var PAGE_DYNAMIC = "[data-consultor-nome],.tc-nome,.tc-esp,.mz-quem,.pf-cod,.cb-rod b,#neo-chegada";
+  // Elementos que podem ser texto editável, e as marcas de formatação que um texto pode ter dentro. Elemento com
+  // outra coisa dentro (imagem, campo, ícone) não é editável: trocar o texto apagaria o resto.
+  var PAGE_TEXT = "h1,h2,h3,h4,h5,h6,p,li,figcaption,label,button,a,small,b,strong,em,span,dt,dd,td,th,blockquote,div";
+  var PAGE_INLINE = { BR: 1, EM: 1, I: 1, B: 1, STRONG: 1, U: 1, SMALL: 1, SUP: 1, SUB: 1 };
+  var pageOriginals = [];
+
+  function pageSlug(s) {
+    return String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  }
+  function norm(s) { return String(s || "").replace(/\s+/g, " ").trim(); }
+  // Texto de um elemento como o cliente lê: <br> vira quebra de linha; espaços repetidos viram um.
+  function textOfEl(el) {
+    var out = "";
+    el.childNodes.forEach(function (n) {
+      if (n.nodeType === 3) out += n.data;
+      else if (n.nodeName === "BR") out += "\n";
+      else if (n.nodeType === 1) out += textOfEl(n);
+    });
+    return out;
+  }
+  function normText(s) { return String(s || "").replace(/[^\S\n]+/g, " ").replace(/ *\n */g, "\n").trim(); }
+
+  // Seções da página: as de primeiro nível, com uma chave estável (a mesma nos layouts A e B quando o conteúdo é o mesmo).
+  function pageSections() {
+    var list = [];
+    document.querySelectorAll("section,footer.foot,header.top").forEach(function (el) {
+      if (el.closest("#neo-chegada") || (el.parentElement && el.parentElement.closest("section"))) return;
+      var key = el.matches("footer") ? "rodape" : el.matches("header") ? "topo" : el.getAttribute("aria-labelledby") || pageSlug(el.getAttribute("aria-label")) || el.id;
+      if (!key || list.some(function (x) { return x.key === key; })) return;
+      var h = el.querySelector("h1,h2,h3");
+      list.push({ key: key, el: el, label: PAGE_NAMES[key] || norm(h && h.textContent) || el.getAttribute("aria-label") || key });
+    });
+    return list;
+  }
+
+  // Textos editáveis de uma seção: o elemento mais externo que só tem texto (e formatação) dentro.
+  function pageTexts(section) {
+    var out = [];
+    var picked = [];
+    section.querySelectorAll(PAGE_TEXT).forEach(function (el) {
+      if (el.closest(PAGE_DYNAMIC) || picked.some(function (p) { return p.contains(el); })) return;
+      for (var i = 0; i < el.children.length; i++) if (!PAGE_INLINE[el.children[i].tagName]) return;
+      var t = normText(textOfEl(el));
+      if (!t) return;
+      picked.push(el);
+      out.push({ el: el, text: t });
+    });
+    return out;
+  }
+
+  function pageBlockEls(b) {
+    var els = [];
+    b.sel.forEach(function (sel) { document.querySelectorAll(sel).forEach(function (el) { els.push(el); }); });
+    return els;
+  }
+
+  function pageStyle() {
+    if (document.getElementById("neo-page-style")) return;
+    var st = el("style", "", "[" + PAGE_OFF + "]{display:none!important}" +
+      "[data-neo-cms] [data-neo-text]{cursor:pointer}[data-neo-cms] [data-neo-text]:hover{outline:2px dashed #2d5b48;outline-offset:3px}" +
+      "[data-neo-cms] .neo-focus{outline:3px solid #d8b77c!important;outline-offset:4px;transition:outline-color .3s}" +
+      // No editor, o aviso de medição da página cobriria a prévia.
+      "[data-neo-cms] .med-aviso{display:none!important}");
+    st.id = "neo-page-style";
+    document.head.appendChild(st);
+  }
+
+  // Desfaz a configuração anterior (prévia ao vivo) e aplica a nova.
+  function applyPage(cfg) {
+    cfg = cfg || {};
+    pageStyle();
+    document.querySelectorAll("[" + PAGE_OFF + "]").forEach(function (e) { e.removeAttribute(PAGE_OFF); });
+    pageOriginals.forEach(function (o) { o.el.replaceChildren.apply(o.el, o.nodes); });
+    pageOriginals = [];
+    var sections = pageSections();
+    var hidden = cfg.sections || {};
+    sections.forEach(function (s) { if (hidden[s.key] && hidden[s.key].hidden) s.el.setAttribute(PAGE_OFF, ""); });
+    var blocks = cfg.blocks || {};
+    PAGE_BLOCKS.forEach(function (b) { if (blocks[b.key] === false) pageBlockEls(b).forEach(function (e) { e.setAttribute(PAGE_OFF, ""); }); });
+    (cfg.texts || []).forEach(function (t) {
+      var s = sections.filter(function (x) { return x.key === t.section; })[0];
+      if (!s) return;
+      pageTexts(s.el).forEach(function (x) {
+        if (x.text !== normText(t.from)) return;
+        pageOriginals.push({ el: x.el, nodes: Array.prototype.slice.call(x.el.childNodes) });
+        if (!normText(t.to)) { x.el.setAttribute(PAGE_OFF, ""); return; }
+        var parts = String(t.to).split("\n");
+        var nodes = [];
+        parts.forEach(function (p, i) { if (i) nodes.push(document.createElement("br")); nodes.push(document.createTextNode(p)); });
+        x.el.replaceChildren.apply(x.el, nodes);
+      });
+    });
+  }
+
+  // Editor do admin (?cms=1, dentro do iframe do painel): sem API nem visita. Conta ao painel as seções, os
+  // textos e os blocos; aplica cada mudança na hora; clique num texto leva ao campo dele no painel.
+  function cmsMode() {
+    var parentOk = function (e) { return e.source === window.parent && e.origin === location.origin; };
+    var post = function (msg) { msg.source = "neo-cms"; window.parent.postMessage(msg, location.origin); };
+    document.documentElement.setAttribute("data-neo-cms", "");
+    pageStyle();
+    var outline = [{ key: "chegada", label: PAGE_NAMES.chegada, texts: [], blocks: [] }].concat(pageSections().map(function (s) {
+      var seen = {};
+      var texts = pageTexts(s.el).filter(function (x) {
+        x.el.setAttribute("data-neo-text", "");
+        x.el.setAttribute("data-neo-section", s.key);
+        if (seen[x.text]) return false;
+        seen[x.text] = true;
+        return true;
+      }).map(function (x) { return { text: x.text, tag: x.el.tagName.toLowerCase() }; });
+      var blocks = PAGE_BLOCKS.filter(function (b) {
+        return pageBlockEls(b).some(function (e) { return s.el.contains(e); });
+      }).map(function (b) { return { key: b.key, label: b.label }; });
+      return { key: s.key, label: s.label, texts: texts, blocks: blocks };
+    }));
+    window.addEventListener("message", function (e) {
+      if (!parentOk(e) || !e.data || e.data.source !== "neo-cms") return;
+      if (e.data.type === "config") applyPage(e.data.config);
+      if (e.data.type === "focus") {
+        var target = null;
+        document.querySelectorAll("[data-neo-section]").forEach(function (x) {
+          if (!target && x.getAttribute("data-neo-section") === e.data.section && (!e.data.from || x.getAttribute("data-neo-from") === normText(e.data.from))) target = x;
+        });
+        if (!target) {
+          var sec = pageSections().filter(function (x) { return x.key === e.data.section; })[0];
+          target = sec && sec.el;
+        }
+        if (!target) return;
+        target.scrollIntoView({ behavior: "smooth", block: "center" });
+        target.classList.add("neo-focus");
+        setTimeout(function () { target.classList.remove("neo-focus"); }, 1600);
+      }
+    });
+    // Guarda o texto original de cada elemento editável, para achar o campo mesmo depois da troca.
+    document.querySelectorAll("[data-neo-text]").forEach(function (x) { x.setAttribute("data-neo-from", normText(textOfEl(x))); });
+    document.addEventListener("click", function (e) {
+      var x = e.target && e.target.closest && e.target.closest("[data-neo-text]");
+      if (!x) return;
+      e.preventDefault();
+      e.stopPropagation();
+      post({ type: "select", section: x.getAttribute("data-neo-section"), from: x.getAttribute("data-neo-from") });
+    }, true);
+    post({ type: "outline", sections: outline });
+  }
+
   /* ---------- chegada exclusiva (ADR-0026) ---------- */
   // Antes da apresentação, uma abertura só para o cliente, como o convite da entrega v12 (dashboard.html#convites):
   // "Um convite de Fernando para você", "Boa noite, Rodrigo." e o empreendimento. Aparece uma vez por sessão do
@@ -133,7 +301,8 @@
 
   // Monta a chegada com o corretor e o empreendimento; o nome do cliente entra quando a visita responde.
   function showArrival(room) {
-    if (flag("sessionStorage", ARRIVAL_SESSION)) return;
+    var page = (room.development && room.development.page_config) || {};
+    if (flag("sessionStorage", ARRIVAL_SESSION) || (page.sections && page.sections.chegada && page.sections.chegada.hidden)) return;
     var d = room.development || {};
     var style = el("style", "", ARRIVAL_CSS);
     var root = el("div");
@@ -586,10 +755,15 @@
   }
 
   /* ---------- início ---------- */
+  if (CMS) {
+    cmsMode();
+    return;
+  }
   call("GET", "/public/showroom/" + encodeURIComponent(SLUG) + "/" + encodeURIComponent(CODE))
     .then(function (room) {
       fillBroker(room);
       if (V11) adaptV11();
+      applyPage(room.development && room.development.page_config);
       showArrival(room);
       token = storage(true);
       return call("POST", "/public/showroom/" + encodeURIComponent(SLUG) + "/" + encodeURIComponent(CODE) + "/visit?layout=" + LAYOUT + (CONVITE ? "&convite=" + encodeURIComponent(CONVITE) : ""));
