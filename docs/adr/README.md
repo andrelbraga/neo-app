@@ -29,3 +29,4 @@ Decisões de arquitetura e produto no formato MADR ([template](template.md)).
 | [ADR-0023](ADR-0023-painel-no-layout-da-central.md) | Painel e admin no layout da Central de trabalho (entrega v12), com "ver como" no admin | aceita |
 | [ADR-0024](ADR-0024-clientes-cadastrados-pelo-corretor.md) | Clientes cadastrados pelo corretor (à mão ou por CSV), com link de convite próprio | aceita |
 | [ADR-0025](ADR-0025-crud-do-cliente-e-mensagens-por-perfil.md) | Cliente editável e arquivável, lista no lugar do quadro e mensagens do WhatsApp por perfil e tom | aceita |
+| [ADR-0026](ADR-0026-chegada-exclusiva-do-cliente.md) | A apresentação abre com um convite pessoal ao cliente (saudação pelo nome, corretor e empreendimento) | aceita |

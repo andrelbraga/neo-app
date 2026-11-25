@@ -79,6 +79,123 @@
   }
   function firstName() { return broker ? broker.name.split(" ")[0] : ""; }
 
+  /* ---------- chegada exclusiva (ADR-0026) ---------- */
+  // Antes da apresentação, uma abertura só para o cliente, como o convite da entrega v12 (dashboard.html#convites):
+  // "Um convite de Fernando para você", "Boa noite, Rodrigo." e o empreendimento. Aparece uma vez por sessão do
+  // navegador; quem volta é recebido de novo. Tudo por textContent: nome e textos vêm de fora.
+  var ARRIVAL_SESSION = "neo360-chegada:" + SLUG;
+  var ARRIVAL_SEEN = "neo360-chegada-vista:" + SLUG;
+  var arrival = null;
+
+  function hello(date) {
+    var h = (date || new Date()).getHours();
+    return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+  }
+  function clientFirst(name) { return String(name || "").trim().split(/\s+/)[0] || ""; }
+  function flag(store, key, value) {
+    try {
+      if (value === undefined) return window[store].getItem(key) === "1";
+      window[store].setItem(key, "1");
+    } catch (e) { /* sem armazenamento: a chegada aparece de novo */ }
+    return false;
+  }
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text) e.textContent = text;
+    return e;
+  }
+
+  var ARRIVAL_CSS =
+    "#neo-chegada{position:fixed;inset:0;z-index:2147483000;overflow-y:auto;background:#e7ece7 url(img/folhas-geada.jpg) center/cover;color:#0d1510;" +
+    "font:16px/1.6 Inter,system-ui,-apple-system,'Segoe UI',sans-serif;animation:neoIn .45s ease-out}" +
+    "#neo-chegada::before{content:'';position:fixed;inset:0;background:rgba(244,241,234,.62);pointer-events:none}" +
+    "#neo-chegada .nc-box{position:relative;max-width:620px;margin:0 auto;min-height:100%;display:flex;flex-direction:column}" +
+    "#neo-chegada .nc-top{background:#97d5d0;padding:18px 22px;display:flex;align-items:center}" +
+    "#neo-chegada .nc-top img{height:40px;width:auto}" +
+    "#neo-chegada .nc-body{padding:34px 22px 28px;flex:1;display:flex;flex-direction:column;gap:14px}" +
+    "#neo-chegada .nc-eyebrow{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:#27322b;font-weight:600}" +
+    "#neo-chegada h1{font:600 clamp(36px,9vw,52px)/1.08 Newsreader,Georgia,serif;margin:0;color:#183a2d;text-wrap:balance}" +
+    "#neo-chegada .nc-back{font:italic 18px/1.4 Newsreader,Georgia,serif;color:#2d5b48;margin:0}" +
+    "#neo-chegada .nc-text{font-size:17px;max-width:34em;margin:0}" +
+    "#neo-chegada .nc-sign{font:italic 16px Newsreader,Georgia,serif;color:#2d5b48;margin:0}" +
+    "#neo-chegada .nc-card{position:relative;margin-top:16px;border-radius:24px;overflow:hidden;min-height:340px;display:flex;flex-direction:column;justify-content:flex-end;" +
+    "padding:26px 22px;color:#fff;background:#183a2d center/cover;box-shadow:0 18px 40px rgba(13,21,16,.25)}" +
+    "#neo-chegada .nc-card::before{content:'';position:absolute;inset:0;background:linear-gradient(180deg,rgba(13,21,16,0) 25%,rgba(13,21,16,.78) 100%)}" +
+    "#neo-chegada .nc-card>*{position:relative}" +
+    "#neo-chegada .nc-dev{font-size:13px;letter-spacing:.08em;text-transform:uppercase;font-weight:600}" +
+    "#neo-chegada h2{font:600 clamp(30px,7vw,42px)/1.1 Newsreader,Georgia,serif;margin:6px 0 18px;color:#fff}" +
+    "#neo-chegada h2 em{font-style:normal;color:#d8b77c;display:block}" +
+    "#neo-chegada .nc-go{appearance:none;border:0;border-radius:14px;background:#e2c27c;color:#183a2d;font:700 16px Inter,system-ui,sans-serif;padding:18px 22px;text-align:left;cursor:pointer}" +
+    "#neo-chegada .nc-go:hover{background:#d8b77c}#neo-chegada .nc-go:focus-visible{outline:3px solid #fff;outline-offset:3px}" +
+    "@keyframes neoIn{from{opacity:0}to{opacity:1}}@keyframes neoOut{to{opacity:0}}" +
+    "@media (prefers-reduced-motion:reduce){#neo-chegada{animation:none}}";
+
+  // Monta a chegada com o corretor e o empreendimento; o nome do cliente entra quando a visita responde.
+  function showArrival(room) {
+    if (flag("sessionStorage", ARRIVAL_SESSION)) return;
+    var d = room.development || {};
+    var style = el("style", "", ARRIVAL_CSS);
+    var root = el("div");
+    root.id = "neo-chegada";
+    root.setAttribute("role", "dialog");
+    root.setAttribute("aria-modal", "true");
+    root.setAttribute("aria-labelledby", "nc-hello");
+    var box = el("div", "nc-box");
+    var top = el("div", "nc-top");
+    var logo = el("img");
+    logo.src = "/neo360-logo-nova.png";
+    logo.alt = "Neo360";
+    top.appendChild(logo);
+    var body = el("div", "nc-body");
+    var h1 = el("h1", "", hello() + ".");
+    h1.id = "nc-hello";
+    var back = el("p", "nc-back", "Que bom te ver de novo.");
+    back.hidden = !flag("localStorage", ARRIVAL_SEEN);
+    var text = el("p", "nc-text", "Separei esta oportunidade no " + (d.name || "empreendimento") + " para você conhecer com calma. Veja o apartamento e simule uma proposta do seu jeito.");
+    body.append(el("p", "nc-eyebrow", "Um convite de " + firstName() + " para você"), h1, back, text, el("p", "nc-sign", firstName() + " · seu corretor"));
+    var card = el("div", "nc-card");
+    if (d.cover_image_url) card.style.backgroundImage = "url(\"" + String(d.cover_image_url).replace(/["\\]/g, "") + "\")";
+    var h2 = el("h2", "", "Seu próximo lugar");
+    if (d.city) h2.appendChild(el("em", "", "em " + d.city + "."));
+    var go = el("button", "nc-go", "Conhecer esta oportunidade →");
+    go.type = "button";
+    card.append(el("p", "nc-dev", d.name || ""), h2, go);
+    body.appendChild(card);
+    box.append(top, body);
+    root.appendChild(box);
+    var html = document.documentElement;
+    var overflow = html.style.overflow;
+    html.style.overflow = "hidden";
+    function close() {
+      flag("sessionStorage", ARRIVAL_SESSION, true);
+      flag("localStorage", ARRIVAL_SEEN, true);
+      document.removeEventListener("keydown", esc);
+      html.style.overflow = overflow;
+      root.remove();
+      style.remove();
+      arrival = null;
+    }
+    function esc(e) { if (e.key === "Escape") close(); }
+    go.addEventListener("click", close);
+    document.addEventListener("keydown", esc);
+    document.head.appendChild(style);
+    document.body.appendChild(root);
+    // O foco começa na própria chegada (leitores de tela leem a saudação); Tab leva ao botão.
+    root.tabIndex = -1;
+    root.style.outline = "none";
+    root.focus({ preventScroll: true });
+    arrival = { h1: h1 };
+  }
+
+  // Com o nome do cliente: a saudação e o título da aba passam a ser dele.
+  function greetClient(name) {
+    var first = clientFirst(name);
+    if (!first) return;
+    if (arrival) arrival.h1.textContent = hello() + ", " + first + ".";
+    document.title = (devName ? devName + " · " : "") + "preparado para " + first;
+  }
+
   /* ---------- corretor do link no lugar do exemplo do protótipo ---------- */
   function fillBroker(room) {
     broker = room.broker;
@@ -473,6 +590,7 @@
     .then(function (room) {
       fillBroker(room);
       if (V11) adaptV11();
+      showArrival(room);
       token = storage(true);
       return call("POST", "/public/showroom/" + encodeURIComponent(SLUG) + "/" + encodeURIComponent(CODE) + "/visit?layout=" + LAYOUT + (CONVITE ? "&convite=" + encodeURIComponent(CONVITE) : ""));
     })
@@ -480,6 +598,7 @@
       token = v.token;
       storage(false, token);
       prefill(v);
+      greetClient(v.name);
     })
     .catch(function () {});
 })();
