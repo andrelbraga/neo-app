@@ -49,6 +49,8 @@ export interface Lead {
   profile?: Profile;
   /** Quando o corretor arquivou o cliente (RN-03.19); nulo nos ativos. */
   archived_at?: string | null;
+  /** Último envio pelo WhatsApp que o corretor confirmou (RN-03.22); nulo se nunca enviou. */
+  last_message_at?: string | null;
 }
 
 /** Perfis de compra que o corretor escolhe na ficha (RN-03.17). */

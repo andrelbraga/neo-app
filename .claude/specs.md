@@ -225,3 +225,22 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - Texto novo nos dois layouts: o que é registrado (seções, tempo, o que abre), para quê (o corretor saber o que interessou), com quem os dados ficam (o corretor e a Neo360) e que o que o cliente digita não é registrado. No A, "Apagar registros deste aparelho" e "Medição ativa: o corretor vê como você navega nesta página.". No B, sem "parar quando quiser", porque o B não tem esse controle.
 - P-20 fica parcial: base legal (P-01), o B sem como parar depois de aceitar e os rodapés de A e B (editáveis no editor da página).
 - Teste: `collector.test.ts`. Conferido no Chrome a 390 px nos dois layouts.
+
+## 25/11/2026 — Fila de envio pelo WhatsApp (sem a API da Meta)
+
+- ADR-0028, RN-03.22. Escolhas do usuário: confirmar o envio leva novo → em atendimento; sem limite por fila; quem já recebeu aparece com "enviado em DD/MM".
+- API:
+  - `POST /api/me/leads/:id/message-sent` (`profile`, `tone`) grava o evento `mensagem_enviada` e tira o cliente de novo; cliente sem WhatsApp é recusado (`ErrNoPhone`);
+  - o evento não conta como atividade do cliente, não é sinal e não entra no feed;
+  - `last_message_at` na lista e na ficha.
+- App:
+  - "Enviar mensagens" em Meus clientes abre a fila (`SendQueueDialog`): marcar clientes e tom, um cliente por vez com a mensagem do perfil dele, "Abrir no WhatsApp", "Sim, enviei", "Abrir de novo" ou "Pular", e resumo no fim;
+  - a mensagem avulsa (`MessageComposer`) também pede a confirmação;
+  - a mensagem enviada fica fora da jornada (não é visita).
+- Testes: API com lint, unitários e integração (cobertura de `internal/` em 95,4%); app com typecheck, lint e 112 testes. Não foi conferido no navegador.
+
+## 25/11/2026 — Seleção de clientes na lista para a fila de envio
+
+- Pedido: "Na lista dos clientes quero que tenha checkboxes e com a opção de enviar WhatsApp". ADR-0028 e RN-03.22 atualizadas.
+- App: `LeadsTable` ganha `selection` (checkbox por linha e "selecionar todos" no cabeçalho; sem WhatsApp, desligado), só no corretor e fora dos arquivados. Em Meus clientes, a barra "N selecionados · Limpar · Enviar WhatsApp" substitui o botão "Enviar mensagens"; a busca e a aba limpam a seleção. O `SendQueueDialog` recebe os marcados e só pede o tom.
+- API sem mudança. Testes do app: typecheck, lint e 113 testes. Não foi conferido no navegador.
