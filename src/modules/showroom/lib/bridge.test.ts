@@ -150,3 +150,45 @@ describe("página editável pelo admin (ADR-0027)", () => {
     spy.mockRestore();
   });
 });
+
+describe("título do cartão da proposta e rodapé da apresentação", () => {
+  const dir = resolve(__dirname, "../../../../public/showroom/boa-vista");
+  const card = `<section id="negociar" aria-labelledby="h-neg"><h2 id="h-neg">Proposta</h2>
+    <div class="ncard"><div class="nct"><span>Monte sua proposta personalizada</span></div></div></section>`;
+
+  beforeEach(() => {
+    document.head.innerHTML = "";
+    sessionStorage.clear();
+    localStorage.clear();
+    (window as { BVMetrics?: object }).BVMetrics = {};
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete (window as { BVMetrics?: object }).BVMetrics;
+    delete (room.development as { page_config?: unknown }).page_config;
+  });
+
+  it("a ponte mantém o título da página, e a troca feita no editor vale para o cliente", async () => {
+    document.body.innerHTML = card;
+    run("Rodrigo");
+    await screen.findByRole("dialog");
+    expect(document.querySelector(".nct span")).toHaveTextContent("Monte sua proposta personalizada");
+
+    document.body.innerHTML = card;
+    sessionStorage.clear();
+    room.development = {
+      ...room.development,
+      page_config: { texts: [{ section: "h-neg", from: "Monte sua proposta personalizada", to: "Faça sua proposta" }] },
+    } as typeof room.development;
+    run("Rodrigo");
+    await waitFor(() => expect(document.querySelector(".nct span")).toHaveTextContent("Faça sua proposta"));
+  });
+
+  it.each(["index.html", "index-b.html"])("%s não tem os atalhos de demonstração no rodapé", (file) => {
+    const html = readFileSync(resolve(dir, file), "utf8");
+    expect(html).toContain("<span>Monte sua proposta personalizada</span>");
+    for (const text of ["dash-go\">", "synth-ribbon\">", "Evidências · Dev", "Testar convite personalizado", "Canal Neo360", "quatro dashboards"]) {
+      expect(html).not.toContain(text);
+    }
+  });
+});
