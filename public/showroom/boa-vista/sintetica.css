@@ -44,3 +44,4 @@ section.hero h1 em{font-style:normal!important}
 html{background:#f3efe6}
 .top{height:92px;min-height:0;box-sizing:border-box;flex-wrap:nowrap;flex-shrink:0}
 @media(max-width:650px){.top{height:76px;padding:12px 16px;flex-wrap:nowrap}.top .brand{flex-shrink:0}.top .neo-logo{height:52px;max-width:120px}.top .synth-nav{gap:10px;font-size:10px}}
+.veic-lista{display:grid;gap:10px}.veic-card{display:grid;gap:8px;background:#fffdf8;border:1px solid #cfdcc8;border-radius:14px;padding:12px}.veic-tit{font:700 12px/1.2 Inter,system-ui,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#3d5249}

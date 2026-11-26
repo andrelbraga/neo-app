@@ -18,6 +18,9 @@ describe("aviso de medição da apresentação (P-20)", () => {
     expect(box).toHaveTextContent("Não registramos o que você digita.");
     expect(box.textContent).not.toMatch(/servidor|local/i);
     expect(screen.getByRole("button", { name: "Apagar registros deste aparelho" })).toBeInTheDocument();
+    // Sem o botão "Medição da navegação" no rodapé: o aviso aparece só enquanto o cliente não escolheu.
+    expect(screen.queryByRole("button", { name: "Medição da navegação" })).not.toBeInTheDocument();
+    expect(box.textContent).not.toMatch(/parar quando quiser/);
     screen.getByRole("button", { name: "Recusar / parar" }).click();
     expect(document.body).toHaveTextContent("Medição desativada.");
   });

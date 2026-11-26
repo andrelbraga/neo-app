@@ -542,14 +542,13 @@
   // calc, CAMPANHA, veic, VEICS e nVeic são do script da apresentação; se não existirem, vai só o texto.
   function condicao() {
     try {
-      /* global calc, CAMPANHA, veic, VEICS, nVeic, allVehicles */
+      /* global calc, CAMPANHA, veic, VEICS, nVeic */
       var c = calc();
       var entN = parseInt(($("#p-entn") || {}).value, 10) || 1;
       var r = function (v) { return Math.round((Number(v) || 0) * 100) / 100; };
       var cut = function (v, n) { return String(v || "").trim().slice(0, n); };
       return {
-        // Na página v11 o cliente propõe o valor (#p-preco) e o saldo sai dele.
-        preco: r(V11 ? Number(($("#p-preco") || {}).value) : CAMPANHA.promo),
+        preco: r(CAMPANHA.promo),
         preco_referencia: r(CAMPANHA.ref),
         campanha: cut(CAMPANHA.tipo, 60),
         validade: cut(CAMPANHA.validade, 20),
@@ -563,13 +562,9 @@
         chaves: r(c.chaves),
         veiculos: !veic
           ? []
-          : typeof allVehicles === "function"
-            ? allVehicles().slice(0, 3).map(function (v) {
-                return { modelo: cut(v.modelo, 40), ano: cut(v.ano, 4), km: cut(v.km, 9), valor: r(v.valor) };
-              })
-            : VEICS.slice(0, Math.min(3, nVeic())).map(function (v) {
-                return { modelo: cut(v.mod, 40), ano: cut(v.ano, 4), km: cut(v.km, 9), valor: r(v.valor) };
-              }),
+          : VEICS.slice(0, Math.min(3, nVeic())).map(function (v) {
+              return { modelo: cut(v.mod, 40), ano: cut(v.ano, 4), km: cut(v.km, 9), valor: r(v.valor) };
+            }),
         sujeita_aprovacao: c.ent < CAMPANHA.entMin || c.saldo < 0,
       };
     } catch (e) {
@@ -604,7 +599,7 @@
         lastSent = sig;
         hasContact = true;
         showSaved(body.name, digits(body.phone));
-        offerWhatsApp($("#nz-ok") ? "#nz-ok" : V11 || dados.autorizou_contrato ? "#p-aviso" : "#p-aviso-env");
+        offerWhatsApp($("#nz-ok") ? "#nz-ok" : dados.autorizou_contrato ? "#p-aviso" : "#p-aviso-env");
         return true;
       })
       .catch(function () { return false; });
@@ -702,49 +697,18 @@
   /* ---------- página v11 (ADR-0021, ADR-0022): textos e envio ---------- */
   function adaptV11() {
     // A página foi escrita como protótipo sem envio. Com a ponte, proposta e medição chegam ao
-    // corretor; os avisos passam a dizer isso (RN-03.3, RN-03.8). O perfil e o chat estão fora da página (ADR-0022).
+    // corretor; o rodapé passa a dizer isso (RN-03.3, RN-03.8). O perfil e o chat estão fora da página (ADR-0022).
     var first = firstName();
     var texts = [
-      [".ndec > p:not([class])", "Ao registrar sua intenção, a proposta vai para " + first + " com seu nome e WhatsApp, e a conversa segue por lá. Nada aqui emite contrato ou reserva o imóvel."],
-      ["#negociar .nlegal", "O resumo pode ser copiado, exportado ou impresso por você. A proposta só vai para o corretor quando você registra sua intenção."],
       ["footer.foot p", "Informações fornecidas pela incorporadora. Valores, condições e imagens ilustrativas, sujeitos a confirmação. A proposta vai para o seu corretor quando você a envia; a medição da navegação, só com o seu aceite."],
     ];
     texts.forEach(function (t) { var el = $(t[0]); if (el) el.textContent = t[1]; });
 
-    // Aviso de medição do coletor: aparece ao abrir a página e quando o cliente toca em "Medição deste navegador".
+    // Aviso de medição do coletor: aparece ao abrir a página, enquanto o cliente não aceitou nem recusou.
     var consentText = "Registrar sua navegação nesta apresentação? Guardamos ações, rolagem e tempo por seção, sem texto digitado, e mandamos para " + first + " saber o que mais interessou a você.";
     function fixConsent() { var p = $(".med-aviso p"); if (p && p.textContent !== consentText) p.textContent = consentText; }
     fixConsent();
     new MutationObserver(fixConsent).observe(document.body, { childList: true });
-
-    // Proposta: vai quando o cliente registra a intenção ("Sim, se a proposta for aprovada" ou "Ainda não"),
-    // com nome e WhatsApp obrigatórios (RN-03.8). setIntent é do sintetica.js da página.
-    var origIntent = window.setIntent;
-    if (typeof origIntent !== "function") return;
-    window.setIntent = function (i) {
-      var nome = ($("#p-nome") || {}).value || "";
-      var zap = ($("#p-zap") || {}).value || "";
-      var aviso = $("#p-aviso");
-      if (!nome.trim() || digits(zap).length < 10) {
-        if (aviso) { aviso.hidden = false; aviso.textContent = "Informe seu nome e WhatsApp para enviar a proposta a " + first + "."; }
-        if (typeof fechaFechamento === "function") fechaFechamento(false);
-        var campo = !nome.trim() ? $("#p-nome") : $("#p-zap");
-        if (campo) { campo.scrollIntoView({ block: "center" }); campo.focus({ preventScroll: true }); }
-        return;
-      }
-      if (typeof validProposal === "function" && !validProposal()) return;
-      origIntent(i);
-      var sent = window.regGravaProposta({
-        nome: nome,
-        whatsapp: zap,
-        resumo: typeof textoResumo === "function" ? textoResumo() : "",
-        observacao: ($("#p-obs") || {}).value || "",
-        autorizou_contrato: i === "sim",
-      });
-      sent.then(function (ok) {
-        if (aviso && ok) { aviso.hidden = false; aviso.textContent = "Proposta enviada para " + first + (i === "sim" ? ", com o pedido para seguir ao contrato se for aprovada." : "."); }
-      });
-    };
   }
 
   /* ---------- início ---------- */

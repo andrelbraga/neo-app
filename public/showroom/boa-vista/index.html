@@ -585,24 +585,27 @@ section.hero #btn-conhecer.btn.primary{width:100%;justify-content:center;backgro
 
 <section class="block" id="negociar" aria-labelledby="h-neg" data-f="secoes.proposta">
   <div class="ng">
-    <p class="eyebrow">Uma negociação possível começa aqui</p><h2 id="h-neg">A sua forma de chegar lá.</h2><p class="offer-intro">Explore entrada, parcelas, reforços, chaves e até três veículos. Você pode revisar tudo antes de compartilhar.</p>
+    <h2 id="h-neg">Sua proposta</h2>
 
     <p class="netapa">Etapa 1 · Sua condição</p>
     <div class="ncc">
-      <div class="nt">Exemplo de condição comercial</div>
-      <div class="nlinha"><div><span id="n-ref-nome">Valor de lançamento</span><small>valor herdado do protótipo; não aprovado</small></div><b class="nref" id="n-ref-val">R$ 460.000</b></div>
-      <div class="nlinha nmain"><div>Preço de simulação<small>campanha de referência até <span id="n-validade">30/11/2026</span>, a validar com a incorporadora</small></div><b id="n-promo-val">R$ 370.000</b></div>
+      <div class="nt">Condição comercial do empreendimento</div>
+      <div class="nlinha"><div><span id="n-ref-nome">Valor de lançamento</span><small>referência da incorporadora</small></div><b class="nref" id="n-ref-val">R$ 460.000</b></div>
+      <div class="nlinha nmain"><div>Condição promocional<small>válida até <span id="n-validade">30/11/2026</span>, conforme regras da campanha</small></div><b id="n-promo-val">R$ 370.000</b></div>
     </div>
 
     <div class="ncard">
       <div class="nct"><span>Monte sua proposta personalizada</span></div>
-      <label class="nk" for="p-preco">Valor que você quer propor (R$)</label><input class="nv" id="p-preco" type="number" min="0.01" step="0.01" value="370000"><div class="npills" role="group" aria-label="Composição do pagamento">
-        <button class="npill on" type="button" id="pill-ent" aria-pressed="true">Entrada + parcelas</button>
+      <div class="npills" role="group" aria-label="Composição do pagamento">
+        <button class="npill on" type="button" id="pill-ent" aria-pressed="true">Entrada e parcelas do saldo</button>
         <button class="npill" type="button" id="btn-veic" aria-pressed="false">Incluir veículo</button>
       </div>
       <div class="ncampos">
-        <div><label class="nk" for="p-valor">Entrada em dinheiro</label><input class="nv" id="p-valor" type="number" inputmode="decimal" value="150000"></div>
+        <div><label class="nk" id="l-ent" for="p-valor">Entrada</label><input class="nv" id="p-valor" type="number" inputmode="decimal" value="150000"></div>
         <div><label class="nk" for="p-parc">Parcelas do saldo</label><select class="nv" id="p-parc"><option value="36" selected>36</option><option value="24">24</option><option value="12">12</option></select></div>
+      </div>
+      <div class="ncampos" data-f-inv="condicao.entrada_so_avista" hidden>
+        <div><label class="nk" for="p-entn">Parcelas da entrada</label><select class="nv" id="p-entn"><option value="2">2</option><option value="3" selected>3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option></select></div>
       </div>
       <div class="ncampos">
         <div><label class="nk" for="p-refn">Quantidade de reforços</label><input class="nv" id="p-refn" type="number" inputmode="numeric" min="0" max="12" value="2"></div>
@@ -612,24 +615,19 @@ section.hero #btn-conhecer.btn.primary{width:100%;justify-content:center;backgro
         <div><label class="nk" for="p-chaves">Pagamento nas chaves (R$)</label><input class="nv" id="p-chaves" type="number" inputmode="decimal" min="0" placeholder="0" value=""></div>
       </div>
       <div id="c-veic" class="ncard nveic" hidden>
-        <div class="nct"><span>Veículo na proposta</span></div>
+        <div class="nct"><span>Veículos na proposta</span></div>
         <div class="ncampos">
-          <div><label class="nk" for="p-mod">Marca e modelo</label><input class="nv" id="p-mod" type="text" placeholder="ex.: Toyota Corolla"></div>
-          <div><label class="nk" for="p-ano">Ano</label><input class="nv" id="p-ano" type="number" inputmode="numeric" placeholder="ex.: 2022"></div>
+          <div><label class="nk" for="p-nveic">Quantidade de veículos</label><select class="nv" id="p-nveic"><option value="1" selected>1 veículo</option><option value="2">2 veículos</option><option value="3">3 veículos</option></select></div>
         </div>
-        <div class="ncampos">
-          <div><label class="nk" for="p-km">Quilometragem (km)</label><input class="nv" id="p-km" type="number" inputmode="numeric" placeholder="ex.: 45000"></div>
-          <div><label class="nk" for="p-vveic">Valor estimado (referência, R$)</label><input class="nv" id="p-vveic" type="number" inputmode="decimal" placeholder="0,00"></div>
-        </div>
-        <div><label class="nk" for="p-estado">Como está o veículo</label><textarea class="nta2" id="p-estado" rows="3" maxlength="400" placeholder="ex.: documentação em dia, sem sinistro, funilaria com um arranhão na porta traseira, mecânica revisada recentemente."></textarea></div>
-        <div class="nfotos"><span class="nk">Fotos do veículo</span><input id="p-fotos" type="file" accept="image/*" multiple aria-label="Fotos do primeiro veículo"><div id="photo-preview"></div><p class="nnota">Fotos selecionadas ficam apenas nesta sessão, como prévia; não são enviadas nem salvas no perfil.</p></div>
-        <div id="extra-vehicles"></div><button type="button" class="nanexo" id="add-vehicle">+ Adicionar outro veículo (até 3)</button><p class="nnota">Valores sugeridos sujeitos à avaliação. Documentação, estado e fotos não representam aprovação de permuta.</p>
+        <div id="veic-lista" class="veic-lista"></div>
+        <div class="nfotos"><span class="nk">Fotos dos veículos</span><button class="nanexo" type="button" id="p-fotos">+ Anexar fotos</button><p class="nnota">O envio de fotos será liberado quando o site estiver publicado.</p></div>
+        <p class="nnota">Valores sujeitos à avaliação da incorporadora.</p>
       </div>
     </div>
 
     <div class="nres" aria-live="polite">
       <div class="nrow"><span>Entrada</span><b id="r-ent">R$ 150.000</b></div>
-      <div class="nrow" id="r-vei-l" hidden><span>Veículo (estimado)</span><b id="r-vei">—</b></div>
+      <div class="nrow" id="r-vei-l" hidden><span id="r-vei-t">Veículo (estimado)</span><b id="r-vei">—</b></div>
       <div class="nrow" id="r-refs-w"><span id="r-refs-l">2 reforços de R$ 15.000</span><b id="r-refs">R$ 30.000</b></div>
       <div class="nrow" id="r-chaves-w"><span>Pagamento nas chaves</span><b id="r-chaves">R$ 0</b></div>
       <div class="nsal"><span>Saldo a parcelar</span><span id="r-saldo">R$ 190.000</span></div>
@@ -639,33 +637,33 @@ section.hero #btn-conhecer.btn.primary{width:100%;justify-content:center;backgro
     <button class="nbtn nghost" type="button" id="ver-prop">Gerar proposta completa</button>
     <div class="ncard" id="p-gerada" hidden aria-live="polite"></div>
 
-    <p class="netapa">Etapa 2 · Confira seu rascunho</p>
+    <p class="netapa">Etapa 2 · Confira e envie</p>
     <div class="ncard">
-      <div class="nct"><span>Contato para incluir no resumo (opcional)</span></div>
+      <div class="nct"><span>Seus dados para o corretor retornar</span></div>
       <div class="ncampos">
         <div><label class="nk" for="p-nome">Seu nome</label><input class="nv" id="p-nome" type="text" autocomplete="name" placeholder="ex.: João Silva"></div>
         <div><label class="nk" for="p-zap">WhatsApp</label><input class="nv" id="p-zap" type="tel" inputmode="tel" autocomplete="tel" placeholder="(95) 99123-4567"></div>
       </div>
       <p class="naviso" id="p-aviso-env" hidden></p>
-      <button class="nbtn nghost" type="button" id="p-enviar">Revisar proposta e intenção</button>
+      <button class="nbtn nghost" type="button" id="p-enviar">Enviar para análise</button>
       <p class="naviso" id="p-demo" hidden></p>
     </div>
-    <p class="netapa">Etapa 3 · Sua intenção</p>
+    <p class="netapa">Etapa 3 · Fechamento</p>
     <div class="ndec" id="ndec" role="region" aria-label="Fechamento da proposta">
       <button type="button" class="ndec-x" id="ndec-x" aria-label="Fechar">×</button>
       <p class="ndec-pronta">Sua proposta está pronta</p>
       <h3>Se eu conseguir aprovar sua proposta nessas condições, posso subir o contrato?</h3>
-      <p>Registre sua intenção no resumo. Este protótipo não emite contrato, não reserva o imóvel e não envia dados ao corretor.</p>
+      <p>Esta etapa prepara a documentação. A aprovação final e a assinatura dependem da análise.</p>
       <div class="nobs">
         <label class="nobsl" for="p-obs">Observação (opcional)</label>
         <textarea class="nta" id="p-obs" maxlength="400" placeholder="Se quiser, deixe aqui um comentário para agilizar a negociação."></textarea>
-        <button class="nsubir" id="p-subir" type="button">Sim, se a proposta for aprovada</button><button class="nconv" type="button" id="p-nao">Ainda não</button><button class="nconv" type="button" id="p-observar">Quero deixar uma observação</button>
+        <button class="nsubir" id="p-subir" type="button">✓ Subir o contrato</button>
       </div>
-      <p class="nsujeita" id="p-sujeita">Se a condição sair das regras da campanha, ela aparece como "Sujeita à aprovação especial" neste rascunho.</p>
+      <p class="nsujeita" id="p-sujeita">Se a condição sair das regras da campanha, ela aparece como "Sujeita à aprovação especial" antes do envio.</p>
       <p class="naviso" id="p-aviso" hidden></p>
       <button class="nconv" type="button" id="p-conversa">Prefiro conversar com o corretor</button>
     </div>
-    <div class="export-actions"><button type="button" id="copy-summary">Copiar resumo</button><button type="button" id="export-data">Exportar JSON</button><button type="button" id="print-summary">Imprimir / salvar PDF</button></div><p id="action-feedback" role="status"></p><p class="nlegal">Nesta versão, o resumo pode ser copiado, exportado ou impresso por você. Nenhum envio automático é feito.</p>
+    <p class="nlegal">Nada é enviado até você confirmar.</p>
   </div>
 </section>
 
@@ -980,20 +978,22 @@ document.getElementById('btn-conhecer').addEventListener('click', () => setTimeo
 
 /* Eventos anônimos locais; implementação em metrics/collector.js. */
 function regAcao(k){ window.BVMetrics?.track(k); }
+/* Proposta com nome e WhatsApp: a ponte (neo360-bridge.js) envia ao corretor. */
+function regGravaProposta(dados){}
 /* ---------- proposta (versão 4): condição da campanha, composição ao vivo; nada é enviado daqui ---------- */
 const $ = id => document.getElementById(id);
-let CAMPANHA = { nomeRef: 'Valor de lançamento', ref: 460000, promo: 370000, validade: '30/11/2026', tipo: 'Condição especial de lançamento', entMin: 120000, entSug: 150000, parcMin: 12, parcMax: 36, refN: 2, refV: 15000, chaves: 0 };
-const num = el => { const v = Number(el.value); return Number.isFinite(v) ? Math.max(0,v) : 0; };
+let CAMPANHA = { nomeRef: 'Valor de lançamento', ref: 460000, promo: 370000, validade: '30/11/2026', tipo: 'Condição especial de lançamento', entMin: 120000, entSug: 150000, entrada_so_avista: true, parcMin: 12, parcMax: 36, refN: 2, refV: 15000, chaves: 0 };
+const num = el => { const v = parseFloat(el.value); return isNaN(v) ? 0 : v; };
 const brl = v => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const brl0 = v => 'R$ ' + Math.round(v).toLocaleString('pt-BR');
 let veic = false;
 function calc(){
   const ent = num($('p-valor')), par = parseInt($('p-parc').value, 10);
-  const vei = veic ? num($('p-vveic')) + [...document.querySelectorAll('.extra-value')].reduce((t,e)=>t+num(e),0) : 0;
+  const vei = veic ? VEICS.slice(0, nVeic()).reduce((a, v) => a + (parseFloat(v.valor) || 0), 0) : 0;
   const refN = Math.max(0, Math.round(num($('p-refn')))), refV = Math.max(0, num($('p-refv')));
   const chaves = Math.max(0, num($('p-chaves')));
   const refs = refN * refV;
-  const saldo = num($('p-preco')) - ent - vei - refs - chaves;
+  const saldo = CAMPANHA.promo - ent - vei - refs - chaves;
   return { ent, par, vei, refN, refV, refs, chaves, saldo };
 }
 function render(){
@@ -1022,23 +1022,30 @@ function render(){
   $('btn-veic').classList.toggle('on', veic);
   $('c-veic').hidden = !veic;
   $('r-vei-l').hidden = !veic;
-  $('r-ent').textContent = brl0(c.ent);
+  const entN = parseInt($('p-entn').value, 10) || 1;
+  $('l-ent').textContent = 'Entrada (mínimo de ' + brl0(CAMPANHA.entMin) + ')';
+  $('pill-ent').textContent = window.ENTRADA_PARCELADA ? 'Entrada parcelada e saldo' : 'Entrada e parcelas do saldo';
+  $('r-ent').textContent = window.ENTRADA_PARCELADA ? brl0(c.ent) + ' em ' + entN + 'x de ' + brl0(c.ent / entN) : brl0(c.ent);
   $('r-vei').textContent = brl0(c.vei);
-  $('r-saldo').textContent = c.saldo >= 0 ? brl(c.saldo) : 'Excesso de ' + brl(-c.saldo);
+  $('r-vei-t').textContent = nVeic() > 1 ? nVeic() + ' veículos (estimado)' : 'Veículo (estimado)';
+  $('r-saldo').textContent = c.saldo >= 0 ? brl0(c.saldo) : 'acima do preço';
   $('r-par-l').textContent = 'Parcela estimada em ' + c.par + ' vezes';
   $('r-parc').textContent = (c.saldo > 0 && c.par) ? brl(c.saldo / c.par) : '—';
   const fora = c.ent < CAMPANHA.entMin || c.saldo < 0;
   $('p-sujeita').textContent = fora
     ? 'Sua condição está fora das regras da campanha, então ela segue como "Sujeita à aprovação especial".'
-    : 'Se a condição sair das regras da campanha, ela aparece como "Sujeita à aprovação especial" neste rascunho.';
+    : 'Se a condição sair das regras da campanha, ela aparece como "Sujeita à aprovação especial" antes do envio.';
 }
 function textoResumo(){
-  const c = calc(), partes = ['entrada ' + brl0(c.ent), 'saldo de ' + brl0(Math.max(0, c.saldo)) + ' em ' + c.par + 'x (parcela estimada ' + (c.saldo > 0 ? brl(c.saldo / c.par) : '—') + ')'];
+  const c = calc(), partes = [(window.ENTRADA_PARCELADA ? 'entrada de ' + brl0(c.ent) + ' em ' + (parseInt($('p-entn').value, 10) || 1) + 'x de ' + brl0(c.ent / (parseInt($('p-entn').value, 10) || 1)) : 'entrada de ' + brl0(c.ent)), 'saldo de ' + brl0(Math.max(0, c.saldo)) + ' em ' + c.par + 'x (parcela estimada ' + (c.saldo > 0 ? brl(c.saldo / c.par) : '—') + ')'];
   if (c.refs > 0) partes.push(c.refN + (c.refN === 1 ? ' reforço' : ' reforços') + ' de ' + brl0(c.refV) + ' (total ' + brl0(c.refs) + ')');
   if (c.chaves > 0) partes.push('pagamento nas chaves de ' + brl0(c.chaves));
-  if (veic) partes.push('veículo ' + ($('p-mod').value.trim() || 'modelo não informado') + (c.vei ? ' avaliado em ' + brl0(c.vei) : ''));
+  if (veic) VEICS.slice(0, nVeic()).forEach((v, k) => {
+    const d = [(v.mod || '').trim() || 'modelo não informado', v.ano ? 'ano ' + v.ano : '', v.km ? v.km + ' km' : ''].filter(Boolean).join(', ');
+    partes.push('veículo ' + (k + 1) + ': ' + d + (parseFloat(v.valor) ? ' avaliado em ' + brl0(parseFloat(v.valor)) : '') + ((v.estado || '').trim() ? ' (' + v.estado.trim() + ')' : ''));
+  });
   const nome = $('p-nome').value.trim(), zap = $('p-zap').value.trim(), obs = $('p-obs').value.trim();
-  return 'Rascunho demonstrativo para 104-A, identificação a confirmar (valor proposto ' + brl0(num($('p-preco'))) + '): ' + partes.join('; ') + '.' + (nome ? ' Nome: ' + nome + '.' : '') + (zap ? ' WhatsApp: ' + zap + '.' : '') + (obs ? ' Observação: ' + obs : '');
+  return 'Proposta para o Apartamento 104-A (promoção ' + brl0(CAMPANHA.promo) + '): ' + partes.join('; ') + '.' + (nome ? ' Nome: ' + nome + '.' : '') + (zap ? ' WhatsApp: ' + zap + '.' : '') + (obs ? ' Observação: ' + obs : '');
 }
 const avisa = (el, t) => { el.hidden = false; el.textContent = t; };
 /* fechamento flutuante: depois de enviar a proposta, a etapa 3 sobe e fica no ar até a pessoa tocar */
@@ -1062,10 +1069,44 @@ function fechaFechamento(semSubir){
 $('ndec-x').addEventListener('click', () => fechaFechamento(true));
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && ndecFundo) fechaFechamento(true); });
 $('btn-veic').addEventListener('click', () => { veic = !veic; regAcao('veiculo_' + (veic ? 'on' : 'off')); render(); });
-['p-preco','p-valor', 'p-vveic', 'p-refn', 'p-refv', 'p-chaves'].forEach(id => $(id).addEventListener('input', () => { $(id).dataset.tocado = '1'; render(); }));
-['p-valor', 'p-refn', 'p-refv', 'p-chaves', 'p-vveic'].forEach(id => $(id).addEventListener('focus', e => e.target.select()));
+['p-valor', 'p-refn', 'p-refv', 'p-chaves'].forEach(id => $(id).addEventListener('input', () => { $(id).dataset.tocado = '1'; render(); }));
+['p-valor', 'p-refn', 'p-refv', 'p-chaves'].forEach(id => $(id).addEventListener('focus', e => e.target.select()));
+/* veículos: a pessoa escolhe quantos (1 a 3) e a página prepara um cartão para cada um */
+function montaVeiculos(){
+  const lista = $('veic-lista'), n = nVeic();
+  while (VEICS.length < n) VEICS.push({ mod: '', ano: '', km: '', valor: '', estado: '' });
+  lista.replaceChildren();
+  for (let k = 0; k < n; k++){
+    const v = VEICS[k], id = s => 'pv' + k + '-' + s;
+    const c = document.createElement('div'); c.className = 'veic-card'; c.dataset.k = k;
+    c.innerHTML = `<div class="veic-tit">Veículo ${k + 1}</div>
+      <div class="ncampos">
+        <div><label class="nk" for="${id('mod')}">Marca e modelo</label><input class="nv" id="${id('mod')}" data-f="mod" type="text" placeholder="ex.: Toyota Corolla"></div>
+        <div><label class="nk" for="${id('ano')}">Ano</label><input class="nv" id="${id('ano')}" data-f="ano" type="number" inputmode="numeric" placeholder="ex.: 2022"></div>
+      </div>
+      <div class="ncampos">
+        <div><label class="nk" for="${id('km')}">Quilometragem (km)</label><input class="nv" id="${id('km')}" data-f="km" type="number" inputmode="numeric" placeholder="ex.: 45000"></div>
+        <div><label class="nk" for="${id('valor')}">Valor estimado (referência, R$)</label><input class="nv" id="${id('valor')}" data-f="valor" type="number" inputmode="decimal" placeholder="0,00"></div>
+      </div>
+      <div><label class="nk" for="${id('estado')}">Observações sobre este veículo</label><textarea class="nta2" id="${id('estado')}" data-f="estado" rows="3" maxlength="400" placeholder="ex.: documentação em dia, sem sinistro, um arranhão na porta traseira, revisado recentemente."></textarea></div>`;
+    c.querySelectorAll('[data-f]').forEach(el => { el.value = v[el.dataset.f] || ''; });
+    lista.appendChild(c);
+  }
+}
+function nVeic(){ const s = $('p-nveic'); return s ? Math.max(1, Math.min(3, parseInt(s.value, 10) || 1)) : 1; }
+const VEICS = [];
+$('p-nveic').addEventListener('change', () => { montaVeiculos(); render(); });
+$('veic-lista').addEventListener('input', e => {
+  const el = e.target.closest('[data-f]'); if (!el) return;
+  const k = +el.closest('.veic-card').dataset.k;
+  VEICS[k][el.dataset.f] = el.value;
+  if (el.dataset.f === 'valor') render();
+});
+$('veic-lista').addEventListener('focusin', e => { const el = e.target.closest('[data-f="valor"]'); if (el) el.select(); });
+montaVeiculos();
 document.addEventListener('bv:condicao', e => { CAMPANHA = { ...CAMPANHA, ...(e.detail || {}) }; render(); });
 $('p-parc').addEventListener('change', render);
+$('p-entn').addEventListener('change', render);
 document.querySelectorAll('#negociar .nop[data-foco]').forEach(b => b.addEventListener('click', () => {
   document.querySelectorAll('#negociar .nop').forEach(o => o.classList.toggle('on', o === b));
   $(b.dataset.foco).focus({ preventScroll: true });
@@ -1077,13 +1118,13 @@ function geraPropostaCompleta(){
     [c.refN + (c.refN === 1 ? ' reforço' : ' reforços') + ' de ' + brl0(c.refV), brl0(c.refs)],
     ['Pagamento nas chaves', brl0(c.chaves)]
   ];
-  if (veic) linhas.push(['Veículo (estimado)', c.vei ? brl0(c.vei) : '—']);
+  if (veic) VEICS.slice(0, nVeic()).forEach((v, k) => linhas.push(['Veículo ' + (k + 1) + ((v.mod || '').trim() ? ' · ' + v.mod.trim() : '') + ' (estimado)', parseFloat(v.valor) ? brl0(parseFloat(v.valor)) : '—']));
   linhas.push(['Saldo a parcelar', c.saldo >= 0 ? brl0(c.saldo) : 'acima do preço']);
   linhas.push(['Parcela estimada em ' + c.par + ' vezes', (c.saldo > 0 && c.par) ? brl(c.saldo / c.par) : '—']);
   box.replaceChildren();
   const t = document.createElement('div');
   t.className = 'nt';
-  t.textContent = 'Rascunho · 104-A a confirmar · valor proposto ' + brl0(num($('p-preco')));
+  t.textContent = 'Proposta completa · Apartamento 104-A · promoção ' + brl0(CAMPANHA.promo);
   box.appendChild(t);
   linhas.forEach(([a, b]) => {
     const r = document.createElement('div'); r.className = 'nrow';
@@ -1097,8 +1138,47 @@ function geraPropostaCompleta(){
   box.hidden = false;
 }
 $('ver-prop').addEventListener('click', () => { geraPropostaCompleta(); $('p-gerada').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); regAcao('gerar_proposta'); });
-$('p-enviar').addEventListener('click', () => { if(!validProposal()) return; geraPropostaCompleta(); abreFechamento(); });
-$('p-subir').addEventListener('click', () => setIntent('sim'));
+$('p-enviar').addEventListener('click', () => {
+  const nome = $('p-nome'), zap = $('p-zap');
+  if (!nome.value.trim() || !zap.value.trim()){
+    avisa($('p-aviso-env'), 'Informe seu nome e WhatsApp para o corretor retornar.');
+    (nome.value.trim() ? zap : nome).focus();
+    return;
+  }
+  regGravaProposta({ nome: nome.value.trim(), whatsapp: zap.value.trim(), resumo: textoResumo(), observacao: $('p-obs').value.trim() });
+  regAcao('enviou_proposta');
+  if (location.hash === '#demo') {
+    const bt = $('p-enviar');
+    bt.classList.add('demo-lima');
+    bt.textContent = 'Enviado para análise (demonstração)';
+    avisa($('p-demo'), 'Demonstração: nada foi enviado de verdade. Esta marcação só aparece com #demo no endereço.');
+    setTimeout(abreFechamento, 700);
+    return;
+  }
+  avisa($('p-aviso-env'), 'Recebemos sua proposta com nome e WhatsApp. Seu consultor vai retornar pelo número informado.');
+  setTimeout(abreFechamento, 700);
+});
+$('p-subir').addEventListener('click', () => {
+  const nome = $('p-nome'), zap = $('p-zap');
+  if (!nome.value.trim() || !zap.value.trim()){
+    avisa($('p-aviso'), 'Antes de subir o contrato, informe seu nome e WhatsApp na etapa 2.');
+    nome.focus();
+    return;
+  }
+  if (location.hash === '#demo') {
+    const bt = $('p-subir');
+    bt.classList.add('demo-lima');
+    bt.textContent = 'Contrato marcado para subir (teste)';
+    avisa($('p-aviso'), 'Teste: nada foi enviado nem assinado. Só o registro de teste foi marcado no painel #registro.');
+    $('ndec').classList.add('parado');
+    regAcao('subir_contrato_teste');
+    return;
+  }
+  regGravaProposta({ nome: nome.value.trim(), whatsapp: zap.value.trim(), resumo: textoResumo(), observacao: $('p-obs').value.trim(), autorizou_contrato: true, autorizado_em: new Date().toISOString() });
+  avisa($('p-aviso'), 'Ainda não é possível preparar o contrato por esta página. Fale diretamente com seu consultor.');
+  $('ndec').classList.add('parado');
+  regAcao('subir_contrato');
+});
 $('p-conversa').addEventListener('click', () => {
   fechaFechamento(false);
   regAcao('prefere_corretor');
@@ -1376,7 +1456,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 /* ================= configuração: funções ligadas/desligadas (banco do artefato; padrão = tudo ligado) ================= */
 const CLAUDE = window.claude || { use: async () => null };
 const PADRAO = {
-  condicao: { nomeRef: 'Valor de lançamento', ref: 460000, promo: 370000, validade: '30/11/2026', tipo: 'Condição especial de lançamento', entMin: 120000, entSug: 150000, parcMin: 12, parcMax: 36, refN: 2, refV: 15000, chaves: 0 },
+  condicao: { nomeRef: 'Valor de lançamento', ref: 460000, promo: 370000, validade: '30/11/2026', tipo: 'Condição especial de lançamento', entMin: 120000, entSug: 150000, entrada_so_avista: true, parcMin: 12, parcMax: 36, refN: 2, refV: 15000, chaves: 0 },
   corretor: { altera_preco: false, liga_secoes: false },
   secoes: { hero: true, galeria: true, fatos: true, planta: true, torres: true, simulador: false, proposta: true, contato: true },
   planta3d: { maquete_ativo: true, apto_ativo: true, posicao_solar: true, janelas_luz: true, moveis: true, entorno: true, sol_confirmado: false, desc_original: 'Planta do encarte, Torre A, tipo 01, com proporções aproximadas. Não identifica a unidade 104-A.', desc_apto: 'Decorado 3D de referência. Identificação, rotação e espelhamento da 104-A ainda não confirmados.', desc_maq: 'Maquete em volumetria estimada do empreendimento. Toque no apartamento 104-A para destacá-lo.' },
@@ -1404,6 +1484,7 @@ const setPath = (path, valor) => path.split('.').reduceRight((acc, k) => ({ [k]:
 const escapa = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 function aplicaConfig(){
+  window.ENTRADA_PARCELADA = lê(cfg, 'condicao.entrada_so_avista') === false;
   document.querySelectorAll('[data-f]').forEach(el => { el.hidden = lê(cfg, el.dataset.f) === false; });
   document.querySelectorAll('[data-f-inv]').forEach(el => { el.hidden = lê(cfg, el.dataset.fInv) === true; });
   document.querySelectorAll('[data-txt]').forEach(el => { const v = lê(cfg, el.dataset.txt); el.textContent = v == null ? '' : String(v); });
