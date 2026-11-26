@@ -16,6 +16,8 @@ export interface Broker {
   agency_id: string | null;
   agency_name: string;
   agency_logo_url: string;
+  /** Foto do corretor na API (RN-01.11): junte com o endereço da API (`mediaUrl`); vazio sem foto. */
+  photo_path: string;
   active: boolean;
   leads_count: number;
   created_at: string;

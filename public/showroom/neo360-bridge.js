@@ -409,6 +409,19 @@
         ["letter-spacing", ".04em"], ["border-radius", "inherit"]].forEach(function (p) { av.style.setProperty(p[0], p[1], "important"); });
       foto.replaceChildren(av);
       foto.setAttribute("aria-label", "Seu consultor, " + broker.name);
+      // Foto que o corretor enviou no perfil (RN-01.11); sem ela, ou se não carregar, ficam as iniciais.
+      if (broker.photo_path) {
+        var img = document.createElement("img");
+        img.alt = "";
+        [["width", "100%"], ["height", "100%"], ["object-fit", "cover"], ["border-radius", "inherit"], ["display", "none"]]
+          .forEach(function (p) { img.style.setProperty(p[0], p[1], "important"); });
+        img.onload = function () {
+          img.style.setProperty("display", "block", "important");
+          av.remove();
+        };
+        img.src = API + broker.photo_path;
+        foto.appendChild(img);
+      }
     }
     var quem = $(".mz-quem");
     if (quem) quem.textContent = tag;
@@ -584,6 +597,8 @@
               return { modelo: cut(v.mod, 40), ano: cut(v.ano, 4), km: cut(v.km, 9), valor: r(v.valor) };
             }),
         sujeita_aprovacao: c.ent < CAMPANHA.entMin || c.saldo < 0,
+        // Fotos dos veículos já enviadas ao bucket (RN-03.23); a API liga à proposta só as deste cliente.
+        fotos: veic ? vehiclePhotos.map(function (f) { return f.id; }) : [],
       };
     } catch (e) {
       return null;
@@ -643,6 +658,102 @@
       "background:#25D366;color:#fff;font:600 15px Inter,system-ui,sans-serif;text-decoration:none";
     a.addEventListener("click", function () { track("whatsapp", { origem: "proposta" }); });
     ref.insertAdjacentElement("afterend", a);
+  }
+
+  /* ---------- fotos dos veículos (RN-03.23, ADR-0029) ---------- */
+  // O cliente anexa até 6 fotos; cada uma vai reduzida para a API assim que escolhida e só chega ao corretor
+  // junto com a proposta. Sem a API (falha de rede), a foto não entra e o aviso diz isso.
+  var PHOTO_MAX = 6;
+  var vehiclePhotos = [];
+  var PHOTO_CSS =
+    ".neo-fotos{display:flex;flex-wrap:wrap;gap:8px}.neo-fotos figure{position:relative;width:76px;height:76px;margin:0;" +
+    "border-radius:10px;overflow:hidden;background:#efe9da;border:1px solid #e2dccd}.neo-fotos img{width:100%;height:100%;" +
+    "object-fit:cover;display:block}.neo-fotos figure.enviando img{opacity:.45}.neo-fotos button{all:unset;position:absolute;" +
+    "top:3px;right:3px;width:22px;height:22px;border-radius:50%;background:rgba(13,21,16,.75);color:#fff;font:700 14px/22px " +
+    "system-ui;text-align:center;cursor:pointer}.neo-fotos button:focus-visible{outline:2px solid #b38d3e}";
+
+  // Reduz a foto (lado maior até 1600 px, JPEG) para o envio ser rápido no celular; se o navegador não
+  // conseguir ler o arquivo, vai o original e a API confere.
+  function shrink(file) {
+    if (typeof createImageBitmap !== "function") return Promise.resolve(file);
+    return createImageBitmap(file).then(function (bmp) {
+      var k = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+      var c = document.createElement("canvas");
+      c.width = Math.round(bmp.width * k);
+      c.height = Math.round(bmp.height * k);
+      c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+      return new Promise(function (ok) { c.toBlob(function (b) { ok(b || file); }, "image/jpeg", 0.85); });
+    }).catch(function () { return file; });
+  }
+
+  function setupVehiclePhotos() {
+    var btn = $("#p-fotos");
+    if (!btn) return;
+    var st = el("style", "", PHOTO_CSS);
+    document.head.appendChild(st);
+    var input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/jpeg,image/png,image/webp,image/*";
+    input.multiple = true;
+    input.hidden = true;
+    var list = el("div", "neo-fotos");
+    list.setAttribute("aria-label", "Fotos anexadas");
+    var msg = el("p", "nnota");
+    msg.setAttribute("role", "status");
+    msg.hidden = true;
+    btn.insertAdjacentElement("afterend", msg);
+    btn.insertAdjacentElement("afterend", list);
+    btn.insertAdjacentElement("afterend", input);
+    var say = function (t) { msg.hidden = !t; msg.textContent = t || ""; };
+    var refresh = function () {
+      btn.hidden = vehiclePhotos.length + list.querySelectorAll(".enviando").length >= PHOTO_MAX;
+    };
+
+    btn.addEventListener("click", function () { input.click(); });
+    input.addEventListener("change", function () {
+      var files = Array.prototype.slice.call(input.files || []);
+      input.value = "";
+      var room = PHOTO_MAX - vehiclePhotos.length - list.querySelectorAll(".enviando").length;
+      say(files.length > room ? "Até " + PHOTO_MAX + " fotos por proposta." : "");
+      files.slice(0, Math.max(0, room)).forEach(function (file) {
+        var fig = el("figure", "enviando");
+        var img = document.createElement("img");
+        img.alt = "Foto do veículo";
+        img.src = URL.createObjectURL(file);
+        fig.appendChild(img);
+        list.appendChild(fig);
+        refresh();
+        shrink(file).then(function (blob) {
+          if (!token) throw new Error();
+          var form = new FormData();
+          form.append("file", blob, "veiculo.jpg");
+          return fetch(API + "/public/lead/photos", { method: "POST", headers: { "X-Visitor-Token": token }, body: form })
+            .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j && j.data && j.data.error); return j.data; }); });
+        }).then(function (photo) {
+          var item = { id: photo.id, fig: fig };
+          vehiclePhotos.push(item);
+          fig.className = "";
+          var rm = el("button", "", "×");
+          rm.type = "button";
+          rm.setAttribute("aria-label", "Remover foto");
+          rm.addEventListener("click", function () {
+            vehiclePhotos = vehiclePhotos.filter(function (f) { return f !== item; });
+            URL.revokeObjectURL(img.src);
+            fig.remove();
+            say("");
+            refresh();
+          });
+          fig.appendChild(rm);
+          track("acao", { chave: "anexou_foto_veiculo" });
+          refresh();
+        }).catch(function (e) {
+          URL.revokeObjectURL(img.src);
+          fig.remove();
+          say((e && e.message) ? "Não foi possível anexar a foto: " + e.message + "." : "Não foi possível anexar a foto. Tente de novo.");
+          refresh();
+        });
+      });
+    });
   }
 
   var pf = $("#pf-form");
@@ -737,6 +848,7 @@
   call("GET", "/public/showroom/" + encodeURIComponent(SLUG) + "/" + encodeURIComponent(CODE))
     .then(function (room) {
       fillBroker(room);
+      setupVehiclePhotos();
       if (V11) adaptV11();
       applyPage(room.development && room.development.page_config);
       showArrival(room);

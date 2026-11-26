@@ -32,3 +32,4 @@ Decisões de arquitetura e produto no formato MADR ([template](template.md)).
 | [ADR-0026](ADR-0026-chegada-exclusiva-do-cliente.md) | A apresentação abre com um convite pessoal ao cliente (saudação pelo nome, corretor e empreendimento) | aceita |
 | [ADR-0027](ADR-0027-editor-da-pagina-de-apresentacao.md) | Editor da página de apresentação no admin: seções, blocos (3D) e textos, com prévia ao vivo e publicar | aceita |
 | [ADR-0028](ADR-0028-fila-de-envio-pelo-whatsapp.md) | Fila de envio pelo WhatsApp sem a API da Meta: o corretor escolhe os clientes, envia um por um e confirma | aceita |
+| [ADR-0029](ADR-0029-fotos-no-bucket.md) | Fotos no bucket S3 (Railway): foto do corretor no cartão da apresentação e fotos dos veículos na proposta | aceita |

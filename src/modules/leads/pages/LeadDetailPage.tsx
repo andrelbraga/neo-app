@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Archive, ArchiveRestore, ArrowRight, CalendarDays, Clock3, FileSignature, MessageCircle, Pencil, Phone, PencilLine, Plus, Star, Tag, X } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useCallback, useState, type ReactNode } from "react";
 import { Link, useParams } from "react-router-dom";
 import { cn } from "@/shared/lib/cn";
 import { formatBRL, formatDateTime, formatPhone, timeAgo } from "@/shared/lib/format";
@@ -67,6 +67,8 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
   const archive = useArchive();
   const broker = mode === "corretor";
   const back = broker ? "/painel/clientes" : "/admin/clientes";
+  // Fotos dos veículos das propostas (RN-03.23): pedem o login, então vêm pelo serviço.
+  const photo = useCallback((photoId: string) => (broker ? myLeadService.photo(id, photoId) : adminLeadService.photo(id, photoId)), [broker, id]);
   const lead = useQuery({ queryKey: ["lead", mode, id], queryFn: () => (broker ? myLeadService.get(id) : adminLeadService.get(id)), refetchInterval: 15_000 });
 
   const showActivity = (f?: JourneyFilter) => {
@@ -319,6 +321,7 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
                     whatsapp={wa}
                     onAdjust={broker ? () => setEditing({ base: p }) : undefined}
                     isSale={l.stage === "fechado" && l.sale_proposal_id === p.id}
+                    photo={photo}
                   />
                 ))
               )}
