@@ -311,3 +311,14 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - `ResponsiveTable` virou uma grade (papéis de tabela mantidos): colunas em px são fixas e centralizadas, sem corte; as em % dividem o resto, com `minWidth` opcional. `from="xl"` mostra a tabela só a partir de 1280 px (abaixo, cartões).
 - Lista de clientes (corretor e admin): tabela a partir de 1280 px; mínimos para interesse, etapa e atividade; selo compacto ("2 novas") na linha do telefone, nome inteiro em cima. Profissionais: larguras mínimas e tabela a partir de 1280 px.
 - Conferido no Chromium sem tela com API simulada em 1024, 1100, 1280 e 1440 px (corretor: clientes; admin: clientes, profissionais e usuários), com medida de cada coluna. Testes: app com typecheck, lint e 133 testes.
+
+## 25/11/2026 — Veículos da proposta na visão do corretor (fotos, valores e observações)
+
+- Pedido: "Os carros que são anexados à proposta quero que sejam possíveis ser vistos por parte da visão do corretor [...] assim como valores e etc." RN-03.23 atualizada (cópia no neo-api).
+- Lacunas fechadas:
+  - as fotos iam num bloco só, sem dizer de qual veículo eram: com 2 ou 3 veículos, a apresentação mostra "Fotos do: Veículo 1 · Corolla" e cada miniatura leva "V1", "V2";
+  - as observações que o cliente escreve em cada veículo ("Observações sobre este veículo") não iam para o corretor: agora vão em `veiculos[i].estado`, com `veiculos[i].fotos`;
+  - na ficha, veículos e fotos eram seções separadas: agora é um cartão por veículo (modelo, ano, km, valor estimado, observações do cliente e as fotos dele), com total estimado quando há mais de um, e "Outras fotos" para as que vieram sem veículo.
+- Foto ampliada ao clicar, com anterior, próxima e "Abrir em tamanho real", por cima da página inteira (fora da gaveta da ficha).
+- Só valem as fotos que a API ligou à proposta (`condition.fotos`); id de foto em `veiculos[i].fotos` que não foi ligado não aparece. Com um veículo só, as fotos sem veículo (propostas anteriores) são dele.
+- Conferido no Chromium sem tela com API simulada (ficha com dois veículos e fotos reais do empreendimento como exemplo). Testes: app com typecheck, lint, 135 testes e build.

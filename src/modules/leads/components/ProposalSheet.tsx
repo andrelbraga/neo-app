@@ -1,11 +1,12 @@
-import { BadgeCheck, Car, Check, Copy, FileSignature, KeyRound, MessageCircle, PencilLine, Quote, UserRound } from "lucide-react";
+import { BadgeCheck, Car, Check, ChevronLeft, ChevronRight, Copy, FileSignature, KeyRound, MessageCircle, PencilLine, Quote, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { cn } from "@/shared/lib/cn";
 import { formatBRL, formatDateTime, formatPhone } from "@/shared/lib/format";
 import { buttonClass } from "@/shared/ui/styles";
-import { Badge } from "@/shared/ui/ui";
-import { conditionText, paymentParts, type Proposal } from "../model/proposal";
+import { Badge, Dialog } from "@/shared/ui/ui";
+import { conditionText, paymentParts, photosByVehicle, type Condition, type Proposal } from "../model/proposal";
 
 // Cores das partes: as mesmas da linha do tempo de pagamento da apresentação, no tom do painel.
 const partColor: Record<string, string> = { entrada: "bg-forest", veiculo: "bg-ink-muted", parcelas: "bg-teal", reforcos: "bg-gold", chaves: "bg-coral" };
@@ -26,11 +27,12 @@ interface Props {
   photo?: (id: string) => Promise<Blob>;
 }
 
-/** Fotos dos veículos que o cliente anexou à proposta (RN-03.23); clique abre a foto inteira. */
-function VehiclePhotos({ ids, load }: { ids: string[]; load: (id: string) => Promise<Blob> }) {
+/** Carrega as fotos dos veículos com o login (corretor ou admin) e libera os endereços ao sair. */
+function usePhotoUrls(ids: string[], load?: (id: string) => Promise<Blob>) {
   const [urls, setUrls] = useState<Record<string, string | null>>({});
   const key = ids.join(",");
   useEffect(() => {
+    if (!load || !key) return;
     let alive = true;
     const made: string[] = [];
     key.split(",").forEach((id) => {
@@ -47,26 +49,118 @@ function VehiclePhotos({ ids, load }: { ids: string[]; load: (id: string) => Pro
       made.forEach((u) => URL.revokeObjectURL(u));
     };
   }, [key, load]);
+  return urls;
+}
 
+/** Miniaturas que abrem a foto ampliada. */
+function Thumbs({ ids, urls, label, onOpen }: { ids: string[]; urls: Record<string, string | null>; label: string; onOpen: (i: number) => void }) {
   return (
-    <section aria-label="Fotos dos veículos">
-      <h4 className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted">Fotos dos veículos</h4>
-      <ul className="flex flex-wrap gap-2">
-        {ids.map((id, i) => {
-          const url = urls[id];
+    <ul className="flex flex-wrap gap-2">
+      {ids.map((id, i) => {
+        const url = urls[id];
+        return (
+          <li key={id} className="h-20 w-20 overflow-hidden rounded-lg bg-cream">
+            {url ? (
+              <button type="button" onClick={() => onOpen(i)} aria-label={`Ampliar foto ${i + 1} de ${label}`} className="block h-full w-full transition hover:opacity-90">
+                <img src={url} alt={`Foto ${i + 1} de ${label}`} className="h-full w-full object-cover" />
+              </button>
+            ) : (
+              <span className="flex h-full items-center justify-center px-2 text-center text-[11px] text-ink-muted">{url === null ? "Foto indisponível" : "Carregando…"}</span>
+            )}
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+/** Foto ampliada, com a anterior e a próxima do mesmo veículo. */
+function PhotoViewer({ list, index, label, urls, onClose, onMove }: { list: string[]; index: number; label: string; urls: Record<string, string | null>; onClose: () => void; onMove: (i: number) => void }) {
+  const url = urls[list[index]];
+  // Fora da gaveta da ficha: por cima da página inteira, sem a barra do painel na frente.
+  return createPortal(
+    <Dialog title={`${label} · foto ${index + 1} de ${list.length}`} onClose={onClose}>
+      <div className="flex min-h-64 items-center justify-center rounded-xl bg-ink/5">
+        {url ? <img src={url} alt={`Foto ${index + 1} de ${label}`} className="max-h-[65vh] w-auto max-w-full rounded-lg object-contain" /> : <p className="text-sm text-ink-muted">Foto indisponível</p>}
+      </div>
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex gap-2">
+          <button type="button" className={buttonClass("outline")} disabled={index === 0} onClick={() => onMove(index - 1)}>
+            <ChevronLeft size={16} /> Anterior
+          </button>
+          <button type="button" className={buttonClass("outline")} disabled={index >= list.length - 1} onClick={() => onMove(index + 1)}>
+            Próxima <ChevronRight size={16} />
+          </button>
+        </div>
+        {url && (
+          <a href={url} target="_blank" rel="noreferrer" className={buttonClass("ghost")}>
+            Abrir em tamanho real
+          </a>
+        )}
+      </div>
+    </Dialog>,
+    document.body,
+  );
+}
+
+/**
+ * Veículos da proposta (RN-03.23): um cartão por veículo com modelo, ano, km, valor estimado, as observações do
+ * cliente e as fotos dele. Fotos sem veículo definido aparecem em "Outras fotos".
+ */
+function Vehicles({ c, load }: { c: Condition; load?: (id: string) => Promise<Blob> }) {
+  const { vehicles, others } = photosByVehicle(c);
+  const urls = usePhotoUrls(load ? [...vehicles.flat(), ...others] : [], load);
+  const [view, setView] = useState<{ list: string[]; index: number; label: string } | null>(null);
+  const total = c.veiculos.reduce((a, v) => a + v.valor, 0);
+  if (c.veiculos.length === 0 && others.length === 0) return null;
+  return (
+    <section aria-label="Veículos na negociação">
+      <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+        <h4 className="text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted">Veículos na negociação</h4>
+        {c.veiculos.length > 1 && <span className="text-xs text-ink-muted">Total estimado: <b className="text-ink">{formatBRL(total)}</b></span>}
+      </div>
+      <ul className="grid gap-3">
+        {c.veiculos.map((v, i) => {
+          const label = `Veículo ${i + 1}`;
+          const photos = vehicles[i];
           return (
-            <li key={id} className="h-24 w-24 overflow-hidden rounded-xl bg-cream/60">
-              {url ? (
-                <a href={url} target="_blank" rel="noreferrer" aria-label={`Abrir foto ${i + 1}`}>
-                  <img src={url} alt={`Foto ${i + 1} do veículo`} className="h-full w-full object-cover" />
-                </a>
+            <li key={i} aria-label={`${label}: ${v.modelo || "modelo não informado"}`} className="flex flex-col gap-3 rounded-xl bg-cream/60 p-4">
+              <div className="flex items-start gap-3">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cream-card text-ink-muted">
+                  <Car size={17} />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <small className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted">{label}</small>
+                  <b className="block truncate text-sm text-ink">{v.modelo || "Modelo não informado"}</b>
+                  <small className="block text-xs text-ink-muted">{[v.ano && `ano ${v.ano}`, v.km && `${Number(v.km).toLocaleString("pt-BR")} km`].filter(Boolean).join(" · ") || "sem ano e km"}</small>
+                </span>
+                <span className="shrink-0 text-right">
+                  <small className="block text-[10px] uppercase tracking-[0.12em] text-ink-muted">Valor estimado</small>
+                  <b className="whitespace-nowrap text-sm text-ink">{formatBRL(v.valor)}</b>
+                </span>
+              </div>
+              {v.estado && (
+                <p className="rounded-lg bg-cream-card px-3 py-2 text-sm text-ink">
+                  <small className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted">Observações do cliente</small>
+                  {v.estado}
+                </p>
+              )}
+              {load && photos.length > 0 ? (
+                <Thumbs ids={photos} urls={urls} label={label} onOpen={(index) => setView({ list: photos, index, label })} />
               ) : (
-                <span className="flex h-full items-center justify-center px-2 text-center text-[11px] text-ink-muted">{url === null ? "Foto indisponível" : "Carregando…"}</span>
+                <small className="text-xs text-ink-muted">Sem fotos deste veículo.</small>
               )}
             </li>
           );
         })}
       </ul>
+      {load && others.length > 0 && (
+        <div className="mt-3">
+          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted">Outras fotos</p>
+          <Thumbs ids={others} urls={urls} label="outras fotos" onOpen={(index) => setView({ list: others, index, label: "Outras fotos" })} />
+        </div>
+      )}
+      {view && <PhotoViewer {...view} urls={urls} onClose={() => setView(null)} onMove={(index) => setView({ ...view, index })} />}
     </section>
   );
 }
@@ -166,24 +260,7 @@ export function ProposalSheet({ proposal: p, number, baseNumber, clientName, wha
               {c.saldo > 0 && c.parcelas === 0 && <p className="mt-2 text-xs font-medium text-gold">Faltam {formatBRL(c.saldo)} sem forma de pagamento.</p>}
             </section>
 
-            {c.veiculos.length > 0 && (
-              <section aria-label="Veículos na negociação">
-                <h4 className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted">Veículos na negociação</h4>
-                <ul className="grid gap-2 sm:grid-cols-2">
-                  {c.veiculos.map((v, i) => (
-                    <li key={i} className="flex items-center gap-3 rounded-xl bg-cream/60 px-4 py-3">
-                      <Car size={17} className="shrink-0 text-ink-muted" />
-                      <span className="min-w-0 flex-1">
-                        <b className="block truncate text-sm text-ink">{v.modelo || "Modelo não informado"}</b>
-                        <small className="block text-xs text-ink-muted">{[v.ano && `ano ${v.ano}`, v.km && `${v.km} km`].filter(Boolean).join(" · ") || "sem ano e km"}</small>
-                      </span>
-                      <b className="whitespace-nowrap text-sm text-ink">{formatBRL(v.valor)}</b>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-            )}
-            {c.fotos.length > 0 && photo && <VehiclePhotos ids={c.fotos} load={photo} />}
+            <Vehicles c={c} load={photo} />
           </>
         ) : (
           <p className="flex items-start gap-2 rounded-xl bg-cream/60 px-4 py-3 text-xs text-ink-muted">
