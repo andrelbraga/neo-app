@@ -286,3 +286,9 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - Ponte: esses cartões (e o "Seu consultor") contam como seção própria mesmo dentro de outra; os textos deles ficam com o cartão, não com "Dúvidas", para a mesma troca valer nos dois layouts.
 - Sem imobiliária no cadastro do corretor, o cartão da imobiliária continua sumindo na página do cliente mesmo ligado (ADR-0010).
 - Conferido no Chrome sem tela (API simulada, sem registrar visita): ocultar e mostrar na prévia e na página do cliente, layouts A e B. Testes em `bridge.test.ts`.
+
+## 25/11/2026 — Editor da página avisa que o cartão da imobiliária depende do cadastro do corretor
+
+- Pergunta: a página `ANT-7821` não mostrava a imobiliária "mesmo a imobiliária estando habilitada". Causa: o corretor Anthony Oliveira não tem imobiliária no cadastro, e corretor autônomo não mostra o cartão (ADR-0010); o olho do editor só permite que a seção apareça. Pedido: "é interessante ressaltar isso então".
+- Editor (`/admin/empreendimentos/:id/pagina`): a seção "Imobiliária parceira", visível, mostra o aviso "Só aparece para o cliente quando o corretor do link tem imobiliária no cadastro [...]" com o link "Ver a imobiliária de cada profissional" (`/admin/profissionais`). Texto em `sectionNotes` (`developments/model/page.ts`).
+- Testes: `PageEditorPage.test.tsx`; app com typecheck, lint e 124 testes.

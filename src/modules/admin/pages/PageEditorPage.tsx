@@ -10,6 +10,7 @@ import {
   isHidden,
   pageFrom,
   samePage,
+  sectionNotes,
   setBlock,
   setHidden,
   setText,
@@ -60,6 +61,7 @@ function SectionItem({
 }) {
   const hidden = isHidden(draft, s.key);
   const changes = changesIn(draft, s);
+  const note = sectionNotes[s.key];
   const [q, setQ] = useState("");
   const texts = s.texts.map((t, i) => ({ ...t, i })).filter((t) => !q || t.text.toLowerCase().includes(q.toLowerCase()));
   return (
@@ -81,6 +83,14 @@ function SectionItem({
           {hidden ? <EyeOff size={16} /> : <Eye size={16} />}
         </button>
       </div>
+      {note && !hidden && (
+        <p className="mx-3 mb-3 rounded-xl bg-gold-soft/60 px-3 py-2 text-xs text-ink">
+          {note.text}{" "}
+          <Link to={note.link.to} className="font-semibold text-forest underline">
+            {note.link.label}
+          </Link>
+        </p>
+      )}
       {open && (
         <div className="space-y-4 border-t border-line px-3 pb-4 pt-3">
           {hidden && <p className="rounded-xl bg-cream px-3 py-2 text-xs text-ink-muted">Seção oculta: não aparece para o cliente.</p>}
