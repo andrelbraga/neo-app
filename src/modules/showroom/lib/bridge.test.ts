@@ -293,3 +293,85 @@ describe("cartões da imobiliária e da incorporadora no editor (layout B)", () 
     expect(document.querySelector('[aria-labelledby="h-duv"]')).not.toHaveAttribute("data-neo-off");
   });
 });
+
+describe("fotos no bucket (ADR-0029)", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete (room.broker as { photo_path?: string }).photo_path;
+    for (const k of ["calc", "CAMPANHA", "veic", "VEICS", "nVeic", "regGravaProposta"]) delete (window as unknown as Record<string, unknown>)[k];
+  });
+
+  it("a foto do corretor substitui as iniciais no cartão quando carrega (RN-01.11)", async () => {
+    document.body.innerHTML = '<section aria-label="Seu consultor"><div class="tc-foto"></div><h2 class="tc-nome"></h2></section>';
+    (room.broker as { photo_path?: string }).photo_path = "/public/media/brokers/abc.jpg";
+    run("Rodrigo");
+    await waitFor(() => expect(document.querySelector(".tc-foto img")).toBeInTheDocument());
+    const img = document.querySelector<HTMLImageElement>(".tc-foto img")!;
+    expect(img.getAttribute("src")).toBe("/api/public/media/brokers/abc.jpg");
+    expect(document.querySelector(".tc-foto span")).toHaveTextContent("FL");
+    img.dispatchEvent(new Event("load"));
+    expect(document.querySelector(".tc-foto span")).not.toBeInTheDocument();
+    expect(img.style.getPropertyValue("display")).toBe("block");
+  });
+
+  it("o cliente anexa fotos do veículo, remove uma e as que ficam vão na proposta (RN-03.23)", async () => {
+    const user = userEvent.setup();
+    let n = 0;
+    vi.stubGlobal("URL", Object.assign(URL, { createObjectURL: vi.fn(() => `blob:${++n}`), revokeObjectURL: vi.fn() }));
+    document.body.innerHTML = '<section id="negociar"><button id="p-fotos" type="button">+ Anexar fotos</button><p class="nnota">Até 6 fotos.</p></section>';
+    Object.assign(window, {
+      calc: () => ({ ent: 150000, par: 36, saldo: 130000, refN: 0, refV: 0, chaves: 0 }),
+      CAMPANHA: { promo: 370000, ref: 460000, tipo: "", validade: "", entMin: 120000 },
+      veic: true,
+      VEICS: [{ mod: "Corolla", ano: "2022", km: "40000", valor: "90000" }],
+      nVeic: () => 1,
+      regGravaProposta: () => {},
+    });
+    window.history.pushState({}, "", "/showroom/boa-vista/index.html?slug=boa-vista-residencial&code=FER-0001&api=/api");
+    let photoId = 0;
+    const fetchMock = vi.fn(async (url: string) => {
+      const u = String(url);
+      const data = u.includes("/visit") ? { token: "t1", name: "", phone: "" } : u.includes("/public/lead/photos") ? { id: `ph-${++photoId}` } : room;
+      return { ok: true, json: async () => ({ status: 200, data }) } as Response;
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    new Function(code)();
+    await waitFor(() => expect(fetchMock.mock.calls.some(([u]) => String(u).includes("/visit"))).toBe(true));
+    await new Promise((r) => setTimeout(r, 20));
+
+    const input = document.querySelector<HTMLInputElement>('#negociar input[type="file"]')!;
+    const files = [new File(["a"], "a.jpg", { type: "image/jpeg" }), new File(["b"], "b.jpg", { type: "image/jpeg" })];
+    await user.upload(input, files);
+    await waitFor(() => expect(screen.getAllByRole("button", { name: "Remover foto" })).toHaveLength(2));
+    const uploads = fetchMock.mock.calls.filter(([u]) => String(u).includes("/public/lead/photos"));
+    expect(uploads).toHaveLength(2);
+    expect(((uploads[0] as unknown[])[1] as RequestInit).headers).toMatchObject({ "X-Visitor-Token": "t1" });
+    expect(((uploads[0] as unknown[])[1] as RequestInit).body).toBeInstanceOf(FormData);
+
+    await user.click(screen.getAllByRole("button", { name: "Remover foto" })[0]);
+    const send = (window as unknown as { regGravaProposta: (d: object) => Promise<boolean> }).regGravaProposta;
+    await send({ nome: "Rodrigo", whatsapp: "54988887777", resumo: "Proposta", observacao: "" });
+    const post = fetchMock.mock.calls.find(([u]) => String(u).includes("/public/lead/proposals"))!;
+    expect(JSON.parse(String((post as unknown[])[1] && ((post as unknown[])[1] as RequestInit).body)).condition.fotos).toEqual(["ph-2"]);
+  });
+
+  it("foto recusada pela API some e o aviso diz o motivo", async () => {
+    const user = userEvent.setup();
+    vi.stubGlobal("URL", Object.assign(URL, { createObjectURL: vi.fn(() => "blob:x"), revokeObjectURL: vi.fn() }));
+    document.body.innerHTML = '<section id="negociar"><button id="p-fotos" type="button">+ Anexar fotos</button></section>';
+    window.history.pushState({}, "", "/showroom/boa-vista/index.html?slug=boa-vista-residencial&code=FER-0001&api=/api");
+    const fetchMock = vi.fn(async (url: string) => {
+      const u = String(url);
+      if (u.includes("/public/lead/photos")) return { ok: false, json: async () => ({ status: 400, data: { error: "envie uma foto em JPG, PNG ou WebP" } }) } as Response;
+      const data = u.includes("/visit") ? { token: "t1", name: "", phone: "" } : room;
+      return { ok: true, json: async () => ({ status: 200, data }) } as Response;
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    new Function(code)();
+    await waitFor(() => expect(fetchMock.mock.calls.some(([u]) => String(u).includes("/visit"))).toBe(true));
+    await new Promise((r) => setTimeout(r, 20));
+    await user.upload(document.querySelector<HTMLInputElement>('#negociar input[type="file"]')!, new File(["%PDF"], "doc.jpg", { type: "image/jpeg" }));
+    expect(await screen.findByText("Não foi possível anexar a foto: envie uma foto em JPG, PNG ou WebP.")).toBeInTheDocument();
+    expect(document.querySelector(".neo-fotos figure")).not.toBeInTheDocument();
+  });
+});

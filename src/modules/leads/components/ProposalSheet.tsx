@@ -1,5 +1,5 @@
 import { BadgeCheck, Car, Check, Copy, FileSignature, KeyRound, MessageCircle, PencilLine, Quote, UserRound } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/shared/lib/cn";
 import { formatBRL, formatDateTime, formatPhone } from "@/shared/lib/format";
@@ -22,6 +22,53 @@ interface Props {
   onAdjust?: () => void;
   /** Esta versão é a base da venda fechada. */
   isSale?: boolean;
+  /** Carrega uma foto de veículo com o login (corretor ou admin); sem ele, as fotos não aparecem. */
+  photo?: (id: string) => Promise<Blob>;
+}
+
+/** Fotos dos veículos que o cliente anexou à proposta (RN-03.23); clique abre a foto inteira. */
+function VehiclePhotos({ ids, load }: { ids: string[]; load: (id: string) => Promise<Blob> }) {
+  const [urls, setUrls] = useState<Record<string, string | null>>({});
+  const key = ids.join(",");
+  useEffect(() => {
+    let alive = true;
+    const made: string[] = [];
+    key.split(",").forEach((id) => {
+      load(id)
+        .then((blob) => {
+          const url = URL.createObjectURL(blob);
+          made.push(url);
+          if (alive) setUrls((u) => ({ ...u, [id]: url }));
+        })
+        .catch(() => alive && setUrls((u) => ({ ...u, [id]: null })));
+    });
+    return () => {
+      alive = false;
+      made.forEach((u) => URL.revokeObjectURL(u));
+    };
+  }, [key, load]);
+
+  return (
+    <section aria-label="Fotos dos veículos">
+      <h4 className="mb-3 text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted">Fotos dos veículos</h4>
+      <ul className="flex flex-wrap gap-2">
+        {ids.map((id, i) => {
+          const url = urls[id];
+          return (
+            <li key={id} className="h-24 w-24 overflow-hidden rounded-xl bg-cream/60">
+              {url ? (
+                <a href={url} target="_blank" rel="noreferrer" aria-label={`Abrir foto ${i + 1}`}>
+                  <img src={url} alt={`Foto ${i + 1} do veículo`} className="h-full w-full object-cover" />
+                </a>
+              ) : (
+                <span className="flex h-full items-center justify-center px-2 text-center text-[11px] text-ink-muted">{url === null ? "Foto indisponível" : "Carregando…"}</span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </section>
+  );
 }
 
 /**
@@ -29,7 +76,7 @@ interface Props {
  * lista), veículos, observação e o texto original. Ajustes do corretor aparecem como nova versão. Propostas
  * antigas, sem os números, mostram só o texto.
  */
-export function ProposalSheet({ proposal: p, number, baseNumber, clientName, whatsapp, onAdjust, isSale }: Props) {
+export function ProposalSheet({ proposal: p, number, baseNumber, clientName, whatsapp, onAdjust, isSale, photo }: Props) {
   const [copied, setCopied] = useState(false);
   const c = p.condicao;
   const parts = c ? paymentParts(c, formatBRL) : [];
@@ -136,6 +183,7 @@ export function ProposalSheet({ proposal: p, number, baseNumber, clientName, wha
                 </ul>
               </section>
             )}
+            {c.fotos.length > 0 && photo && <VehiclePhotos ids={c.fotos} load={photo} />}
           </>
         ) : (
           <p className="flex items-start gap-2 rounded-xl bg-cream/60 px-4 py-3 text-xs text-ink-muted">

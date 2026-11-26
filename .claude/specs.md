@@ -286,3 +286,14 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - Ponte: esses cartões (e o "Seu consultor") contam como seção própria mesmo dentro de outra; os textos deles ficam com o cartão, não com "Dúvidas", para a mesma troca valer nos dois layouts.
 - Sem imobiliária no cadastro do corretor, o cartão da imobiliária continua sumindo na página do cliente mesmo ligado (ADR-0010).
 - Conferido no Chrome sem tela (API simulada, sem registrar visita): ocultar e mostrar na prévia e na página do cliente, layouts A e B. Testes em `bridge.test.ts`.
+
+## 25/11/2026 — Foto do corretor e fotos dos veículos (bucket S3)
+
+- Pedido: foto do corretor no cartão da apresentação e fotos dos carros na proposta. ADR-0029, RN-01.11, RN-03.23 e P-21 (cópia compartilhada com o neo-api).
+- Meu perfil: "Sua foto", com enviar, trocar e remover; a foto é reduzida no navegador (640 px) antes de ir para a API. Sem foto, as iniciais.
+- Ponte da apresentação:
+  - a foto do corretor substitui as iniciais no cartão "Seu consultor" quando carrega;
+  - "+ Anexar fotos" dos veículos funciona: até 6 fotos, reduzidas a 1600 px, enviadas na hora, com miniatura e remover; os ids vão em `condition.fotos` da proposta. Aviso quando a API recusa.
+- HTML dos layouts A e B: o aviso "O envio de fotos será liberado quando o site estiver publicado." virou "Até 6 fotos. Elas vão para o corretor junto com a sua proposta." (editável no editor da página).
+- Ficha da proposta (corretor e admin): "Fotos dos veículos", com as miniaturas carregadas com o login e a foto inteira ao clicar. O ajuste do corretor mantém as fotos.
+- Testes: typecheck, lint, 131 testes e build. Não foi conferido no navegador com a API real.

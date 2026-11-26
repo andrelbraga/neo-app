@@ -24,6 +24,7 @@ const empty: Condition = {
   reforcoValor: 0,
   chaves: 0,
   veiculos: [],
+  fotos: [],
 };
 
 /** Campo de valor em reais, digitado como número inteiro (sem centavos, como no simulador). */

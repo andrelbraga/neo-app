@@ -29,6 +29,13 @@ describe("proposalsOf", () => {
     expect(list[1].condicao).toMatchObject({ preco: 370000, entrada: 150000, entradaParcelas: 1, sujeitaAprovacao: true, veiculos: [{ modelo: "X", valor: 1000, ano: "" }] });
   });
 
+  it("lê os ids das fotos dos veículos e o ajuste do corretor mantém as fotos (RN-03.23)", () => {
+    const [p] = proposalsOf([api("p1", { preco: 1, fotos: ["f1", 7, "", "f2"] }, "2026-11-16T10:00:00Z")]);
+    expect(p.condicao?.fotos).toEqual(["f1", "f2"]);
+    expect(toApiCondition(p.condicao!).fotos).toEqual(["f1", "f2"]);
+    expect(proposalsOf([api("p2", { preco: 1 }, "2026-11-16T10:00:00Z")])[0].condicao?.fotos).toEqual([]);
+  });
+
   it("ignora condição sem preço ou em formato estranho", () => {
     expect(proposalsOf([api("p", { condicao: "x" }, "2026-11-16T10:00:00Z")])[0].condicao).toBeUndefined();
     expect(proposalsOf([api("p", { entrada: 1 }, "2026-11-16T10:00:00Z")])[0].condicao).toBeUndefined();
