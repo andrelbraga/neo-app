@@ -253,6 +253,20 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - "Testar convite personalizado" e "Canal Neo360" só existem no pacote v12 (`resources/`), não na apresentação do app.
 - Testes: `bridge.test.ts` (título mantido, troca do editor aplicada, A e B sem atalhos de demonstração); app com typecheck, lint e 118 testes.
 
+## 25/11/2026 — Proposta do layout A igual à da página 104-A e sem o botão de medição
+
+- Pedido: "A etapa de Sua proposta, quero que a página B tenha os mesmos elementos e disposição que está apresentado na página A" (A = `neo360-app/resources/Boa Vista Residencial · Apto 104-A/index.html`; B = layout A em produção) e "Remova o botão de medição de navegação".
+- `index.html` (layout A): a seção `#negociar` e o script da proposta passam a ser os da 104-A, os mesmos do layout B:
+  - etapa 1 "Sua condição", com a condição do empreendimento, "Monte sua proposta personalizada", parcelas da entrada (só com a condição da campanha que permite), quantidade de veículos de 1 a 3 com um cartão por veículo e "Gerar proposta completa";
+  - etapa 2 "Confira e envie", com nome e WhatsApp e "Enviar para análise";
+  - etapa 3 "Fechamento", com "✓ Subir o contrato";
+  - saíram o valor proposto, o veículo único com fotos, "Sim, se a proposta for aprovada", "Ainda não", "Quero deixar uma observação" e copiar, exportar e imprimir o resumo.
+- `PADRAO.condicao` ganha `entrada_so_avista: true`, como na 104-A. `sintetica.js` perdeu o que tratava da proposta antiga, e `sintetica.css` ganhou o estilo dos cartões de veículo. As cores seguem o tema do layout A.
+- Ponte: a proposta vai com o preço da campanha e os veículos da lista nos dois layouts; o aviso com o WhatsApp aparece abaixo de "Enviar para análise". Saíram as trocas de texto da etapa 3 e de `.nlegal` e o envio por `setIntent`.
+- Editor da página: os textos novos estão no HTML, então o editor e a página do cliente mostram o mesmo.
+- Medição: o coletor (`metrics/collector.js`) não põe mais o botão "Medição da navegação" no rodapé; o aviso aparece enquanto o cliente não escolheu e diz "Você pode recusar." P-20 atualizada.
+- Testes: `bridge.test.ts` e `collector.test.ts`; app com typecheck, lint e 120 testes. Conferido em captura da seção (Chrome sem tela, 1100 px) ao lado da 104-A.
+
 ## 25/11/2026 — Perfil "Veraneio" passa a se chamar "Temporada"
 
 - Pedido: "Nos tons de fala das mensagens modelos utilizadas pelos corretores, modifique de Veraneio para Temporada". RN-03.17 atualizada.
