@@ -266,3 +266,9 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - Editor da página: os textos novos estão no HTML, então o editor e a página do cliente mostram o mesmo.
 - Medição: o coletor (`metrics/collector.js`) não põe mais o botão "Medição da navegação" no rodapé; o aviso aparece enquanto o cliente não escolheu e diz "Você pode recusar." P-20 atualizada.
 - Testes: `bridge.test.ts` e `collector.test.ts`; app com typecheck, lint e 120 testes. Conferido em captura da seção (Chrome sem tela, 1100 px) ao lado da 104-A.
+
+## 25/11/2026 — Perfil "Veraneio" passa a se chamar "Temporada"
+
+- Pedido: "Nos tons de fala das mensagens modelos utilizadas pelos corretores, modifique de Veraneio para Temporada". RN-03.17 atualizada.
+- Só o nome na tela muda: aba de "Meus modelos", escolha do perfil na ficha e na mensagem do WhatsApp. A chave gravada continua `veraneio` (sem migration nem mudança na API), e os clientes e modelos salvos seguem valendo. Os textos padrão desse perfil já falam de férias (P-19).
+- Testes: app com typecheck, lint e 118 testes.
