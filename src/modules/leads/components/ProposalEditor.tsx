@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { Trash2 } from "lucide-react";
+import { Car, Trash2 } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import { apiErrorMessage } from "@/app/providers/api/client";
@@ -7,7 +7,7 @@ import { cn } from "@/shared/lib/cn";
 import { formatBRL } from "@/shared/lib/format";
 import { inputClass } from "@/shared/ui/styles";
 import { Button, Dialog, Field } from "@/shared/ui/ui";
-import { conditionText, paymentParts, recompute, toApiCondition, type Condition, type Proposal } from "../model/proposal";
+import { conditionText, formatKm, paymentParts, recompute, toApiCondition, type Condition, type Proposal } from "../model/proposal";
 import { myLeadService } from "../services/lead.service";
 
 const empty: Condition = {
@@ -92,31 +92,52 @@ export function ProposalEditor({ leadId, base, onClose, onSaved }: { leadId: str
           <Money id="aj-chaves" label="Pagamento nas chaves" value={c.chaves} onChange={(chaves) => set({ chaves })} />
         </div>
 
-        {c.veiculos.length > 0 && (
-          <fieldset className="space-y-2">
-            <legend className="text-xs font-semibold uppercase tracking-wider text-ink-muted">Veículos na negociação</legend>
-            {c.veiculos.map((v, i) => (
-              <div key={i} className="flex items-end gap-2">
-                <div className="min-w-0 flex-1">
+        {/* Veículos de entrada (RN-03.23): o corretor ajusta a avaliação de cada um ou tira da negociação. */}
+        <fieldset className="space-y-3">
+          <legend className="mb-1 text-xs font-semibold uppercase tracking-wider text-ink-muted">Veículos de entrada</legend>
+          {c.veiculos.length === 0 && <p className="rounded-xl bg-cream px-4 py-3 text-sm text-ink-muted">Nenhum veículo nesta proposta.</p>}
+          {c.veiculos.map((v, i) => {
+            const name = v.modelo || "Modelo não informado";
+            const details = [v.ano && `ano ${v.ano}`, v.km && `${formatKm(v.km)} km`].filter(Boolean).join(" · ");
+            return (
+              <div key={i} className="rounded-xl border border-line bg-cream/50 p-3 sm:p-4">
+                <div className="flex items-start gap-3">
+                  <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cream-card text-ink-muted">
+                    <Car size={17} />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <small className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted">Veículo {i + 1}</small>
+                    <b className="block truncate text-sm text-ink" title={name}>
+                      {name}
+                    </b>
+                    <small className="block text-xs text-ink-muted">
+                      {details || "sem ano e km"}
+                      {v.fotos.length > 0 && ` · ${v.fotos.length} ${v.fotos.length === 1 ? "foto" : "fotos"}`}
+                    </small>
+                  </span>
+                  <button
+                    type="button"
+                    aria-label={`Tirar ${name} da negociação`}
+                    title="Tirar da negociação"
+                    onClick={() => set({ veiculos: c.veiculos.filter((_, j) => j !== i) })}
+                    className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-line text-ink-muted transition hover:border-rose-300 hover:text-rose-600"
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                </div>
+                {v.estado && <p className="mt-2 line-clamp-3 text-xs text-ink-muted">Cliente: “{v.estado}”</p>}
+                <div className="mt-3">
                   <Money
                     id={`aj-vei-${i}`}
-                    label={v.modelo || `Veículo ${i + 1}`}
+                    label={`Avaliação do veículo ${i + 1}`}
                     value={v.valor}
                     onChange={(valor) => set({ veiculos: c.veiculos.map((x, j) => (j === i ? { ...x, valor } : x)) })}
                   />
                 </div>
-                <button
-                  type="button"
-                  aria-label={`Tirar ${v.modelo || `veículo ${i + 1}`} da negociação`}
-                  onClick={() => set({ veiculos: c.veiculos.filter((_, j) => j !== i) })}
-                  className="mb-0.5 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-line text-ink-muted transition hover:border-rose-300 hover:text-rose-600"
-                >
-                  <Trash2 size={16} />
-                </button>
               </div>
-            ))}
-          </fieldset>
-        )}
+            );
+          })}
+        </fieldset>
 
         <Field id="aj-obs" label="Observação para o cliente (opcional)">
           <textarea id="aj-obs" rows={2} maxLength={400} value={note} onChange={(e) => setNote(e.target.value)} className={inputClass} placeholder="ex.: condição válida até sexta" />

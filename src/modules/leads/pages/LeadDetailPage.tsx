@@ -301,7 +301,7 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
           {tab === "propostas" && (
             <section aria-label="Propostas do cliente" className="space-y-5">
               {broker && (
-                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-cream px-4 py-3">
+                <div className="flex flex-col gap-3 rounded-2xl bg-cream px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
                   <p className="min-w-0 flex-1 text-sm text-ink-muted">A negociação segue no WhatsApp. Ajuste uma versão e envie ao cliente; a anterior fica no histórico.</p>
                   <button type="button" onClick={() => setEditing({ base: latest })} className={buttonClass("primary")}>
                     {latest ? <PencilLine size={15} /> : <Plus size={15} />} {latest ? "Ajustar a última" : "Registrar proposta"}
@@ -322,6 +322,7 @@ export function LeadDetailPage({ mode }: { mode: "corretor" | "admin" }) {
                     onAdjust={broker ? () => setEditing({ base: p }) : undefined}
                     isSale={l.stage === "fechado" && l.sale_proposal_id === p.id}
                     photo={photo}
+                    defaultOpen={i === 0}
                   />
                 ))
               )}

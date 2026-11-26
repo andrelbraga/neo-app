@@ -166,3 +166,8 @@ export function photosByVehicle(c: Condition): { vehicles: string[][]; others: s
   if (c.veiculos.length === 1 && vehicles[0].length === 0) return { vehicles: [others], others: [] };
   return { vehicles, others };
 }
+
+/** Quilometragem como o cliente digitou: só dígitos vira "40.000"; qualquer outro formato fica como veio. */
+export function formatKm(km: string): string {
+  return /^\d+$/.test(km) ? Number(km).toLocaleString("pt-BR") : km;
+}

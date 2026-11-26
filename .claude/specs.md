@@ -322,3 +322,19 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - Foto ampliada ao clicar, com anterior, próxima e "Abrir em tamanho real", por cima da página inteira (fora da gaveta da ficha).
 - Só valem as fotos que a API ligou à proposta (`condition.fotos`); id de foto em `veiculos[i].fotos` que não foi ligado não aparece. Com um veículo só, as fotos sem veículo (propostas anteriores) são dele.
 - Conferido no Chromium sem tela com API simulada (ficha com dois veículos e fotos reais do empreendimento como exemplo). Testes: app com typecheck, lint, 135 testes e build.
+
+## 25/11/2026 — Revisão do fluxo de proposta (acordeão, ajuste, veículos, reenvio e o que o cliente vê)
+
+- Pedido: lista de propostas em acordeão; "Ajustar proposta" quebrado e sem os carros de entrada; revisar proporção, multiplataforma, dados enviados da apresentação, veículos, reenvio com os carros anexados e o que o cliente vê depois de enviar.
+- Ficha (corretor e admin):
+  - propostas em acordeão: a mais recente aberta; as outras com número, valor, autor e data no cabeçalho;
+  - quadros de preço em duas colunas, sem o valor cortado ("R$ 365.…");
+  - no celular, o aviso do WhatsApp empilha com o botão e o cartão do veículo põe o valor embaixo do modelo.
+- Janela (`Dialog`, todas as do app): vai para o `body` (fora da gaveta, que cortava a posição fixa) e rola quando é mais alta que a tela; o "Ajustar proposta" abria com o título cortado.
+- "Ajustar proposta": "Veículos de entrada" com um cartão por veículo (modelo, ano, km, quantidade de fotos, observações do cliente) e a avaliação editável; sem veículos, "Nenhum veículo nesta proposta".
+- Apresentação (ponte):
+  - depois de "Subir o contrato", dizia "Ainda não é possível preparar o contrato por esta página" mesmo com o pedido enviado; agora "Pedido enviado: {corretor} recebeu sua proposta com o pedido para seguir ao contrato [...]";
+  - com falha no envio, a página dizia "Recebemos sua proposta"; agora avisa e pede para tocar de novo, sem o botão do WhatsApp, e fecha o pop-up do fechamento;
+  - "Fotos do" não quebra mais em duas linhas.
+- Reenvio com os mesmos carros: a API descartava as fotos na segunda proposta (cada foto só podia estar em uma); agora valem em todas as propostas do mesmo cliente (neo-api).
+- Conferido no Chromium sem tela com API simulada que grava o que a página envia (layouts A e B, 1280 e 390 px): primeira proposta, pedido de contrato com observação, reenvio com outra entrada e falha de rede. Os três envios levaram os dois veículos (modelo, ano, km, valor, observações) e as fotos de cada um. Testes: app com typecheck, lint, 138 testes e build.

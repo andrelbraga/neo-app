@@ -630,17 +630,37 @@
     };
     lastSummary = body.summary;
     var sig = JSON.stringify([body.summary, body.note, body.wants_contract, body.condition]);
-    if (!token) return Promise.resolve(false);
-    if (sig === lastSent) return Promise.resolve(true);
+    var where = $("#nz-ok") ? "#nz-ok" : dados.autorizou_contrato ? "#p-aviso" : "#p-aviso-env";
+    // A página escreve "Recebemos sua proposta" (ou, no pedido de contrato, "Ainda não é possível...") antes
+    // de a API responder; a ponte troca pelo que de fato aconteceu.
+    var tell = function (text) {
+      var el = $(where);
+      if (el && text) { el.hidden = false; el.textContent = text; }
+    };
+    var failed = function () {
+      tell(dados.autorizou_contrato
+        ? "Não foi possível enviar o pedido agora. Confira sua conexão e toque de novo em “Subir o contrato”."
+        : "Não foi possível enviar sua proposta agora. Confira sua conexão e toque de novo em “Enviar para análise”.");
+      if (!dados.autorizou_contrato && typeof fechaFechamento === "function") setTimeout(function () { try { fechaFechamento(false); } catch (e) {} }, 800);
+      return false;
+    };
+    var done = function () {
+      if (dados.autorizou_contrato) {
+        tell("Pedido enviado: " + firstName() + " recebeu sua proposta com o pedido para seguir ao contrato, se ela for aprovada. A assinatura depende da análise.");
+      }
+      return true;
+    };
+    if (!token) return Promise.resolve(failed());
+    if (sig === lastSent) return Promise.resolve(done());
     return call("POST", "/public/lead/proposals", body)
       .then(function () {
         lastSent = sig;
         hasContact = true;
         showSaved(body.name, digits(body.phone));
-        offerWhatsApp($("#nz-ok") ? "#nz-ok" : dados.autorizou_contrato ? "#p-aviso" : "#p-aviso-env");
-        return true;
+        offerWhatsApp(where);
+        return done();
       })
-      .catch(function () { return false; });
+      .catch(failed);
   };
 
   // Depois do envio, o próximo passo é o WhatsApp do corretor, com a proposta resumida na mensagem.
@@ -679,7 +699,7 @@
     "system-ui;text-align:center;cursor:pointer}.neo-fotos button:focus-visible{outline:2px solid #b38d3e}" +
     ".neo-fotos figcaption{position:absolute;left:3px;bottom:3px;padding:1px 6px;border-radius:999px;background:rgba(13,21,16,.75);" +
     "color:#fff;font:700 10px/16px system-ui}.neo-foto-de{display:flex;align-items:center;gap:8px;font-size:13px}" +
-    ".neo-foto-de select{min-height:36px;border-radius:10px;border:1px solid #cfdcc8;background:#fffdf8;padding:0 10px;font:inherit}";
+    ".neo-foto-de{white-space:nowrap}.neo-foto-de select{min-width:0;flex:1;min-height:36px;border-radius:10px;border:1px solid #cfdcc8;background:#fffdf8;padding:0 10px;font:inherit}";
   // Veículo de cada foto: o escolhido na lista "Fotos do"; com um veículo só, o primeiro.
   function vehicleCount() { try { return typeof nVeic === "function" ? nVeic() : 1; } catch (e) { return 1; } }
 

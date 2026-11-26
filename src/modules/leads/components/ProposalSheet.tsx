@@ -1,12 +1,11 @@
-import { BadgeCheck, Car, Check, ChevronLeft, ChevronRight, Copy, FileSignature, KeyRound, MessageCircle, PencilLine, Quote, UserRound } from "lucide-react";
+import { BadgeCheck, Car, Check, ChevronDown, ChevronLeft, ChevronRight, Copy, FileSignature, KeyRound, MessageCircle, PencilLine, Quote, UserRound } from "lucide-react";
 import { useEffect, useState } from "react";
-import { createPortal } from "react-dom";
 import { toast } from "sonner";
 import { cn } from "@/shared/lib/cn";
 import { formatBRL, formatDateTime, formatPhone } from "@/shared/lib/format";
 import { buttonClass } from "@/shared/ui/styles";
 import { Badge, Dialog } from "@/shared/ui/ui";
-import { conditionText, paymentParts, photosByVehicle, type Condition, type Proposal } from "../model/proposal";
+import { conditionText, formatKm, paymentParts, photosByVehicle, type Condition, type Proposal } from "../model/proposal";
 
 // Cores das partes: as mesmas da linha do tempo de pagamento da apresentação, no tom do painel.
 const partColor: Record<string, string> = { entrada: "bg-forest", veiculo: "bg-ink-muted", parcelas: "bg-teal", reforcos: "bg-gold", chaves: "bg-coral" };
@@ -25,6 +24,8 @@ interface Props {
   isSale?: boolean;
   /** Carrega uma foto de veículo com o login (corretor ou admin); sem ele, as fotos não aparecem. */
   photo?: (id: string) => Promise<Blob>;
+  /** Acordeão: começa aberta (a mais recente) ou fechada, só com o cabeçalho. */
+  defaultOpen?: boolean;
 }
 
 /** Carrega as fotos dos veículos com o login (corretor ou admin) e libera os endereços ao sair. */
@@ -77,8 +78,7 @@ function Thumbs({ ids, urls, label, onOpen }: { ids: string[]; urls: Record<stri
 /** Foto ampliada, com a anterior e a próxima do mesmo veículo. */
 function PhotoViewer({ list, index, label, urls, onClose, onMove }: { list: string[]; index: number; label: string; urls: Record<string, string | null>; onClose: () => void; onMove: (i: number) => void }) {
   const url = urls[list[index]];
-  // Fora da gaveta da ficha: por cima da página inteira, sem a barra do painel na frente.
-  return createPortal(
+  return (
     <Dialog title={`${label} · foto ${index + 1} de ${list.length}`} onClose={onClose}>
       <div className="flex min-h-64 items-center justify-center rounded-xl bg-ink/5">
         {url ? <img src={url} alt={`Foto ${index + 1} de ${label}`} className="max-h-[65vh] w-auto max-w-full rounded-lg object-contain" /> : <p className="text-sm text-ink-muted">Foto indisponível</p>}
@@ -98,8 +98,7 @@ function PhotoViewer({ list, index, label, urls, onClose, onMove }: { list: stri
           </a>
         )}
       </div>
-    </Dialog>,
-    document.body,
+    </Dialog>
   );
 }
 
@@ -125,16 +124,17 @@ function Vehicles({ c, load }: { c: Condition; load?: (id: string) => Promise<Bl
           const photos = vehicles[i];
           return (
             <li key={i} aria-label={`${label}: ${v.modelo || "modelo não informado"}`} className="flex flex-col gap-3 rounded-xl bg-cream/60 p-4">
-              <div className="flex items-start gap-3">
+              <div className="flex flex-wrap items-start gap-3">
                 <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-cream-card text-ink-muted">
                   <Car size={17} />
                 </span>
                 <span className="min-w-0 flex-1">
                   <small className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted">{label}</small>
-                  <b className="block truncate text-sm text-ink">{v.modelo || "Modelo não informado"}</b>
-                  <small className="block text-xs text-ink-muted">{[v.ano && `ano ${v.ano}`, v.km && `${Number(v.km).toLocaleString("pt-BR")} km`].filter(Boolean).join(" · ") || "sem ano e km"}</small>
+                  <b className="block break-words text-sm text-ink">{v.modelo || "Modelo não informado"}</b>
+                  <small className="block text-xs text-ink-muted">{[v.ano && `ano ${v.ano}`, v.km && `${formatKm(v.km)} km`].filter(Boolean).join(" · ") || "sem ano e km"}</small>
                 </span>
-                <span className="shrink-0 text-right">
+                {/* No celular o valor desce para baixo do modelo, que fica inteiro. */}
+                <span className="w-full pl-12 sm:w-auto sm:shrink-0 sm:pl-0 sm:text-right">
                   <small className="block text-[10px] uppercase tracking-[0.12em] text-ink-muted">Valor estimado</small>
                   <b className="whitespace-nowrap text-sm text-ink">{formatBRL(v.valor)}</b>
                 </span>
@@ -170,9 +170,12 @@ function Vehicles({ c, load }: { c: Condition; load?: (id: string) => Promise<Bl
  * lista), veículos, observação e o texto original. Ajustes do corretor aparecem como nova versão. Propostas
  * antigas, sem os números, mostram só o texto.
  */
-export function ProposalSheet({ proposal: p, number, baseNumber, clientName, whatsapp, onAdjust, isSale, photo }: Props) {
+export function ProposalSheet({ proposal: p, number, baseNumber, clientName, whatsapp, onAdjust, isSale, photo, defaultOpen = true }: Props) {
   const [copied, setCopied] = useState(false);
+  const [open, setOpen] = useState(defaultOpen);
+  const bodyId = `proposta-${p.id}`;
   const c = p.condicao;
+  const badges = isSale || p.pediuContrato || c?.sujeitaAprovacao !== undefined;
   const parts = c ? paymentParts(c, formatBRL) : [];
   const total = parts.reduce((a, x) => a + x.value, 0) || 1;
   const fromBroker = p.author === "corretor";
@@ -193,22 +196,37 @@ export function ProposalSheet({ proposal: p, number, baseNumber, clientName, wha
 
   return (
     <article aria-label={`Proposta ${number}`} className="overflow-hidden rounded-2xl bg-cream-card shadow-soft ring-1 ring-line/70">
-      {/* Cabeçalho do documento */}
-      <header className="flex flex-wrap items-start justify-between gap-3 border-b border-line px-5 py-4 sm:px-6">
-        <div className="flex items-center gap-3">
-          <span className={cn("inline-flex h-11 w-11 items-center justify-center rounded-xl", fromBroker ? "bg-forest-soft text-forest" : "bg-coral-soft text-coral")}>
-            {fromBroker ? <PencilLine size={19} /> : <FileSignature size={19} />}
-          </span>
-          <div>
-            <h3 className="text-lg text-ink">Proposta {number}</h3>
-            <p className="flex flex-wrap items-center gap-x-1.5 text-xs font-medium text-ink-muted">
-              {fromBroker ? <PencilLine size={12} /> : <UserRound size={12} />}
-              {fromBroker ? "Ajuste do corretor" : p.clientName ? `Enviada por ${p.clientName}${p.clientPhone ? ` · ${formatPhone(p.clientPhone)}` : ""}` : "Enviada pelo cliente"}
-              {baseNumber ? ` sobre a proposta ${baseNumber}` : ""} · {formatDateTime(p.createdAt)}
-            </p>
-          </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
+      {/* Cabeçalho do documento: é o botão do acordeão; fechado, mostra o valor, quem mandou e quando. */}
+      <header className={cn("border-line", open && "border-b")}>
+        <h3>
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-controls={bodyId}
+            onClick={() => setOpen(!open)}
+            className="flex w-full items-center gap-3 px-4 py-4 text-left font-sans transition hover:bg-cream/50 sm:px-6"
+          >
+            <span className={cn("inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", fromBroker ? "bg-forest-soft text-forest" : "bg-coral-soft text-coral")}>
+              {fromBroker ? <PencilLine size={18} /> : <FileSignature size={18} />}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="flex flex-wrap items-baseline gap-x-2">
+                <span className="font-serif text-lg text-ink">Proposta {number}</span>
+                {c && <span className="whitespace-nowrap text-sm font-bold text-forest">{formatBRL(c.preco)}</span>}
+              </span>
+              <span className="flex items-start gap-1.5 text-xs font-medium text-ink-muted">
+                <span className="mt-0.5 shrink-0">{fromBroker ? <PencilLine size={12} /> : <UserRound size={12} />}</span>
+                <span className="min-w-0 break-words">
+                  {fromBroker ? "Ajuste do corretor" : p.clientName ? `Enviada por ${p.clientName}${p.clientPhone ? ` · ${formatPhone(p.clientPhone)}` : ""}` : "Enviada pelo cliente"}
+                  {baseNumber ? ` sobre a proposta ${baseNumber}` : ""} · {formatDateTime(p.createdAt)}
+                </span>
+              </span>
+            </span>
+            <ChevronDown size={18} className={cn("shrink-0 text-ink-muted transition", open && "rotate-180")} />
+          </button>
+        </h3>
+        {badges && (
+        <div className="flex flex-wrap items-center gap-2 px-4 pb-3 sm:px-6">
           {isSale && (
             <span className="inline-flex items-center gap-1 rounded-full bg-ok px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.06em] text-white">
               <BadgeCheck size={13} /> Base da venda
@@ -217,16 +235,21 @@ export function ProposalSheet({ proposal: p, number, baseNumber, clientName, wha
           {p.pediuContrato && <Badge tone="coral">Pediu para seguir ao contrato</Badge>}
           {c?.sujeitaAprovacao !== undefined && (c.sujeitaAprovacao ? <Badge tone="gold">Sujeita à aprovação especial</Badge> : <Badge tone="ok">Dentro das regras da campanha</Badge>)}
         </div>
+        )}
       </header>
 
-      <div className="space-y-6 px-5 py-5 sm:px-6">
+      <div id={bodyId} hidden={!open} className="space-y-6 px-4 py-5 sm:px-6">
         {c ? (
           <>
             {/* Preço */}
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-3">
               <Figure label="Valor da proposta" value={formatBRL(c.preco)} strong />
               {c.precoReferencia > c.preco && <Figure label="Valor de referência" value={formatBRL(c.precoReferencia)} strike />}
-              {(c.campanha || c.validade) && <Figure label="Campanha" value={[c.campanha, c.validade && `até ${c.validade}`].filter(Boolean).join(" · ")} />}
+              {(c.campanha || c.validade) && (
+                <div className="col-span-2">
+                  <Figure label="Campanha" value={[c.campanha, c.validade && `até ${c.validade}`].filter(Boolean).join(" · ")} />
+                </div>
+              )}
             </div>
 
             {/* Como paga */}
@@ -310,7 +333,7 @@ function Figure({ label, value, strong, strike }: { label: string; value: string
   return (
     <div className="rounded-xl bg-cream/60 px-4 py-3">
       <small className="block text-[10px] font-bold uppercase tracking-[0.12em] text-ink-muted">{label}</small>
-      <b className={cn("mt-1 block", strong ? "truncate text-2xl text-ink" : "text-sm leading-snug text-ink", strike && "text-ink-muted line-through")}>{value}</b>
+      <b className={cn("mt-1 block", strong ? "whitespace-nowrap text-xl text-ink sm:text-2xl" : "text-sm leading-snug text-ink", strike && "text-ink-muted line-through")}>{value}</b>
     </div>
   );
 }
