@@ -107,6 +107,7 @@ export function BrokersPage() {
       {list.data && list.data.length > 0 && (
         <ResponsiveTable
           label="Profissionais"
+          from="xl"
           rows={list.data}
           rowKey={(b) => b.id}
           onRowClick={edit}
@@ -115,6 +116,7 @@ export function BrokersPage() {
               key: "nome",
               header: "Nome",
               width: "25%",
+              minWidth: "212px",
               cell: (b) => (
                 <span className="flex min-w-0 items-center gap-3">
                   <Avatar name={`${b.first_name} ${b.last_name}`} size="sm" />
@@ -127,22 +129,21 @@ export function BrokersPage() {
                 </span>
               ),
             },
-            { key: "codigo", header: "Código", width: "10%", cell: (b) => <span className="font-mono text-xs">{b.code}</span> },
-            { key: "creci", header: "CRECI", width: "10%", cell: (b) => b.creci || "—" },
-            { key: "whatsapp", header: "WhatsApp", width: "14%", cell: (b) => formatPhone(b.phone) },
+            { key: "codigo", header: "Código", width: "10%", minWidth: "88px", cell: (b) => <span className="font-mono text-xs">{b.code}</span> },
+            { key: "creci", header: "CRECI", width: "8%", minWidth: "64px", cell: (b) => b.creci || "—" },
+            { key: "whatsapp", header: "WhatsApp", width: "14%", minWidth: "176px", cell: (b) => formatPhone(b.phone) },
             {
               key: "imobiliaria",
               header: "Imobiliária",
               width: "15%",
               cell: (b) => (b.agency_name ? <span title={b.agency_name}>{b.agency_name}</span> : <span className="text-ink-muted">Autônomo</span>),
             },
-            { key: "clientes", header: "Clientes", width: "9%", align: "center", cell: (b) => b.leads_count },
-            { key: "situacao", header: "Situação", width: "11%", cell: (b) => (b.active ? <Badge>Ativo</Badge> : <Badge tone="gray">Desativado</Badge>) },
+            { key: "clientes", header: "Clientes", width: "8%", minWidth: "104px", align: "center", cell: (b) => b.leads_count },
+            { key: "situacao", header: "Situação", width: "11%", minWidth: "156px", cell: (b) => (b.active ? <Badge>Ativo</Badge> : <Badge tone="gray">Desativado</Badge>) },
             {
               key: "acoes",
               header: "",
-              width: "6%",
-              align: "right",
+              width: "56px",
               cell: (b) => (
                 <button
                   type="button"

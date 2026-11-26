@@ -55,11 +55,17 @@ export function SignalIcons({ signals, max = 5, onSelect }: { signals: string[];
 }
 
 /** Propostas do cliente que o corretor ainda não abriu, pulsando. */
-export function NewProposalsBadge({ count }: { count: number }) {
+/** Selo de propostas não abertas; `compact` ("2 novas") é o da lista, para o nome do cliente caber inteiro. */
+export function NewProposalsBadge({ count, compact = false }: { count: number; compact?: boolean }) {
   if (count <= 0) return null;
+  const full = count === 1 ? "1 proposta nova" : `${count} propostas novas`;
   return (
-    <span className="inline-flex shrink-0 animate-pop items-center gap-1 whitespace-nowrap rounded-full bg-rose-600 px-2 py-0.5 text-[11px] font-semibold text-white" title="Propostas que você ainda não abriu">
-      {count === 1 ? "1 proposta nova" : `${count} propostas novas`}
+    <span
+      className="inline-flex shrink-0 animate-pop items-center gap-1 whitespace-nowrap rounded-full bg-rose-600 px-2 py-0.5 text-[11px] font-semibold text-white"
+      title="Propostas que você ainda não abriu"
+      aria-label={full}
+    >
+      {compact ? (count === 1 ? "1 nova" : `${count} novas`) : full}
     </span>
   );
 }
@@ -98,29 +104,38 @@ export function LeadsTable({
     {
       key: "cliente",
       header: "Cliente",
-      width: showBroker ? "26%" : selection ? "27%" : "30%",
+      width: "30%",
+      minWidth: "190px",
       cell: (l) => (
         <span className="flex min-w-0 items-center gap-3">
           <Avatar name={leadName(l)} size="sm" />
-          <span className="min-w-0">
-            <span className="flex min-w-0 items-center gap-2">
-              <Link to={`${basePath}/${l.id}`} onClick={(e) => e.stopPropagation()} className="truncate font-semibold text-ink hover:text-forest hover:underline">
-                {leadName(l)}
-              </Link>
-              <NewProposalsBadge count={l.new_proposals} />
-            </span>
-            {l.phone && <span className="block truncate text-xs text-ink-muted">{formatPhone(l.phone)}</span>}
+          <span className="min-w-0 flex-1">
+            <Link
+              to={`${basePath}/${l.id}`}
+              onClick={(e) => e.stopPropagation()}
+              title={leadName(l)}
+              className="block truncate font-semibold text-ink hover:text-forest hover:underline"
+            >
+              {leadName(l)}
+            </Link>
+            {(l.phone || l.new_proposals > 0) && (
+              <span className="mt-0.5 flex min-w-0 items-center gap-2">
+                <NewProposalsBadge count={l.new_proposals} compact />
+                {l.phone && <span className="truncate text-xs text-ink-muted">{formatPhone(l.phone)}</span>}
+              </span>
+            )}
           </span>
         </span>
       ),
     },
-    { key: "empreendimento", header: "Empreendimento", width: showBroker ? "18%" : "22%", cell: (l) => <span title={l.development_name}>{l.development_name}</span> },
+    { key: "empreendimento", header: "Empreendimento", width: "20%", cell: (l) => <span title={l.development_name}>{l.development_name}</span> },
     ...(showBroker
       ? [
           {
             key: "corretor",
             header: "Corretor",
             width: "16%",
+            minWidth: "120px",
             cell: (l: Lead) => (
               <>
                 <span className="block truncate" title={l.broker_name}>
@@ -132,14 +147,24 @@ export function LeadsTable({
           },
         ]
       : []),
-    { key: "interesse", header: "Interesse", width: "14%", cell: (l) => <SignalIcons signals={l.signals} max={4} /> },
-    { key: "etapa", header: "Etapa", width: showBroker ? "13%" : "16%", cell: (l) => <StageBadge stage={l.stage} /> },
-    { key: "atividade", header: "Atividade", width: "13%", align: "right", cell: (l) => <span className="text-ink-muted">{timeAgo(l.last_activity_at)}</span> },
-    ...(actions ? [{ key: "acoes", header: "Ações", width: "72px", align: "right" as const, cell: (l: Lead) => actions(l) }] : []),
+    // Larguras mínimas: quatro ícones, o nome da etapa mais longo ("Em atendimento") e "há 59 min" inteiros.
+    { key: "interesse", header: "Interesse", width: "14%", minWidth: "120px", cell: (l) => <SignalIcons signals={l.signals} max={4} /> },
+    { key: "etapa", header: "Etapa", width: "16%", minWidth: "168px", cell: (l) => <StageBadge stage={l.stage} /> },
+    {
+      key: "atividade",
+      header: "Atividade",
+      width: "12%",
+      minWidth: "104px",
+      align: "right",
+      cell: (l) => <span className="whitespace-nowrap text-ink-muted">{timeAgo(l.last_activity_at)}</span>,
+    },
+    ...(actions ? [{ key: "acoes", header: "Ações", width: "64px", cell: (l: Lead) => actions(l) }] : []),
   ];
   return (
     <ResponsiveTable
       label="Clientes"
+      // Com o menu lateral, as sete colunas só cabem inteiras a partir de 1280 px; abaixo, cartões.
+      from="xl"
       rows={leads}
       columns={columns}
       rowKey={(l) => l.id}
@@ -169,7 +194,7 @@ export function LeadsTable({
                   </span>
                 )}
               </span>
-              <NewProposalsBadge count={l.new_proposals} />
+              <NewProposalsBadge count={l.new_proposals} compact />
               {actions && <span className="w-7 shrink-0" aria-hidden="true" />}
             </span>
             <span className="mt-auto flex items-center justify-between gap-2">
@@ -213,7 +238,7 @@ function selectColumn(leads: Lead[], selection: LeadSelection): Column<Lead> {
   const allOn = ids.length > 0 && ids.every((id) => selection.selected.has(id));
   return {
     key: "selecionar",
-    width: "44px",
+    width: "48px",
     header: (
       <input
         type="checkbox"
