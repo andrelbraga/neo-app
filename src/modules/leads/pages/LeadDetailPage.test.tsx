@@ -108,12 +108,22 @@ describe("LeadDetailPage", () => {
     expect(within(nova).getByText(/Enviada por Maria · \(54\) 97777-6666/)).toBeInTheDocument();
     expect(within(nova).getByRole("link", { name: "Responder no WhatsApp" }).getAttribute("href")).toContain("wa.me/5554977776666");
     expect(within(antiga).getByText("Pediu para seguir ao contrato")).toBeInTheDocument();
-    expect(within(antiga).getByText(/antes do detalhamento em números/)).toBeInTheDocument();
+    // Acordeão: a mais recente aberta, as anteriores só com o cabeçalho até o corretor abrir.
+    expect(within(nova).getByRole("button", { name: /Proposta 2/ })).toHaveAttribute("aria-expanded", "true");
+    const toggle = within(antiga).getByRole("button", { name: /Proposta 1/ });
+    expect(toggle).toHaveAttribute("aria-expanded", "false");
+    expect(within(antiga).getByText(/antes do detalhamento em números/)).not.toBeVisible();
+    await user.click(toggle);
+    expect(toggle).toHaveAttribute("aria-expanded", "true");
+    expect(within(antiga).getByText(/antes do detalhamento em números/)).toBeVisible();
 
     await user.click(within(nova).getByRole("button", { name: "Ajustar proposta" }));
     const dialog = screen.getByRole("dialog", { name: "Ajustar proposta" });
     const entrada = within(dialog).getByLabelText("Entrada");
     expect(entrada).toHaveValue(200000);
+    // Os veículos de entrada da proposta aparecem no ajuste, com a avaliação para o corretor mudar.
+    expect(within(dialog).getByText("Compass 2022")).toBeInTheDocument();
+    expect(within(dialog).getByLabelText("Avaliação do veículo 1")).toHaveValue(40000);
     await user.clear(within(dialog).getByLabelText("Valor da proposta"));
     await user.type(within(dialog).getByLabelText("Valor da proposta"), "360000");
     expect(within(dialog).getByText(/R\$\s?90\.000/)).toBeInTheDocument(); // 360 − 200 − 40 (carro) − 30 (reforços)

@@ -426,3 +426,45 @@ describe("fotos no bucket (ADR-0029)", () => {
     expect(document.querySelector(".neo-fotos figure")).not.toBeInTheDocument();
   });
 });
+
+describe("o que o cliente vê depois de enviar a proposta", () => {
+  const page = '<section id="negociar"><p id="p-aviso-env" hidden></p><p id="p-aviso" hidden></p></section>';
+  async function start(ok: boolean) {
+    document.body.innerHTML = page;
+    window.history.pushState({}, "", "/showroom/boa-vista/index.html?slug=boa-vista-residencial&code=FER-0001&api=/api");
+    const fetchMock = vi.fn(async (url: string) => {
+      const u = String(url);
+      if (u.includes("/public/lead/proposals") && !ok) return { ok: false, json: async () => ({ status: 500, data: { error: "erro interno" } }) } as Response;
+      const data = u.includes("/visit") ? { token: "t1", name: "", phone: "" } : room;
+      return { ok: true, json: async () => ({ status: 200, data }) } as Response;
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    (window as unknown as Record<string, unknown>).regGravaProposta = () => {};
+    new Function(code)();
+    await waitFor(() => expect(fetchMock.mock.calls.some(([u]) => String(u).includes("/visit"))).toBe(true));
+    await new Promise((r) => setTimeout(r, 20));
+    return (window as unknown as { regGravaProposta: (d: object) => Promise<boolean> }).regGravaProposta;
+  }
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete (window as unknown as Record<string, unknown>).regGravaProposta;
+  });
+
+  it("pedido de contrato enviado diz que chegou ao corretor", async () => {
+    const send = await start(true);
+    document.getElementById("p-aviso")!.textContent = "Ainda não é possível preparar o contrato por esta página.";
+    expect(await send({ nome: "Rodrigo", whatsapp: "54988887777", resumo: "r", autorizou_contrato: true })).toBe(true);
+    expect(document.getElementById("p-aviso")).toHaveTextContent("Pedido enviado: Fernando recebeu sua proposta com o pedido para seguir ao contrato");
+    expect(document.getElementById("nz-wa-p-aviso")).toBeInTheDocument();
+  });
+
+  it("falha no envio não diz que recebemos: pede para tentar de novo", async () => {
+    const send = await start(false);
+    document.getElementById("p-aviso-env")!.textContent = "Recebemos sua proposta com nome e WhatsApp.";
+    expect(await send({ nome: "Rodrigo", whatsapp: "54988887777", resumo: "r" })).toBe(false);
+    expect(document.getElementById("p-aviso-env")).toHaveTextContent("Não foi possível enviar sua proposta agora.");
+    expect(document.getElementById("nz-wa-p-aviso-env")).not.toBeInTheDocument();
+    expect(await send({ nome: "Rodrigo", whatsapp: "54988887777", resumo: "r", autorizou_contrato: true })).toBe(false);
+    expect(document.getElementById("p-aviso")).toHaveTextContent("Não foi possível enviar o pedido agora.");
+  });
+});

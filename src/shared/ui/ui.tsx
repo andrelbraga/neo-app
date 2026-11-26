@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes, ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/shared/lib/cn";
 import { buttonClass, type Variant } from "./styles";
 
@@ -86,16 +87,20 @@ export function EmptyState({ title, text, action }: { title: string; text?: stri
 }
 
 /** Janela sobre a página para os formulários do admin. Fecha no X ou no Esc. */
+/**
+ * Janela por cima da página inteira (fora de painéis e gavetas, que cortariam a posição fixa). Centralizada
+ * quando cabe; mais alta que a tela, rola sem cortar o título.
+ */
 export function Dialog({ title, onClose, children }: { title: string; onClose: () => void; children: ReactNode }) {
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
       aria-label={title}
-      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-ink/40 p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto overscroll-contain bg-ink/40 p-3 sm:p-6"
       onKeyDown={(e) => e.key === "Escape" && onClose()}
     >
-      <div className="card w-full max-w-2xl p-6 shadow-xl">
+      <div className="card my-auto w-full max-w-2xl p-5 shadow-xl sm:p-6">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-2xl text-ink">{title}</h2>
           <button type="button" onClick={onClose} aria-label="Fechar" className="rounded-full px-2 text-2xl leading-none text-ink-muted hover:text-forest">
@@ -104,7 +109,8 @@ export function Dialog({ title, onClose, children }: { title: string; onClose: (
         </div>
         {children}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
 
