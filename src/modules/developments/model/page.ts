@@ -89,3 +89,14 @@ export function tagLabel(tag: string): string {
   if (tag === "label") return "Rótulo";
   return "Texto";
 }
+
+/**
+ * Seções que o olho liga mas que dependem de outro cadastro para aparecer ao cliente. A imobiliária vem do
+ * cadastro do corretor do link: corretor sem imobiliária (autônomo) não mostra o cartão (ADR-0010).
+ */
+export const sectionNotes: Record<string, { text: string; link: { to: string; label: string } }> = {
+  "imobiliaria-parceira": {
+    text: "Só aparece para o cliente quando o corretor do link tem imobiliária no cadastro, com o nome e o logo dela. Corretor sem imobiliária (autônomo) não mostra este cartão, mesmo com a seção visível.",
+    link: { to: "/admin/profissionais", label: "Ver a imobiliária de cada profissional" },
+  },
+};

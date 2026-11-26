@@ -297,3 +297,9 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - HTML dos layouts A e B: o aviso "O envio de fotos será liberado quando o site estiver publicado." virou "Até 6 fotos. Elas vão para o corretor junto com a sua proposta." (editável no editor da página).
 - Ficha da proposta (corretor e admin): "Fotos dos veículos", com as miniaturas carregadas com o login e a foto inteira ao clicar. O ajuste do corretor mantém as fotos.
 - Testes: typecheck, lint, 131 testes e build. Não foi conferido no navegador com a API real.
+
+## 25/11/2026 — Editor da página avisa que o cartão da imobiliária depende do cadastro do corretor
+
+- Pergunta: a página `ANT-7821` não mostrava a imobiliária "mesmo a imobiliária estando habilitada". Causa: o corretor Anthony Oliveira não tem imobiliária no cadastro, e corretor autônomo não mostra o cartão (ADR-0010); o olho do editor só permite que a seção apareça. Pedido: "é interessante ressaltar isso então".
+- Editor (`/admin/empreendimentos/:id/pagina`): a seção "Imobiliária parceira", visível, mostra o aviso "Só aparece para o cliente quando o corretor do link tem imobiliária no cadastro [...]" com o link "Ver a imobiliária de cada profissional" (`/admin/profissionais`). Texto em `sectionNotes` (`developments/model/page.ts`).
+- Testes: `PageEditorPage.test.tsx`; app com typecheck, lint e 124 testes.

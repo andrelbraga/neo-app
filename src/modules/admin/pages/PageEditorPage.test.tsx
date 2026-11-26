@@ -61,6 +61,17 @@ describe("PageEditorPage (ADR-0027)", () => {
     expect(screen.getByRole("button", { name: /^Planta e 3D/ })).toBeInTheDocument();
   });
 
+  it("avisa que o cartão da imobiliária depende do cadastro do corretor (ADR-0010)", async () => {
+    const user = userEvent.setup();
+    open();
+    await fromPreview({ type: "outline", sections: [...outline, { key: "imobiliaria-parceira", label: "Imobiliária parceira", texts: [], blocks: [] }] });
+    const note = await screen.findByText(/Só aparece para o cliente quando o corretor do link tem imobiliária no cadastro/);
+    expect(within(note).getByRole("link", { name: "Ver a imobiliária de cada profissional" })).toHaveAttribute("href", "/admin/profissionais");
+    expect(screen.getAllByText(/Só aparece para o cliente/)).toHaveLength(1);
+    await user.click(screen.getByRole("button", { name: "Ocultar Imobiliária parceira" }));
+    expect(screen.queryByText(/Só aparece para o cliente/)).not.toBeInTheDocument();
+  });
+
   it("oculta seção, desliga o 3D e troca texto ao vivo, e publica", async () => {
     const user = userEvent.setup();
     svc.savePage.mockImplementation(async (_id, c) => ({ ...dev, page_config: c }));
