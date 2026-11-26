@@ -237,3 +237,16 @@ describe("proposta do layout A igual à da página 104-A", () => {
     expect(document.getElementById("nz-wa-p-aviso-env")).toBeInTheDocument();
   });
 });
+
+describe("visual da proposta do layout A fiel à página 104-A", () => {
+  const dir = resolve(__dirname, "../../../../public/showroom/boa-vista");
+
+  it("o tema da Sintética não muda a seção da proposta e ela fica fora do .wrap", () => {
+    const css = readFileSync(resolve(dir, "sintetica.css"), "utf8");
+    for (const rule of ["#negociar .nbtn", "#negociar .ncard", "#negociar .nv", "#negociar .nres", ".ng{max-width"]) expect(css).not.toContain(rule);
+    expect(css).toContain(".block:not(#negociar) h2");
+    expect(css).toContain("#negociar{font-weight:550;color:#0d1510}");
+    const html = readFileSync(resolve(dir, "index.html"), "utf8");
+    expect(html).toMatch(/<\/div>\n<!-- Sua proposta fora do \.wrap[^\n]*\n<section class="block" id="negociar"/);
+  });
+});

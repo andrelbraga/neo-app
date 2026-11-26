@@ -272,3 +272,9 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - Pedido: "Nos tons de fala das mensagens modelos utilizadas pelos corretores, modifique de Veraneio para Temporada". RN-03.17 atualizada.
 - Só o nome na tela muda: aba de "Meus modelos", escolha do perfil na ficha e na mensagem do WhatsApp. A chave gravada continua `veraneio` (sem migration nem mudança na API), e os clientes e modelos salvos seguem valendo. Os textos padrão desse perfil já falam de férias (P-19).
 - Testes: app com typecheck, lint e 118 testes.
+
+## 25/11/2026 — Visual de "Sua proposta" do layout A fiel à página 104-A
+
+- Pedido: o formulário da proposta em produção "continua apresentando de forma diferente" da página 104-A (`http://localhost:8000/index.html`); "Quero que seja fiel ao que está na página do localhost".
+- Os elementos já eram os mesmos; o tema da Sintética (`sintetica.css`) mudava o visual. Na seção `#negociar` saíram fundo verde, cartões brancos, botões verde-escuros, campos maiores, título fino, largura de 920 px e margens de 80 px; a seção usa o peso e a cor de texto da 104-A e fica fora do `.wrap`, como na 104-A (no computador, mais larga que as outras seções do layout A, como lá).
+- Conferido com o estilo calculado dos 81 elementos visíveis da seção, iguais aos da 104-A em 1280, 1024, 768 e 390 px, com a ponte e a configuração publicada (API simulada, sem registrar visita); as outras seções não mudaram de lugar. Teste em `bridge.test.ts`.
