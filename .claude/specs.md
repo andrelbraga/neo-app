@@ -278,3 +278,11 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - Pedido: o formulário da proposta em produção "continua apresentando de forma diferente" da página 104-A (`http://localhost:8000/index.html`); "Quero que seja fiel ao que está na página do localhost".
 - Os elementos já eram os mesmos; o tema da Sintética (`sintetica.css`) mudava o visual. Na seção `#negociar` saíram fundo verde, cartões brancos, botões verde-escuros, campos maiores, título fino, largura de 920 px e margens de 80 px; a seção usa o peso e a cor de texto da 104-A e fica fora do `.wrap`, como na 104-A (no computador, mais larga que as outras seções do layout A, como lá).
 - Conferido com o estilo calculado dos 81 elementos visíveis da seção, iguais aos da 104-A em 1280, 1024, 768 e 390 px, com a ponte e a configuração publicada (API simulada, sem registrar visita); as outras seções não mudaram de lugar. Teste em `bridge.test.ts`.
+
+## 25/11/2026 — Editor da página: ocultar e mostrar a imobiliária e a incorporadora no layout B
+
+- Pedido: "Verifique o por que a função de habilitar e desabilitar da incorporadora e da imobiliária não está funcionando".
+- Causa: no layout B os cartões "Imobiliária parceira" e "Incorporadora responsável" ficam dentro da seção "Dúvidas", e a ponte só tratava seções de primeiro nível. Em B eles não apareciam na lista do editor, o olho não os ocultava na prévia e a configuração publicada (que vale para A e B, ADR-0027) não os escondia na página do cliente. No layout A, onde ficam soltos, já funcionava.
+- Ponte: esses cartões (e o "Seu consultor") contam como seção própria mesmo dentro de outra; os textos deles ficam com o cartão, não com "Dúvidas", para a mesma troca valer nos dois layouts.
+- Sem imobiliária no cadastro do corretor, o cartão da imobiliária continua sumindo na página do cliente mesmo ligado (ADR-0010).
+- Conferido no Chrome sem tela (API simulada, sem registrar visita): ocultar e mostrar na prévia e na página do cliente, layouts A e B. Testes em `bridge.test.ts`.

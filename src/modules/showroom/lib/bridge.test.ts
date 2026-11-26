@@ -250,3 +250,46 @@ describe("visual da proposta do layout A fiel à página 104-A", () => {
     expect(html).toMatch(/<\/div>\n<!-- Sua proposta fora do \.wrap[^\n]*\n<section class="block" id="negociar"/);
   });
 });
+
+describe("cartões da imobiliária e da incorporadora no editor (layout B)", () => {
+  // No layout B os cartões ficam dentro da seção de dúvidas; no A, soltos.
+  const pageB = `
+    <section aria-labelledby="h-duv"><h2 id="h-duv">Ficou com alguma dúvida?</h2><p>Toque numa pergunta.</p>
+      <section class="inc-card" aria-label="Imobiliária parceira"><h3>Atendimento em parceria</h3></section>
+      <section class="inc-card" aria-label="Incorporadora responsável"><h3>Empreendimento próprio</h3></section>
+    </section>`;
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete (room.development as { page_config?: unknown }).page_config;
+  });
+
+  it("o editor lista os cartões como seções próprias, com os textos deles, e oculta e mostra na prévia", () => {
+    document.body.innerHTML = pageB;
+    window.history.pushState({}, "", "/showroom/boa-vista/index-b.html?cms=1&slug=bv");
+    vi.stubGlobal("fetch", vi.fn());
+    const posted: Record<string, unknown>[] = [];
+    const spy = vi.spyOn(window, "postMessage").mockImplementation((m: unknown) => void posted.push(m as Record<string, unknown>));
+    new Function(code)();
+    const outline = posted.find((m) => m.type === "outline")!.sections as { key: string; texts: { text: string }[] }[];
+    expect(outline.map((s) => s.key)).toEqual(["chegada", "h-duv", "imobiliaria-parceira", "incorporadora-responsavel"]);
+    expect(outline[1].texts.map((t) => t.text)).toEqual(["Ficou com alguma dúvida?", "Toque numa pergunta."]);
+    expect(outline[2].texts.map((t) => t.text)).toEqual(["Atendimento em parceria"]);
+
+    const send = (config: unknown) =>
+      window.dispatchEvent(new MessageEvent("message", { data: { source: "neo-cms", type: "config", config }, origin: window.location.origin, source: window }));
+    const cards = () => [...document.querySelectorAll(".inc-card")].map((e) => e.hasAttribute("data-neo-off"));
+    send({ sections: { "imobiliaria-parceira": { hidden: true }, "incorporadora-responsavel": { hidden: true } } });
+    expect(cards()).toEqual([true, true]);
+    send({ sections: {} });
+    expect(cards()).toEqual([false, false]);
+    spy.mockRestore();
+  });
+
+  it("a página do cliente no layout B oculta a incorporadora quando o admin desliga", async () => {
+    document.body.innerHTML = pageB;
+    room.development = { ...room.development, page_config: { sections: { "incorporadora-responsavel": { hidden: true } } } } as typeof room.development;
+    run("Rodrigo");
+    await waitFor(() => expect(document.querySelector('[aria-label="Incorporadora responsável"]')).toHaveAttribute("data-neo-off"));
+    expect(document.querySelector('[aria-labelledby="h-duv"]')).not.toHaveAttribute("data-neo-off");
+  });
+});

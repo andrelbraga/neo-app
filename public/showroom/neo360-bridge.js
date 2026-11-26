@@ -124,12 +124,29 @@
   }
   function normText(s) { return String(s || "").replace(/[^\S\n]+/g, " ").replace(/ *\n */g, "\n").trim(); }
 
-  // Seções da página: as de primeiro nível, com uma chave estável (a mesma nos layouts A e B quando o conteúdo é o mesmo).
+  // Cartões que são seção própria mesmo dentro de outra: no layout B ficam dentro de "Dúvidas"; no A, soltos.
+  var PAGE_CARDS = { "seu-consultor": 1, "imobiliaria-parceira": 1, "incorporadora-responsavel": 1 };
+  function pageKey(el) {
+    return el.matches("footer") ? "rodape" : el.matches("header") ? "topo" : el.getAttribute("aria-labelledby") || pageSlug(el.getAttribute("aria-label")) || el.id;
+  }
+  // Cartão aninhado dentro de section (exceto a própria section).
+  function innerCard(el, section) {
+    var inner = el.closest("section");
+    while (inner && inner !== section && section.contains(inner)) {
+      if (PAGE_CARDS[pageKey(inner)]) return inner;
+      inner = inner.parentElement && inner.parentElement.closest("section");
+    }
+    return null;
+  }
+
+  // Seções da página: as de primeiro nível e os cartões, com uma chave estável (a mesma nos layouts A e B quando o
+  // conteúdo é o mesmo).
   function pageSections() {
     var list = [];
     document.querySelectorAll("section,footer.foot,header.top").forEach(function (el) {
-      if (el.closest("#neo-chegada") || (el.parentElement && el.parentElement.closest("section"))) return;
-      var key = el.matches("footer") ? "rodape" : el.matches("header") ? "topo" : el.getAttribute("aria-labelledby") || pageSlug(el.getAttribute("aria-label")) || el.id;
+      if (el.closest("#neo-chegada")) return;
+      var key = pageKey(el);
+      if (el.parentElement && el.parentElement.closest("section") && !PAGE_CARDS[key]) return;
       if (!key || list.some(function (x) { return x.key === key; })) return;
       var h = el.querySelector("h1,h2,h3");
       list.push({ key: key, el: el, label: PAGE_NAMES[key] || norm(h && h.textContent) || el.getAttribute("aria-label") || key });
@@ -137,12 +154,13 @@
     return list;
   }
 
-  // Textos editáveis de uma seção: o elemento mais externo que só tem texto (e formatação) dentro.
+  // Textos editáveis de uma seção: o elemento mais externo que só tem texto (e formatação) dentro. Os textos de
+  // um cartão aninhado ficam com o cartão, para valerem nos dois layouts.
   function pageTexts(section) {
     var out = [];
     var picked = [];
     section.querySelectorAll(PAGE_TEXT).forEach(function (el) {
-      if (el.closest(PAGE_DYNAMIC) || picked.some(function (p) { return p.contains(el); })) return;
+      if (el.closest(PAGE_DYNAMIC) || innerCard(el, section) || picked.some(function (p) { return p.contains(el); })) return;
       for (var i = 0; i < el.children.length; i++) if (!PAGE_INLINE[el.children[i].tagName]) return;
       var t = normText(textOfEl(el));
       if (!t) return;
