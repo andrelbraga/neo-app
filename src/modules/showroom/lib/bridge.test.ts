@@ -231,7 +231,7 @@ describe("proposta do layout A igual à da página 104-A", () => {
     const send = (window as unknown as { regGravaProposta: (d: object) => Promise<boolean> }).regGravaProposta;
     await send({ nome: "Rodrigo", whatsapp: "54988887777", resumo: "Proposta", observacao: "" });
     const post = fetchMock.mock.calls.find(([u]) => String(u).includes("/public/lead/proposals"))!;
-    const body = JSON.parse(String((post[1] as RequestInit).body));
+    const body = JSON.parse(String(((post as unknown[])[1] as RequestInit).body));
     expect(body.condition.preco).toBe(370000);
     expect(body.condition.veiculos.map((v: { modelo: string }) => v.modelo)).toEqual(["Corolla", "Onix"]);
     expect(document.getElementById("nz-wa-p-aviso-env")).toBeInTheDocument();
