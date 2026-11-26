@@ -1,4 +1,4 @@
-import { api } from "@/app/providers/api/client";
+import { api, axiosInstance } from "@/app/providers/api/client";
 import type {
   Activity,
   ApiProposal,
@@ -46,6 +46,8 @@ export const myLeadService = {
   /** Cadastra um cliente à mão (RN-03.16). */
   create: (c: NewClient) => api.post<Lead>("/me/leads", c),
   /** Planilha CSV de clientes: `dryRun` só confere; sem ele, cadastra as linhas válidas. */
+  /** Foto de veículo de uma proposta do cliente (RN-03.23). */
+  photo: (leadId: string, photoId: string) => photoBlob(`/me/leads/${leadId}/photos/${photoId}`),
   importCsv: (developmentId: string, file: File, dryRun: boolean) => {
     const form = new FormData();
     form.set("development_id", developmentId);
@@ -61,4 +63,10 @@ export const adminLeadService = {
   get: (id: string) => api.get<LeadDetail>(`/admin/leads/${id}`),
   summary: (broker?: string) => api.get<Summary>(`/admin/summary${query({ broker })}`),
   activity: (broker?: string) => api.get<Activity[]>(`/admin/activity${query({ broker })}`),
+  photo: (leadId: string, photoId: string) => photoBlob(`/admin/leads/${leadId}/photos/${photoId}`),
 };
+
+// As fotos dos veículos pedem o login: vêm como arquivo, não pelo envelope { status, data }.
+async function photoBlob(url: string): Promise<Blob> {
+  return (await axiosInstance.get<Blob>(url, { responseType: "blob" })).data;
+}

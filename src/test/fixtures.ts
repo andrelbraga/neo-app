@@ -14,6 +14,7 @@ export const brokerFixture: Broker = {
   agency_id: null,
   agency_name: "",
   agency_logo_url: "",
+  photo_path: "",
   active: true,
   leads_count: 2,
   created_at: "2026-11-16T10:00:00Z",

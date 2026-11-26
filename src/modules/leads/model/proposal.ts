@@ -22,6 +22,8 @@ export interface Condition {
   reforcoValor: number;
   chaves: number;
   veiculos: Vehicle[];
+  /** Ids das fotos dos veículos que o cliente anexou (RN-03.23). */
+  fotos: string[];
   /** Só a apresentação sabe as regras da campanha; no ajuste do corretor fica indefinido. */
   sujeitaAprovacao?: boolean;
 }
@@ -67,6 +69,7 @@ export function parseCondition(raw: unknown): Condition | undefined {
           return { modelo: str(o.modelo), ano: str(o.ano), km: str(o.km), valor: num(o.valor) };
         })
       : [],
+    fotos: Array.isArray(c.fotos) ? c.fotos.filter((f): f is string => typeof f === "string" && f !== "") : [],
     sujeitaAprovacao: typeof c.sujeita_aprovacao === "boolean" ? c.sujeita_aprovacao : undefined,
   };
 }
@@ -115,6 +118,8 @@ export function toApiCondition(c: Condition): Record<string, unknown> {
     reforco_valor: c.reforcoValor,
     chaves: c.chaves,
     veiculos: c.veiculos,
+    // O ajuste continua mostrando as fotos dos veículos que o cliente mandou.
+    fotos: c.fotos,
   };
 }
 
