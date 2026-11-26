@@ -56,7 +56,7 @@ export interface Lead {
 /** Perfis de compra que o corretor escolhe na ficha (RN-03.17). */
 export type Profile = "" | "moradia" | "investimento" | "veraneio";
 export const profiles: Profile[] = ["", "moradia", "investimento", "veraneio"];
-export const profileLabel: Record<Profile, string> = { "": "Sem perfil", moradia: "Moradia", investimento: "Investimento", veraneio: "Veraneio" };
+export const profileLabel: Record<Profile, string> = { "": "Sem perfil", moradia: "Moradia", investimento: "Investimento", veraneio: "Temporada" };
 
 /** Tons das mensagens do WhatsApp (RN-03.20). */
 export type MessageTone = "formal" | "proximo" | "direto";
@@ -66,7 +66,7 @@ export const toneLabel: Record<MessageTone, string> = { formal: "Formal", proxim
 /** Perfil dos modelos: "geral" vale para quem não tem perfil. */
 export type TemplateProfile = "geral" | Exclude<Profile, "">;
 export const templateProfiles: TemplateProfile[] = ["geral", "moradia", "investimento", "veraneio"];
-export const templateProfileLabel: Record<TemplateProfile, string> = { geral: "Sem perfil", moradia: "Moradia", investimento: "Investimento", veraneio: "Veraneio" };
+export const templateProfileLabel: Record<TemplateProfile, string> = { geral: "Sem perfil", moradia: "Moradia", investimento: "Investimento", veraneio: "Temporada" };
 
 /** Modelo de mensagem: o texto do corretor (`custom`) ou o padrão. */
 export interface MessageTemplate {

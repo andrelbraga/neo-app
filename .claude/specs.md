@@ -252,3 +252,9 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - Editor da página (ADR-0027) em conformidade: o editor lê o HTML sem a ponte, então antes mostrava os atalhos na prévia e listava um título diferente do que o cliente via. Agora o editor e a página do cliente mostram o mesmo texto, e trocar o título no editor vale para o cliente.
 - "Testar convite personalizado" e "Canal Neo360" só existem no pacote v12 (`resources/`), não na apresentação do app.
 - Testes: `bridge.test.ts` (título mantido, troca do editor aplicada, A e B sem atalhos de demonstração); app com typecheck, lint e 118 testes.
+
+## 25/11/2026 — Perfil "Veraneio" passa a se chamar "Temporada"
+
+- Pedido: "Nos tons de fala das mensagens modelos utilizadas pelos corretores, modifique de Veraneio para Temporada". RN-03.17 atualizada.
+- Só o nome na tela muda: aba de "Meus modelos", escolha do perfil na ficha e na mensagem do WhatsApp. A chave gravada continua `veraneio` (sem migration nem mudança na API), e os clientes e modelos salvos seguem valendo. Os textos padrão desse perfil já falam de férias (P-19).
+- Testes: app com typecheck, lint e 118 testes.

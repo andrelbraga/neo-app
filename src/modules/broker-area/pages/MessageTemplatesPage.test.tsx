@@ -33,7 +33,7 @@ describe("MessageTemplatesPage (RN-03.20)", () => {
     await user.click(within(formal).getByRole("button", { name: "Salvar" }));
     await waitFor(() => expect(my.saveTemplate).toHaveBeenCalledWith("geral", "formal", "Novo texto sem link"));
 
-    await user.click(screen.getByRole("tab", { name: "Veraneio" }));
+    await user.click(screen.getByRole("tab", { name: "Temporada" }));
     expect(screen.getAllByRole("region")).toHaveLength(1);
   });
 
