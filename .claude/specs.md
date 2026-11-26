@@ -303,3 +303,11 @@ Pedido (CLI): analisar as telas de `resources/Neo360_BoaVista_COMPLETO_v12/dist/
 - Pergunta: a página `ANT-7821` não mostrava a imobiliária "mesmo a imobiliária estando habilitada". Causa: o corretor Anthony Oliveira não tem imobiliária no cadastro, e corretor autônomo não mostra o cartão (ADR-0010); o olho do editor só permite que a seção apareça. Pedido: "é interessante ressaltar isso então".
 - Editor (`/admin/empreendimentos/:id/pagina`): a seção "Imobiliária parceira", visível, mostra o aviso "Só aparece para o cliente quando o corretor do link tem imobiliária no cadastro [...]" com o link "Ver a imobiliária de cada profissional" (`/admin/profissionais`). Texto em `sectionNotes` (`developments/model/page.ts`).
 - Testes: `PageEditorPage.test.tsx`; app com typecheck, lint e 124 testes.
+
+## 25/11/2026 — Lista de clientes do corretor com colunas organizadas
+
+- Pedido: "A lista de clientes dentro da visão do corretor está com problemas na posição dos elementos, checkboxes está quebrado, coluna 'ações' está cortado".
+- Causa: a tabela de layout fixo misturava larguras em % (92%) com colunas em px (checkbox 44 px e ações 72 px); passava de 100% e o navegador espremia as fixas: o checkbox do cabeçalho saía com reticências, "Ações" cortado, etapas ("Em atendimento", "Venda fechada") e o nome do cliente cortados pelo selo de propostas novas.
+- `ResponsiveTable` virou uma grade (papéis de tabela mantidos): colunas em px são fixas e centralizadas, sem corte; as em % dividem o resto, com `minWidth` opcional. `from="xl"` mostra a tabela só a partir de 1280 px (abaixo, cartões).
+- Lista de clientes (corretor e admin): tabela a partir de 1280 px; mínimos para interesse, etapa e atividade; selo compacto ("2 novas") na linha do telefone, nome inteiro em cima. Profissionais: larguras mínimas e tabela a partir de 1280 px.
+- Conferido no Chromium sem tela com API simulada em 1024, 1100, 1280 e 1440 px (corretor: clientes; admin: clientes, profissionais e usuários), com medida de cada coluna. Testes: app com typecheck, lint e 133 testes.

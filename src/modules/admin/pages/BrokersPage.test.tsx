@@ -64,7 +64,7 @@ describe("BrokersPage", () => {
     const cards = screen.getByRole("list", { name: "Profissionais" });
     expect(within(cards).getAllByRole("listitem")).toHaveLength(2);
     // A linha inteira da tabela abre a edição.
-    await user.click(within(table).getByText("Rui Souza").closest("tr")!);
+    await user.click(within(table).getByText("Rui Souza").closest('[role="row"]')!);
     expect(await screen.findByRole("option", { name: "Antiga (inativa)" })).toBeInTheDocument();
     expect(screen.getByLabelText("Imobiliária")).toHaveValue("a2");
     await user.selectOptions(screen.getByLabelText("Imobiliária"), "");
