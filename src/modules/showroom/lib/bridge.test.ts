@@ -192,3 +192,48 @@ describe("título do cartão da proposta e rodapé da apresentação", () => {
     }
   });
 });
+
+describe("proposta do layout A igual à da página 104-A", () => {
+  const dir = resolve(__dirname, "../../../../public/showroom/boa-vista");
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    delete (window as { BVMetrics?: object }).BVMetrics;
+    for (const k of ["calc", "CAMPANHA", "veic", "VEICS", "nVeic"]) delete (window as unknown as Record<string, unknown>)[k];
+  });
+
+  it("o HTML tem as três etapas da 104-A e o script da Sintética não procura os campos antigos", () => {
+    const html = readFileSync(resolve(dir, "index.html"), "utf8");
+    for (const text of ['id="p-entn"', 'id="p-nveic"', 'id="veic-lista"', ">Enviar para análise<", ">✓ Subir o contrato<", "Etapa 3 · Fechamento", "Seus dados para o corretor retornar"]) {
+      expect(html).toContain(text);
+    }
+    for (const text of ['id="p-preco"', 'id="p-mod"', 'id="copy-summary"', 'id="p-nao"', "entrada_so_avista: true, parcMin"]) {
+      if (text.startsWith("entrada")) expect(html).toContain(text);
+      else expect(html).not.toContain(text);
+    }
+    const synth = readFileSync(resolve(dir, "sintetica.js"), "utf8");
+    for (const id of ["p-preco", "p-mod", "p-vveic", "p-fotos", "add-vehicle", "copy-summary", "p-nao", "setIntent"]) expect(synth).not.toContain(id);
+  });
+
+  it("a proposta vai com o preço da campanha e os veículos da lista", async () => {
+    (window as { BVMetrics?: object }).BVMetrics = {};
+    Object.assign(window, {
+      calc: () => ({ ent: 150000, par: 36, saldo: 190000, refN: 2, refV: 15000, chaves: 0 }),
+      CAMPANHA: { promo: 370000, ref: 460000, tipo: "Condição especial", validade: "30/11/2026", entMin: 120000 },
+      veic: true,
+      VEICS: [{ mod: "Corolla", ano: "2022", km: "40000", valor: "90000" }, { mod: "Onix", ano: "2020", km: "", valor: "50000" }],
+      nVeic: () => 2,
+    });
+    (window as unknown as Record<string, unknown>).regGravaProposta = () => {};
+    document.body.innerHTML = '<p class="naviso" id="p-aviso-env"></p><p class="naviso" id="p-aviso"></p>';
+    const fetchMock = run("Rodrigo");
+    await waitFor(() => expect(fetchMock.mock.calls.some(([u]) => String(u).includes("/visit"))).toBe(true));
+    await new Promise((r) => setTimeout(r, 20));
+    const send = (window as unknown as { regGravaProposta: (d: object) => Promise<boolean> }).regGravaProposta;
+    await send({ nome: "Rodrigo", whatsapp: "54988887777", resumo: "Proposta", observacao: "" });
+    const post = fetchMock.mock.calls.find(([u]) => String(u).includes("/public/lead/proposals"))!;
+    const body = JSON.parse(String(((post as unknown[])[1] as RequestInit).body));
+    expect(body.condition.preco).toBe(370000);
+    expect(body.condition.veiculos.map((v: { modelo: string }) => v.modelo)).toEqual(["Corolla", "Onix"]);
+    expect(document.getElementById("nz-wa-p-aviso-env")).toBeInTheDocument();
+  });
+});
