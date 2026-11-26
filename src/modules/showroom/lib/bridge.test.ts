@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
 // A ponte da apresentação (public/showroom/neo360-bridge.js) roda dentro da página do empreendimento.
@@ -353,6 +353,57 @@ describe("fotos no bucket (ADR-0029)", () => {
     await send({ nome: "Rodrigo", whatsapp: "54988887777", resumo: "Proposta", observacao: "" });
     const post = fetchMock.mock.calls.find(([u]) => String(u).includes("/public/lead/proposals"))!;
     expect(JSON.parse(String((post as unknown[])[1] && ((post as unknown[])[1] as RequestInit).body)).condition.fotos).toEqual(["ph-2"]);
+  });
+
+  it("com dois veículos, o cliente escolhe de qual são as fotos e cada veículo vai com as dele e as observações", async () => {
+    const user = userEvent.setup();
+    let n = 0;
+    vi.stubGlobal("URL", Object.assign(URL, { createObjectURL: vi.fn(() => `blob:${++n}`), revokeObjectURL: vi.fn() }));
+    document.body.innerHTML =
+      '<section id="negociar"><select id="p-nveic"><option value="1">1</option><option value="2" selected>2</option></select><div id="veic-lista"></div>' +
+      '<button id="p-fotos" type="button">+ Anexar fotos</button></section>';
+    Object.assign(window, {
+      calc: () => ({ ent: 150000, par: 36, saldo: 90000, refN: 0, refV: 0, chaves: 0 }),
+      CAMPANHA: { promo: 370000, ref: 460000, tipo: "", validade: "", entMin: 120000 },
+      veic: true,
+      VEICS: [
+        { mod: "Corolla", ano: "2022", km: "40000", valor: "90000", estado: "Revisado" },
+        { mod: "Onix", ano: "2020", km: "", valor: "50000", estado: "" },
+      ],
+      nVeic: () => 2,
+      regGravaProposta: () => {},
+    });
+    window.history.pushState({}, "", "/showroom/boa-vista/index.html?slug=boa-vista-residencial&code=FER-0001&api=/api");
+    let photoId = 0;
+    const fetchMock = vi.fn(async (url: string) => {
+      const u = String(url);
+      const data = u.includes("/visit") ? { token: "t1", name: "", phone: "" } : u.includes("/public/lead/photos") ? { id: `ph-${++photoId}` } : room;
+      return { ok: true, json: async () => ({ status: 200, data }) } as Response;
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    new Function(code)();
+    await waitFor(() => expect(fetchMock.mock.calls.some(([u]) => String(u).includes("/visit"))).toBe(true));
+    await new Promise((r) => setTimeout(r, 20));
+
+    const pick = screen.getByRole("combobox", { name: "De qual veículo são as fotos" });
+    expect(within(pick).getAllByRole("option").map((o) => o.textContent)).toEqual(["Veículo 1 · Corolla", "Veículo 2 · Onix"]);
+    const input = document.querySelector<HTMLInputElement>('#negociar input[type="file"]')!;
+    await user.upload(input, new File(["a"], "a.jpg", { type: "image/jpeg" }));
+    await waitFor(() => expect(screen.getAllByRole("button", { name: "Remover foto" })).toHaveLength(1));
+    await user.selectOptions(pick, "1");
+    await user.upload(input, new File(["b"], "b.jpg", { type: "image/jpeg" }));
+    await waitFor(() => expect(screen.getAllByRole("button", { name: "Remover foto" })).toHaveLength(2));
+    expect([...document.querySelectorAll(".neo-fotos figcaption")].map((f) => f.textContent)).toEqual(["V1", "V2"]);
+
+    const send = (window as unknown as { regGravaProposta: (d: object) => Promise<boolean> }).regGravaProposta;
+    await send({ nome: "Rodrigo", whatsapp: "54988887777", resumo: "Proposta", observacao: "" });
+    const post = fetchMock.mock.calls.find(([u]) => String(u).includes("/public/lead/proposals"))!;
+    const condition = JSON.parse(String(((post as unknown[])[1] as RequestInit).body)).condition;
+    expect(condition.fotos).toEqual(["ph-1", "ph-2"]);
+    expect(condition.veiculos).toEqual([
+      { modelo: "Corolla", ano: "2022", km: "40000", valor: 90000, estado: "Revisado", fotos: ["ph-1"] },
+      { modelo: "Onix", ano: "2020", km: "", valor: 50000, estado: "", fotos: ["ph-2"] },
+    ]);
   });
 
   it("foto recusada pela API some e o aviso diz o motivo", async () => {

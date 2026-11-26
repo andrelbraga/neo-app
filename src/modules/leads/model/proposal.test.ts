@@ -1,6 +1,6 @@
 import { formatBRL } from "@/shared/lib/format";
 import type { ApiProposal } from "./lead.types";
-import { conditionText, paymentParts, proposalsOf, recompute, toApiCondition } from "./proposal";
+import { conditionText, paymentParts, photosByVehicle, proposalsOf, recompute, toApiCondition } from "./proposal";
 
 const api = (id: string, condition: Record<string, unknown>, created_at: string, extra: Partial<ApiProposal> = {}): ApiProposal => ({
   id,
@@ -34,6 +34,17 @@ describe("proposalsOf", () => {
     expect(p.condicao?.fotos).toEqual(["f1", "f2"]);
     expect(toApiCondition(p.condicao!).fotos).toEqual(["f1", "f2"]);
     expect(proposalsOf([api("p2", { preco: 1 }, "2026-11-16T10:00:00Z")])[0].condicao?.fotos).toEqual([]);
+  });
+
+  it("lê observações e fotos de cada veículo e agrupa só as fotos ligadas à proposta", () => {
+    const [p] = proposalsOf([
+      api("p1", { preco: 1, fotos: ["a", "b", "c"], veiculos: [{ modelo: "Corolla", estado: "Revisado", fotos: ["a", "zz"] }, { modelo: "Onix", fotos: "x" }] }, "2026-11-16T10:00:00Z"),
+    ]);
+    expect(p.condicao?.veiculos[0]).toMatchObject({ estado: "Revisado", fotos: ["a", "zz"] });
+    expect(p.condicao?.veiculos[1].fotos).toEqual([]);
+    expect(photosByVehicle(p.condicao!)).toEqual({ vehicles: [["a"], []], others: ["b", "c"] });
+    const [one] = proposalsOf([api("p2", { preco: 1, fotos: ["a"], veiculos: [{ modelo: "Corolla" }] }, "2026-11-16T10:00:00Z")]);
+    expect(photosByVehicle(one.condicao!)).toEqual({ vehicles: [["a"]], others: [] });
   });
 
   it("ignora condição sem preço ou em formato estranho", () => {

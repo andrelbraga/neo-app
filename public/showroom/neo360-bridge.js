@@ -593,12 +593,17 @@
         chaves: r(c.chaves),
         veiculos: !veic
           ? []
-          : VEICS.slice(0, Math.min(3, nVeic())).map(function (v) {
-              return { modelo: cut(v.mod, 40), ano: cut(v.ano, 4), km: cut(v.km, 9), valor: r(v.valor) };
+          : VEICS.slice(0, Math.min(3, nVeic())).map(function (v, k) {
+              // Observações e fotos de cada veículo vão junto, para o corretor avaliar a permuta (RN-03.23).
+              return {
+                modelo: cut(v.mod, 40), ano: cut(v.ano, 4), km: cut(v.km, 9), valor: r(v.valor), estado: cut(v.estado, 400),
+                fotos: vehiclePhotos.filter(function (f) { return f.vehicle === k; }).map(function (f) { return f.id; }),
+              };
             }),
         sujeita_aprovacao: c.ent < CAMPANHA.entMin || c.saldo < 0,
         // Fotos dos veículos já enviadas ao bucket (RN-03.23); a API liga à proposta só as deste cliente.
-        fotos: veic ? vehiclePhotos.map(function (f) { return f.id; }) : [],
+        // Só as fotos dos veículos que continuam na proposta (o cliente pode ter diminuído a quantidade).
+        fotos: veic ? vehiclePhotos.filter(function (f) { return f.vehicle < Math.min(3, nVeic()); }).map(function (f) { return f.id; }) : [],
       };
     } catch (e) {
       return null;
@@ -662,7 +667,8 @@
 
   /* ---------- fotos dos veículos (RN-03.23, ADR-0029) ---------- */
   // O cliente anexa até 6 fotos; cada uma vai reduzida para a API assim que escolhida e só chega ao corretor
-  // junto com a proposta. Sem a API (falha de rede), a foto não entra e o aviso diz isso.
+  // junto com a proposta. Com mais de um veículo, ele escolhe de qual veículo são as fotos. Sem a API (falha de
+  // rede), a foto não entra e o aviso diz isso.
   var PHOTO_MAX = 6;
   var vehiclePhotos = [];
   var PHOTO_CSS =
@@ -670,7 +676,12 @@
     "border-radius:10px;overflow:hidden;background:#efe9da;border:1px solid #e2dccd}.neo-fotos img{width:100%;height:100%;" +
     "object-fit:cover;display:block}.neo-fotos figure.enviando img{opacity:.45}.neo-fotos button{all:unset;position:absolute;" +
     "top:3px;right:3px;width:22px;height:22px;border-radius:50%;background:rgba(13,21,16,.75);color:#fff;font:700 14px/22px " +
-    "system-ui;text-align:center;cursor:pointer}.neo-fotos button:focus-visible{outline:2px solid #b38d3e}";
+    "system-ui;text-align:center;cursor:pointer}.neo-fotos button:focus-visible{outline:2px solid #b38d3e}" +
+    ".neo-fotos figcaption{position:absolute;left:3px;bottom:3px;padding:1px 6px;border-radius:999px;background:rgba(13,21,16,.75);" +
+    "color:#fff;font:700 10px/16px system-ui}.neo-foto-de{display:flex;align-items:center;gap:8px;font-size:13px}" +
+    ".neo-foto-de select{min-height:36px;border-radius:10px;border:1px solid #cfdcc8;background:#fffdf8;padding:0 10px;font:inherit}";
+  // Veículo de cada foto: o escolhido na lista "Fotos do"; com um veículo só, o primeiro.
+  function vehicleCount() { try { return typeof nVeic === "function" ? nVeic() : 1; } catch (e) { return 1; } }
 
   // Reduz a foto (lado maior até 1600 px, JPEG) para o envio ser rápido no celular; se o navegador não
   // conseguir ler o arquivo, vai o original e a API confere.
@@ -705,6 +716,42 @@
     btn.insertAdjacentElement("afterend", list);
     btn.insertAdjacentElement("afterend", input);
     var say = function (t) { msg.hidden = !t; msg.textContent = t || ""; };
+    // Com 2 ou 3 veículos, "Fotos do: Veículo 1 · Corolla" diz de qual veículo são as próximas fotos.
+    var pickWrap = el("label", "neo-foto-de");
+    pickWrap.appendChild(document.createTextNode("Fotos do"));
+    var pick = document.createElement("select");
+    pick.setAttribute("aria-label", "De qual veículo são as fotos");
+    pickWrap.appendChild(pick);
+    btn.insertAdjacentElement("beforebegin", pickWrap);
+    var vehicleName = function (k) {
+      var m = (typeof VEICS !== "undefined" && VEICS[k] && String(VEICS[k].mod || "").trim()) || "";
+      return "Veículo " + (k + 1) + (m ? " · " + m : "");
+    };
+    var syncPick = function () {
+      var n = vehicleCount();
+      var keep = Math.min(Number(pick.value) || 0, n - 1);
+      pick.replaceChildren();
+      for (var k = 0; k < n; k++) {
+        var o = document.createElement("option");
+        o.value = String(k);
+        o.textContent = vehicleName(k);
+        pick.appendChild(o);
+      }
+      pick.value = String(keep);
+      pickWrap.hidden = n < 2;
+      list.querySelectorAll("figure[data-vehicle]").forEach(function (f) {
+        var k = Number(f.getAttribute("data-vehicle"));
+        var cap = f.querySelector("figcaption");
+        if (cap) cap.textContent = n > 1 ? "V" + (k + 1) : "";
+        if (cap) cap.hidden = n < 2;
+      });
+    };
+    syncPick();
+    var lista = $("#veic-lista");
+    if (lista) lista.addEventListener("input", syncPick);
+    var nv = $("#p-nveic");
+    if (nv) nv.addEventListener("change", syncPick);
+    btn.addEventListener("click", syncPick);
     var refresh = function () {
       btn.hidden = vehiclePhotos.length + list.querySelectorAll(".enviando").length >= PHOTO_MAX;
     };
@@ -716,11 +763,16 @@
       var room = PHOTO_MAX - vehiclePhotos.length - list.querySelectorAll(".enviando").length;
       say(files.length > room ? "Até " + PHOTO_MAX + " fotos por proposta." : "");
       files.slice(0, Math.max(0, room)).forEach(function (file) {
+        var vehicle = vehicleCount() > 1 ? Number(pick.value) || 0 : 0;
         var fig = el("figure", "enviando");
+        fig.setAttribute("data-vehicle", String(vehicle));
         var img = document.createElement("img");
-        img.alt = "Foto do veículo";
+        img.alt = "Foto do veículo " + (vehicle + 1);
         img.src = URL.createObjectURL(file);
+        var cap = el("figcaption", "", vehicleCount() > 1 ? "V" + (vehicle + 1) : "");
+        cap.hidden = vehicleCount() < 2;
         fig.appendChild(img);
+        fig.appendChild(cap);
         list.appendChild(fig);
         refresh();
         shrink(file).then(function (blob) {
@@ -730,7 +782,7 @@
           return fetch(API + "/public/lead/photos", { method: "POST", headers: { "X-Visitor-Token": token }, body: form })
             .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j && j.data && j.data.error); return j.data; }); });
         }).then(function (photo) {
-          var item = { id: photo.id, fig: fig };
+          var item = { id: photo.id, fig: fig, vehicle: vehicle };
           vehiclePhotos.push(item);
           fig.className = "";
           var rm = el("button", "", "×");

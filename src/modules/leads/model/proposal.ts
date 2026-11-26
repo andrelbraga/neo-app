@@ -5,6 +5,10 @@ export interface Vehicle {
   ano: string;
   km: string;
   valor: number;
+  /** Observações do cliente sobre o veículo (documentação, estado, revisões). */
+  estado: string;
+  /** Fotos deste veículo (ids); só valem as que a API ligou à proposta (`Condition.fotos`). */
+  fotos: string[];
 }
 
 /** Condição em números: a que a apresentação calcula (ADR-0014) ou a do ajuste do corretor (ADR-0015). */
@@ -42,6 +46,7 @@ export interface Proposal {
   condicao?: Condition;
 }
 
+const ids = (v: unknown) => (Array.isArray(v) ? v.filter((f): f is string => typeof f === "string" && f !== "") : []);
 const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : Number(v) || 0);
 const str = (v: unknown) => (typeof v === "string" ? v : "");
 
@@ -66,10 +71,10 @@ export function parseCondition(raw: unknown): Condition | undefined {
     veiculos: Array.isArray(c.veiculos)
       ? c.veiculos.map((v) => {
           const o = (v ?? {}) as Record<string, unknown>;
-          return { modelo: str(o.modelo), ano: str(o.ano), km: str(o.km), valor: num(o.valor) };
+          return { modelo: str(o.modelo), ano: str(o.ano), km: str(o.km), valor: num(o.valor), estado: str(o.estado), fotos: ids(o.fotos) };
         })
       : [],
-    fotos: Array.isArray(c.fotos) ? c.fotos.filter((f): f is string => typeof f === "string" && f !== "") : [],
+    fotos: ids(c.fotos),
     sujeitaAprovacao: typeof c.sujeita_aprovacao === "boolean" ? c.sujeita_aprovacao : undefined,
   };
 }
@@ -146,4 +151,18 @@ export function paymentParts(c: Condition, brl: (v: number, cents?: boolean) => 
 export function conditionText(c: Condition, brl: (v: number, cents?: boolean) => string): string {
   const parts = paymentParts(c, brl).map((p) => `• ${p.label}${p.detail ? ` (${p.detail})` : ""}: ${brl(p.value)}`);
   return [`Valor: ${brl(c.preco)}`, ...parts].join("\n");
+}
+
+/**
+ * Fotos de cada veículo da proposta (RN-03.23): só as que a API ligou à proposta. As que não são de nenhum
+ * veículo ficam em `others`; com um veículo só e fotos sem dono (propostas de antes da escolha do veículo), elas
+ * são dele.
+ */
+export function photosByVehicle(c: Condition): { vehicles: string[][]; others: string[] } {
+  const valid = new Set(c.fotos);
+  const vehicles = c.veiculos.map((v) => v.fotos.filter((id) => valid.has(id)));
+  const used = new Set(vehicles.flat());
+  const others = c.fotos.filter((id) => !used.has(id));
+  if (c.veiculos.length === 1 && vehicles[0].length === 0) return { vehicles: [others], others: [] };
+  return { vehicles, others };
 }
